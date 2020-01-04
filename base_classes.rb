@@ -66,12 +66,13 @@ end
 
 # buttons
 class Delete_Button
-	attr_accessor :z, :x, :y
+	attr_accessor :z, :x, :y, :hidden
 	def initialize x, y, ui_element
 		@x = x
 		@y = y
 		@ui_element = ui_element
-		@z = 0
+		@z = 0 # can be manipulated by outside scripts if need be
+		@hidden = false
 		@color = $colors["button_deselected"]
 		@container = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: [0, 0, 0, 0.0]
 		draw
@@ -105,20 +106,22 @@ class Delete_Button
 	end
 end
 class Quad_Button
-	attr_accessor :image_url, :z, :x, :y
+	attr_accessor :image_url, :z, :x, :y, :action, :hidden, :color
 	def initialize text, x, y, image_url, action
 		@text = text
 		@x = x
 		@y = y
 		@image_url = image_url
 		@action = action
-		@z = 0
+		@hidden = false
+		@z = 0 # can be manipulated by outside scripts if need be
 		@color = $colors["button_deselected"]
 		@first_draw = true
 		draw
 		$all_buttons.push self
 	end
 	def draw
+		@hidden = false # using draw function unhides it, not drawing if hidden occurs in other scripts
 		# remove first
 		if !@first_draw
 			@button_1.remove
@@ -134,7 +137,7 @@ class Quad_Button
 		@button_text = Text.new @text, x: @x+30-determine_text_width(@text, 15)/2, y: @y+65, size: 15, color: $colors["note"], z: @z
 		@image = Image.new @image_url, x: @x+15, y: @y+15, width: 30, height: 30, color: $colors["background"], z: @z+1
 	end
-	def click event # placeholder, class is extended with this function
+	def click event
 		if @button_1.contains? event.x, event.y or @button_2.contains? event.x, event.y
 			@action.call
 		end
@@ -152,17 +155,46 @@ class Quad_Button
 	def remove
 		@button_1.remove
 		@button_2.remove
+		@button_text.remove
+		@image.remove
 		$all_buttons.delete_at $all_buttons.find_index self
+	end
+	def hide # hides the button without removing it
+		@button_1.remove
+		@button_2.remove
+		@button_text.remove
+		@image.remove
+		@hidden = true
+	end
+end
+class Toggle_Quad_Button < Quad_Button # @action will be Boolean instead of Proc
+	def click event
+		if @button_1.contains? event.x, event.y or @button_2.contains? event.x, event.y
+			@action = !@action
+			if @action
+				@color = $colors["button_selected"]
+			else
+				@color = $colors["button_deselected"]
+			end
+			draw
+			@action # returns value of @action to be used
+		end
+	end
+	# not needed because color changes differently
+	def mouse_down event
+	end
+	def mouse_up
 	end
 end
 class Text_Button
-	attr_accessor :height, :z, :x, :y
+	attr_accessor :height, :z, :x, :y, :hidden
 	def initialize text, x, y, action
 		@text = text
 		@x = x
 		@y = y
 		@action = action
-		@z = 0
+		@z = 0 # can be manipulated by outside scripts if need be
+		@hidden = false
 		@height = 25 # to return in Export_Window's determine_element_y method
 		@first_draw = true
 		@color = $colors["button_deselected"]
@@ -170,6 +202,7 @@ class Text_Button
 		$all_buttons.push self
 	end
 	def draw
+		@hidden = false # using draw function unhides it, not drawing if hidden occurs in other scripts
 		# remove first
 		if !@first_draw
 			@button.remove
@@ -199,5 +232,10 @@ class Text_Button
 		@button.remove
 		@button_text.remove
 		$all_buttons.delete_at $all_buttons.find_index self
+	end
+	def hide # hides the button without removing it
+		@button.remove
+		@button_text.remove
+		@hidden = true
 	end
 end

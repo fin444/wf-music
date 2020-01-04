@@ -37,7 +37,7 @@ class Export_Window
 			end
 		end
 	end
-	def determine_element_y
+	def determine_element_y # to automatically place dynamically generated elements
 		if @elements.length == 0
 			return 70+@title.height
 		end

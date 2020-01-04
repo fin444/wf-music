@@ -40,7 +40,7 @@ def new_element type
 		Lure_UI.new
 	end
 	Add_UI.new
-	if !$playing_bar.nil?
+	if !$playing_bar.nil? # makes sure that $playing_bar isn't covered by the new elements
 		$playing_bar.remove
 		$playing_bar = Line.new x1: $playing_counter, y1: $containers[0].container.height, x2: $playing_counter, y2: $height, color: $colors["note"], width: 3
 	end

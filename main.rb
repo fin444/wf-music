@@ -1,7 +1,10 @@
 # TODO
 # echo lures
 # change scale/instrument/animal
-# time scale display on top bar
+# scrolling
+# time display on top_bar
+# note/time limits on mandachord/shawzin
+# saving and loading files
 
 require "ruby2d"
 require "clipboard"
@@ -83,28 +86,46 @@ end
 
 # inputs
 on :mouse_up do |event|
-	$all_buttons.each do |b|
-		b.mouse_up
-	end
-	if !$export_window.nil?
-		$export_window.click event
-	else
-		$containers.each do |c|
-			if c.container.contains? event.x, event.y
-				c.click event
+	case event.button
+	when :left
+		$all_buttons.each do |b|
+			if !b.hidden
+				b.mouse_up
 			end
 		end
+		if !$export_window.nil?
+			$export_window.click event
+		else
+			$containers.each do |c|
+				if c.container.contains? event.x, event.y
+					c.click event
+				end
+			end
+		end
+	when :right
+		$containers.select{ |c| c.class.name == "Shawzin_UI" }.each do |c|
+			c.right_click event
+		end
+	when :middle
+		# not used right now, but save this for later
 	end
 end
 on :mouse_down do |event|
-	if !$export_window.nil?
-		$export_window.mouse_down event
-	else
-		$containers.each do |c|
-			if c.container.contains? event.x, event.y
-				c.mouse_down event
+	case event.button
+	when :left
+		if !$export_window.nil?
+			$export_window.mouse_down event
+		else
+			$containers.each do |c|
+				if c.container.contains? event.x, event.y
+					c.mouse_down event
+				end
 			end
 		end
+	when :right
+		# not used right now, but save this for later
+	when :middle
+		# not used right now, but save this for later
 	end
 end
 on :key_down do |event|
