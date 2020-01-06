@@ -1,4 +1,5 @@
 # TODO
+# not all shawzin notes delete
 # echo lures
 # change scale/instrument/animal
 # scrolling
@@ -23,7 +24,7 @@ def reposition_all # make all containers have proper y value after one is delete
 	end
 	if !$playing_bar.nil?
 		$playing_bar.remove
-		$playing_bar = Line.new x1: $playing_counter, y1: $containers[0].container.height, x2: $playing_counter, y2: $height, color: $colors["note"], width: 3
+		$playing_bar = Line.new x1: $playing_counter, y1: $containers[0].container.height, x2: $playing_counter, y2: $height, color: $colors["note"], width: 3, z: 8
 	end
 end
 def determine_text_width text, size
@@ -57,7 +58,7 @@ def play_all
 		$playing_counter = 50
 		$playing_previous = 47
 		if $playing_bar.nil?
-			$playing_bar = Line.new x1: 50, y1: $containers[0].container.height, x2: 50, y2: $height, color: $colors["note"], width: 3
+			$playing_bar = Line.new x1: 50, y1: $containers[0].container.height, x2: 50, y2: $height, color: $colors["note"], width: 3, z: 8
 		end
 	end
 end
@@ -70,7 +71,7 @@ update do
 		$playing_previous = $playing_counter.floor
 		$playing_counter += (1340.0/480.0).round 3
 		$playing_bar.remove
-		$playing_bar = Line.new x1: $playing_counter, y1: $containers[0].container.height, x2: $playing_counter, y2: $height, color: $colors["note"], width: 3
+		$playing_bar = Line.new x1: $playing_counter, y1: $containers[0].container.height, x2: $playing_counter, y2: $height, color: $colors["note"], width: 3, z: 8
 		($playing_counter.floor-$playing_previous).times do |t|
 			$containers.each do |c|
 				c.play $playing_previous+t
@@ -93,12 +94,19 @@ on :mouse_up do |event|
 				b.mouse_up
 			end
 		end
-		if !$export_window.nil?
-			$export_window.click event
-		else
-			$containers.each do |c|
-				if c.container.contains? event.x, event.y
-					c.click event
+		if !$open_dropdown.nil?
+			if $open_dropdown.click event
+				dont = true # used to signify that click was handled on dropdown
+			end
+		end
+		if dont.nil?
+			if !$export_window.nil?
+				$export_window.click event
+			else
+				$containers.each do |c|
+					if c.container.contains? event.x, event.y
+						c.click event
+					end
 				end
 			end
 		end

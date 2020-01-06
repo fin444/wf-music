@@ -1,4 +1,3 @@
-# ui elements
 class UI_Element # inherited by all main ui elements
 	attr_accessor :y, :container
 	def initialize
@@ -15,14 +14,14 @@ class UI_Element # inherited by all main ui elements
 			@text = "Mandachord"
 		when "Lure_UI"
 			@height = 200
-			@text = "Echo_Lure"
+			@text = "Echo Lure"
 		when "Add_UI"
 			@height = 40
 			@text = ""
 		end
 		# generate base stuff
 		@y = determine_y -1
-		@container = Rectangle.new x: 50, y: @y, width: $width-100, height: @height, color: $colors["background"]
+		@container = Rectangle.new x: 50, y: @y, width: $width-100, height: @height, color: [0, 0, 0, 0]
 		@name = Text.new @text, x: 55, y: @y, size: 17, color: $colors["string"]
 		@delete_button = Delete_Button.new $width-70, @y, self
 		draw # individual for each sub-class
@@ -64,6 +63,107 @@ class UI_Element # inherited by all main ui elements
 	end
 end
 
+class Dropdown
+	attr_accessor :z
+	def initialize x, y, options, selected, update
+		@x = x
+		@y = y
+		@options = options
+		@update = update
+		@drawn_options = []
+		@options_containers = []
+		@selected = selected
+		@z = 0 # can be manipulated by outside scripts if need be
+		@height = 19 # to be changed when open/closed
+		@open = false
+		@first_draw = true
+		h = ""
+		options.each do |o|
+			if o.length > h.length
+				h = o
+			end
+		end
+		@text_width = determine_text_width h, 17
+		@selected_container = Rectangle.new x: @x, y: @y, width: @text_width, height: 19, color: [0, 0, 0, 0] # static container to detect if the top area is clicked
+		draw
+	end
+	def draw
+		if !@first_draw
+			@outline.remove
+			@container.remove
+			@arrow.remove
+			@drawn_selected.remove
+			@drawn_options.each do |d|
+				d.remove
+			end
+			@drawn_options = []
+			@options_containers.each do |d|
+				d.remove
+			end
+			@options_containers = []
+		else
+			@first_draw = false
+		end
+		@outline = Rectangle.new x: @x-1, y: @y-1, width: @text_width+22, height: @height+2, color: $colors["string"], z: @z
+		@container = Rectangle.new x: @x, y: @y, width: @text_width+20, height: @height, color: $colors["background"], z: @z+1
+		@drawn_selected = Text.new @selected, x: @x+1, y: @y, size: 17, color: $colors["string"], z: @z+2
+		if @open
+			@arrow = Triangle.new x1: @x+@container.width-15, y1: @y+15, x2: @x+@container.width-2, y2: @y+15, x3: @x+@container.width-8, y3: @y+7, color: $colors["string"], z: @z+2
+			@options.each do |o|
+				@options_containers.push Rectangle.new x: @x, y: @y+20*((@options.find_index o)+1), width: @text_width+20, height: 20, color: $colors["background"], z: @z+2
+				@drawn_options.push Text.new o, x: @x+1, y: @y+20*((@options.find_index o)+1), size: 17, color: $colors["string"], z: @z+3
+			end
+		else
+			@arrow = Triangle.new x1: @x+@container.width-15, y1: @y+7, x2: @x+@container.width-2, y2: @y+7, x3: @x+@container.width-8, y3: @y+15, color: $colors["string"], z: @z+2
+		end
+	end
+	def click event
+		if @container.contains? event.x, event.y
+			if @open
+				@options_containers.each do |c|
+					if c.contains? event.x, event.y
+						@selected = @options[@options_containers.find_index c]
+						close # no need to draw because that is done in the close method
+					end
+				end
+				if @selected_container.contains? event.x, event.y
+					close
+				end
+				@update.call @selected
+			else
+				@open = true
+				@height = (@options.length+1)*20+2
+				draw
+				$open_dropdown = self
+			end
+			return true # tell click handler that click was on this element
+		elsif @open
+			close
+			return false # tell click handler that click wasn't on this element
+		end
+		false # tell click handler that click wasn't on this element
+	end
+	def close
+		@open = false
+		@height = 22
+		draw
+		$open_dropdown = nil
+	end
+	def remove
+		@outline.remove
+		@container.remove
+		@arrow.remove
+		@drawn_selected.remove
+		@selected_container.remove
+		@drawn_options.each do |d|
+			d.remove
+		end
+		@options_containers.each do |d|
+			d.remove
+		end
+	end
+end
+
 # buttons
 class Delete_Button
 	attr_accessor :z, :x, :y, :hidden
@@ -74,13 +174,16 @@ class Delete_Button
 		@z = 0 # can be manipulated by outside scripts if need be
 		@hidden = false
 		@color = $colors["button_deselected"]
-		@container = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: [0, 0, 0, 0.0]
+		@container = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: [0, 0, 0, 0]
+		@first_draw = true
 		draw
 		$all_buttons.push self
 	end
 	def draw
-		if !@text.nil?
+		if !@first_draw
 			@text.remove
+		else
+			@first_draw = false
 		end
 		@text = Text.new "x", x: @x, y: @y-15, size: 35, color: @color, z: @z
 	end

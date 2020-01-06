@@ -9,10 +9,11 @@ class Shawzin_UI < UI_Element
 		@line_2 = Line.new x1: 50, y1: @y+160, x2: $width-50, y2: @y+160, width: 4, color: $colors["string"]
 		@line_3 = Line.new x1: 50, y1: @y+240, x2: $width-50, y2: @y+240, width: 4, color: $colors["string"]
 		@notes = []
+		@select_scale = Dropdown.new (70+determine_text_width("Shawzin", 17)), @y, $all_scales, @scale, Proc.new{ |s| @scale = s }
 	end
 	def click event
 		if event.y > @y+20
-			if event.x < 50 or event.x > $width-50 # don't put outside the strings on left or right
+			if event.x < 50 || event.x > $width-50 # don't put outside the strings on left or right
 			elsif event.y <= @y+120 # if below halfway between string 1 and string 2
 				@notes.push Shawzin_Note.new 1, y, $shawzin_settings, event.x
 			elsif event.y <= @y+200 # if below halfway between string 2 and string 3
@@ -24,6 +25,7 @@ class Shawzin_UI < UI_Element
 				$containers[0].editing_buttons[4].action.call
 			end
 		else
+			@select_scale.click event
 			@delete_button.click event
 		end
 	end
@@ -60,6 +62,7 @@ class Shawzin_UI < UI_Element
 		@notes.each do |n|
 			n.remove
 		end
+		@select_scale.remove
 		@delete_button.remove
 		@name.remove
 		@line_1.remove
@@ -73,9 +76,11 @@ class Shawzin_UI < UI_Element
 		@line_1.remove
 		@line_2.remove
 		@line_3.remove
+		@select_scale.remove
 		@line_1 = Line.new x1: 50, y1: @y+80, x2: $width-50, y2: @y+80, width: 4, color: $colors["string"]
 		@line_2 = Line.new x1: 50, y1: @y+160, x2: $width-50, y2: @y+160, width: 4, color: $colors["string"]
 		@line_3 = Line.new x1: 50, y1: @y+240, x2: $width-50, y2: @y+240, width: 4, color: $colors["string"]
+		@select_scale = Dropdown.new (70+determine_text_width("Shawzin", 17)), @y, $all_scales, @scale, Proc.new{ |s| @scale = s }
 		@notes.each do |n|
 			n.container_y = @y
 			n.draw
@@ -154,20 +159,21 @@ class Shawzin_Note
 		if !@options[0] # draw either circle to show false
 			@drawn_sky = Circle.new x: @drawn.x-20, y: @drawn.y-35, radius: 4, color: @color
 		else # or mouse button to show true
-			@drawn_sky = Image.new "resources/images/left_mouse_button.png", x: @drawn.x-31, y: @drawn.y-47, width: 16, height: 24, color: @color
+			@drawn_sky = Image.new "resources/images/left_arrow_button.png", x: @drawn.x-38, y: @drawn.y-47, width: 24, height: 24, color: @color
 		end
 		if !@options[1]
 			@drawn_earth = Circle.new x: @drawn.x, y: @drawn.y-35, radius: 4, color: @color
 		else
-			@drawn_earth = Image.new "resources/images/middle_mouse_button.png", x: @drawn.x-8, y: @drawn.y-47, width: 16, height: 24, color: @color
+			@drawn_earth = Image.new "resources/images/down_arrow_button.png", x: @drawn.x-12, y: @drawn.y-47, width: 24, height: 24, color: @color
 		end
 		if !@options[2]
 			@drawn_water = Circle.new x: @drawn.x+20, y: @drawn.y-35, radius: 4, color: @color
 		else
-			@drawn_water = Image.new "resources/images/right_mouse_button.png", x: @drawn.x+16, y: @drawn.y-47, width: 16, height: 24, color: @color
+			@drawn_water = Image.new "resources/images/right_arrow_button.png", x: @drawn.x+15, y: @drawn.y-47, width: 24, height: 24, color: @color
 		end
 	end
 	def remove
+		puts "#{self}.remove"
 		@drawn.remove
 		@drawn_sky.remove
 		@drawn_earth.remove

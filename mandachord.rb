@@ -16,8 +16,10 @@ class Mandachord_UI < UI_Element
 				@drawn[0].push Mandachord_Note.new "melody", 50+a*21, @y, n+1
 			end
 		end
+		@select_instrument = Dropdown.new (70+determine_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
 	end
 	def click event
+		@select_instrument.click event
 		@delete_button.click event
 		@drawn.each do |a| # loops through every column
 			a.each do |n| # loops through everything in column
@@ -60,12 +62,15 @@ class Mandachord_UI < UI_Element
 			end
 		end
 		@name.remove
+		@select_instrument.remove
 		@delete_button.remove
 		@container.remove
 		$containers.delete_at $containers.find_index self
 		reposition_all
 	end
 	def reposition_unique
+		@select_instrument.remove
+		@select_instrument = Dropdown.new (70+determine_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
 		@drawn.each do |a|
 			a.each do |n|
 				n.reposition @y

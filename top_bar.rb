@@ -19,9 +19,9 @@ class Top_UI < UI_Element
 		@editing = false
 		@note = nil
 		@editing_buttons = []
-		@editing_buttons.push Toggle_Quad_Button.new "Sky Fret", 50, @y+10, "resources/images/left_mouse_button.png", false
-		@editing_buttons.push Toggle_Quad_Button.new "Earth Fret", 140, @y+10, "resources/images/middle_mouse_button.png", false
-		@editing_buttons.push Toggle_Quad_Button.new "Water Fret", 230, @y+10, "resources/images/right_mouse_button.png", false
+		@editing_buttons.push Toggle_Quad_Button.new "Sky Fret", 50, @y+10, "resources/images/left_arrow.png", false
+		@editing_buttons.push Toggle_Quad_Button.new "Earth Fret", 140, @y+10, "resources/images/down_arrow.png", false
+		@editing_buttons.push Toggle_Quad_Button.new "Water Fret", 230, @y+10, "resources/images/right_arrow.png", false
 		@editing_buttons.push Quad_Button.new "Delete", 320, @y+10, "resources/images/clear.png", Proc.new{ } # Proc filled in later
 		@editing_buttons.push Quad_Button.new "Stop Editing", 410, @y+10, "resources/images/clear.png", Proc.new{ } # Proc filled in later
 		@editing_buttons.each do |b|
@@ -55,6 +55,11 @@ class Top_UI < UI_Element
 		end
 	end
 	def edit note
+		if @note == note
+			@editing_buttons[4].action.call
+			@note = nil
+			return
+		end
 		@note = note
 		if @editing # closes the old editing setup
 			@editing_buttons[4].action.call
