@@ -1,11 +1,10 @@
 # TODO
-# not all shawzin notes delete
-# echo lures
-# change scale/instrument/animal
+# echo lure colors
+# saving and loading files
 # scrolling
 # time display on top_bar
 # note/time limits on mandachord/shawzin
-# saving and loading files
+# options
 
 require "ruby2d"
 require "clipboard"
@@ -40,7 +39,6 @@ load "shawzin.rb"
 load "mandachord.rb"
 load "echo_lure.rb"
 load "add.rb"
-load "export.rb"
 
 # playing
 $playing = false # set to true to move bar and play song
@@ -53,7 +51,7 @@ def play_all
 			$playing_highest = h+5
 		end
 	end
-	if $playing_highest != 5
+	if $playing_highest > 5
 		$playing = true
 		$playing_counter = 50
 		$playing_previous = 47
@@ -87,6 +85,7 @@ end
 
 # inputs
 on :mouse_up do |event|
+	$mouse_down = false
 	case event.button
 	when :left
 		$all_buttons.each do |b|
@@ -119,6 +118,7 @@ on :mouse_up do |event|
 	end
 end
 on :mouse_down do |event|
+	$mouse_down = true
 	case event.button
 	when :left
 		if !$export_window.nil?
@@ -134,6 +134,13 @@ on :mouse_down do |event|
 		# not used right now, but save this for later
 	when :middle
 		# not used right now, but save this for later
+	end
+end
+on :mouse_move do |event|
+	if $mouse_down
+		$containers.filter{ |c| c.class.name == "Lure_UI" }.each do |c|
+			c.mouse_move event
+		end
 	end
 end
 on :key_down do |event|

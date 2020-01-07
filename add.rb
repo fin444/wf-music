@@ -1,9 +1,9 @@
 class Add_UI < UI_Element
 	def draw
 		@buttons = []
-		@buttons.push Text_Button.new "Shawzin", $width/2-192, @y, Proc.new{ new_element "Shawzin" }
-		@buttons.push Text_Button.new "Mandachord", $width/2-90, @y, Proc.new{ new_element "Mandachord" }
-		@buttons.push Text_Button.new "Echo Lure", $width/2+49, @y, Proc.new{ new_element "Echo Lure" }
+		@buttons.push Text_Button.new "Shawzin", $width/2-192, @y, 22, Proc.new{ new_element "Shawzin" }
+		@buttons.push Text_Button.new "Mandachord", $width/2-90, @y, 22, Proc.new{ new_element "Mandachord" }
+		@buttons.push Text_Button.new "Echo Lure", $width/2+49, @y, 22, Proc.new{ new_element "Echo Lure" }
 		@delete_button.remove # don't delete the add section
 	end
 	def click event

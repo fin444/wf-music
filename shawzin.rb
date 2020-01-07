@@ -9,7 +9,8 @@ class Shawzin_UI < UI_Element
 		@line_2 = Line.new x1: 50, y1: @y+160, x2: $width-50, y2: @y+160, width: 4, color: $colors["string"]
 		@line_3 = Line.new x1: 50, y1: @y+240, x2: $width-50, y2: @y+240, width: 4, color: $colors["string"]
 		@notes = []
-		@select_scale = Dropdown.new (70+determine_text_width("Shawzin", 17)), @y, $all_scales, @scale, Proc.new{ |s| @scale = s }
+		@select_scale = Dropdown.new (60+determine_text_width("Shawzin", 17)), @y, $all_scales, @scale, Proc.new{ |s| @scale = s }
+		@export = Text_Button.new "Copy Song Code", @select_scale.x+@select_scale.width+10, @y, 17, Proc.new{ export }
 	end
 	def click event
 		if event.y > @y+20
@@ -26,10 +27,12 @@ class Shawzin_UI < UI_Element
 			end
 		else
 			@select_scale.click event
+			@export.click event
 			@delete_button.click event
 		end
 	end
 	def mouse_down event
+		@export.mouse_down event
 		@delete_button.mouse_down event
 	end
 	def right_click event
@@ -59,6 +62,7 @@ class Shawzin_UI < UI_Element
 		end
 	end
 	def remove
+		puts @notes
 		@notes.each do |n|
 			n.remove
 		end
@@ -87,7 +91,7 @@ class Shawzin_UI < UI_Element
 		end
 	end
 	def export # all data information is based off of the warframe wiki
-		# limit 4:16 song with 1666 notes
+		# TODO: limit 4:16 song with 1666 notes
 		str = (($all_scales.find_index @scale)+1).to_s
 		note_chars = "BCDEFGHJKLMNOPRSTUVWXhijklmnZabcdefpqrstuvxyz012356789+/"
 		time_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
@@ -119,7 +123,7 @@ class Shawzin_UI < UI_Element
 			str += time_chars[(n.x-50)/670] # second character is measure (1/64 of song)
 			str += time_chars[((n.x-50)%670)/60] # third character is 1/64 of measure
 		end
-		str
+		Clipboard.copy str
 	end
 end
 
@@ -135,7 +139,7 @@ class Shawzin_Note
 		draw
 	end
 	def play scale # get url for the sound to play
-		url = "resources/sounds/shawzin/#{scale}/#{@string}"
+		url = "resources/sounds/shawzin/#{scale.downcase}/#{@string}"
 		if @options[0]
 			url += "sky"
 		end
@@ -173,15 +177,9 @@ class Shawzin_Note
 		end
 	end
 	def remove
-		puts "#{self}.remove"
 		@drawn.remove
 		@drawn_sky.remove
 		@drawn_earth.remove
 		@drawn_water.remove
-		$containers.select{ |c| c.class.name == "Shawzin_UI" }.each do |c|
-			if c.notes.any?{ |n| n == self }
-				c.notes.delete_at c.notes.find_index self
-			end
-		end
 	end
 end

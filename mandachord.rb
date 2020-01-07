@@ -1,4 +1,4 @@
-$all_mandachord_instruments = ["Alpha", "Beta", "Gamma", "Delta", "Druke"]
+$all_mandachord_instruments = ["Adau", "Alpha", "Beta", "Delta", "Gamma", "Epsilon", "Horos", "Druk", "Plogg"]
 
 class Mandachord_UI < UI_Element
 	def draw
@@ -16,7 +16,7 @@ class Mandachord_UI < UI_Element
 				@drawn[0].push Mandachord_Note.new "melody", 50+a*21, @y, n+1
 			end
 		end
-		@select_instrument = Dropdown.new (70+determine_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
+		@select_instrument = Dropdown.new (60+determine_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
 	end
 	def click event
 		@select_instrument.click event
@@ -95,7 +95,7 @@ class Mandachord_Note
 	end
 	def play instrument
 		if @selected
-			puts "[#{Time.now.strftime("%I:%M:%S")}] resources/sounds/mandachord/#{instrument}/#{@number}#{@type}"
+			puts "[#{Time.now.strftime("%I:%M:%S")}] resources/sounds/mandachord/#{instrument.downcase}/#{@number}#{@type}"
 		end
 	end
 	def draw

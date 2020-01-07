@@ -14,7 +14,6 @@ class Top_UI < UI_Element
 				$containers[0].buttons[0].draw
 			end
 		}
-		@buttons.push Quad_Button.new "Export", 140, @y+10, "resources/images/clear.png", Proc.new{ $export_window = Export_Window.new }
 		# buttons for editing shawzin, will hide until needed
 		@editing = false
 		@note = nil
@@ -85,6 +84,11 @@ class Top_UI < UI_Element
 		@editing_buttons[3].action = Proc.new{ # sets the action for the delete button
 			@editing_buttons[4].action.call # close the editing section before removing
 			@note.remove
+			$containers.select{ |c| c.class.name == "Shawzin_UI" }.each do |c|
+				if c.notes.any?{ |n| n == @note }
+					c.notes.delete_at c.notes.find_index @note
+				end
+			end
 		}
 		@editing_buttons[4].action = Proc.new{ # closes editing
 			@editing = false

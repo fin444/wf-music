@@ -13,7 +13,7 @@ class UI_Element # inherited by all main ui elements
 			@height = 310
 			@text = "Mandachord"
 		when "Lure_UI"
-			@height = 200
+			@height = 220
 			@text = "Echo Lure"
 		when "Add_UI"
 			@height = 40
@@ -64,7 +64,7 @@ class UI_Element # inherited by all main ui elements
 end
 
 class Dropdown
-	attr_accessor :z
+	attr_accessor :x, :z, :width
 	def initialize x, y, options, selected, update
 		@x = x
 		@y = y
@@ -84,7 +84,8 @@ class Dropdown
 			end
 		end
 		@text_width = determine_text_width h, 17
-		@selected_container = Rectangle.new x: @x, y: @y, width: @text_width, height: 19, color: [0, 0, 0, 0] # static container to detect if the top area is clicked
+		@selected_container = Rectangle.new x: @x, y: @y, width: @text_width+20, height: 19, color: [0, 0, 0, 0] # static container to detect if the top area is clicked
+		@width = @text_width+22 # to be read by external scripts, not actually used for anything internally
 		draw
 	end
 	def draw
@@ -290,15 +291,15 @@ class Toggle_Quad_Button < Quad_Button # @action will be Boolean instead of Proc
 	end
 end
 class Text_Button
-	attr_accessor :height, :z, :x, :y, :hidden
-	def initialize text, x, y, action
+	attr_accessor :z, :x, :y, :hidden
+	def initialize text, x, y, font_size, action
 		@text = text
 		@x = x
 		@y = y
+		@font_size = font_size
 		@action = action
 		@z = 0 # can be manipulated by outside scripts if need be
 		@hidden = false
-		@height = 25 # to return in Export_Window's determine_element_y method
 		@first_draw = true
 		@color = $colors["button_deselected"]
 		draw
@@ -313,8 +314,8 @@ class Text_Button
 		else
 			@first_draw = false
 		end
-		@button = Rectangle.new x: @x, y: @y, width: determine_text_width(@text, 22)+10, height: 25, color: @color, z: @z
-		@button_text = Text.new @text, x: @x+5, y: @y, size: 22, color: $colors["background"], z: @z+1
+		@button = Rectangle.new x: @x, y: @y, width: determine_text_width(@text, @font_size)+10, height: @font_size+3, color: @color, z: @z
+		@button_text = Text.new @text, x: @x+5, y: @y, size: @font_size, color: $colors["background"], z: @z+1
 	end
 	def click event # placeholder, class is extended with this function
 		if @button.contains? event.x, event.y
