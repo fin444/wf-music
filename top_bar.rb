@@ -14,6 +14,7 @@ class Top_UI < UI_Element
 				$containers[0].buttons[0].draw
 			end
 		}
+		@buttons.push Quad_Button.new "Save", 140, @y+10, "resources/images/clear.png", Proc.new { save }
 		# buttons for editing shawzin, will hide until needed
 		@editing = false
 		@note = nil

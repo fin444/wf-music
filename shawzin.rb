@@ -10,7 +10,7 @@ class Shawzin_UI < UI_Element
 		@line_3 = Line.new x1: 50, y1: @y+240, x2: $width-50, y2: @y+240, width: 4, color: $colors["string"]
 		@notes = []
 		@select_scale = Dropdown.new (60+determine_text_width("Shawzin", 17)), @y, $all_scales, @scale, Proc.new{ |s| @scale = s }
-		@export = Text_Button.new "Copy Song Code", @select_scale.x+@select_scale.width+10, @y, 17, Proc.new{ export }
+		@export = Text_Button.new "Copy Song Code", @select_scale.x+@select_scale.width+10, @y, 17, Proc.new{ Clipboard.copy export }
 	end
 	def click event
 		if event.y > @y+20
@@ -123,7 +123,7 @@ class Shawzin_UI < UI_Element
 			str += time_chars[(n.x-50)/670] # second character is measure (1/64 of song)
 			str += time_chars[((n.x-50)%670)/60] # third character is 1/64 of measure
 		end
-		Clipboard.copy str
+		str
 	end
 end
 

@@ -5,6 +5,9 @@ class Mandachord_UI < UI_Element
 		@instrument = $all_mandachord_instruments[0]
 		@drawn = [[]]
 		@notes = []
+		@percussion_background = Rectangle.new x: 49, y: @y+30, width: $width-94, height: 65, color: $colors["percussion"]
+		@percussion_background = Rectangle.new x: 49, y: @y+94, width: $width-94, height: 105, color: $colors["bass"]
+		@percussion_background = Rectangle.new x: 49, y: @y+199, width: $width-94, height: 105, color: $colors["melody"]
 		64.times do |a|
 			3.times do |n|
 				@drawn[0].push Mandachord_Note.new "percussion", 50+a*21, @y, n+1
@@ -78,12 +81,22 @@ class Mandachord_UI < UI_Element
 		end
 	end
 	def export
-		self.to_s
+		str = ""
+		@notes = @notes.sort_by{ |n| n.x }
+		@notes.each do |n|
+			str += "#{n.number}#{n.type[0]}"
+			if (n.x-50)/21 < 10
+				str += "0#{(n.x-50)/21}"
+			else
+				str += "#{(n.x-50)/21}"
+			end
+		end
+		str
 	end
 end
 
 class Mandachord_Note
-	attr_accessor :drawn, :selected, :x
+	attr_accessor :drawn, :selected, :x, :number, :type
 	def initialize type, x, container_y, number
 		@type = type
 		@x = x
@@ -101,11 +114,9 @@ class Mandachord_Note
 	def draw
 		if !@first_draw # removes all current, but if they don't exist yet then it doesn't
 			@drawn.remove
-			@drawn_inner.remove
 		end
 		@first_draw = false
-		@drawn = Rectangle.new x: @x, y: @y, width: 21, height: 21, color: $colors[@type]
-		@drawn_inner = Rectangle.new x: @x+1, y: @y+1, width: 19, height: 19, color: determine_color
+		@drawn = Rectangle.new x: @x+1, y: @y+1, width: 19, height: 19, color: determine_color
 	end
 	def determine_y container_y
 		case @type
@@ -124,7 +135,6 @@ class Mandachord_Note
 		$colors["background"]
 	end
 	def remove
-		@drawn.remove
 		@drawn_inner.remove
 	end
 	def reposition container_y

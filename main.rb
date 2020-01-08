@@ -1,6 +1,8 @@
 # TODO
-# echo lure colors
+# clicking through dropdown in echo lure
+# one echo lure noise per column?
 # saving and loading files
+# echo lure noise connection
 # scrolling
 # time display on top_bar
 # note/time limits on mandachord/shawzin
@@ -12,6 +14,8 @@ require "clipboard"
 $containers = []
 $colors = {"background"=>"#14121D", "string"=>"#BBA664", "button_selected"=>"#F2E1AD", "button_deselected"=>"#BDA76C", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"}
 $all_buttons = []
+$file_name = ""
+$fps = Text.new get(:fps).round(2), x: 0, y: 0, size: 15, color: "white"
 
 $width = 1440
 $height = 900
@@ -65,6 +69,8 @@ def pause_all
 end
 
 update do
+	$fps.remove
+	$fps = Text.new get(:fps).round(2), x: 0, y: 0, size: 15, color: "white"
 	if $playing
 		$playing_previous = $playing_counter.floor
 		$playing_counter += (1340.0/480.0).round 3
@@ -110,7 +116,7 @@ on :mouse_up do |event|
 			end
 		end
 	when :right
-		$containers.select{ |c| c.class.name == "Shawzin_UI" }.each do |c|
+		$containers.select{ |c| c.class.name == "Shawzin_UI" or c.class.name == "Lure_UI" }.each do |c|
 			c.right_click event
 		end
 	when :middle
@@ -161,6 +167,21 @@ on :key_up do |event|
 		$shawzin_settings[1] = false
 	when "d" # water fret
 		$shawzin_settings[2] = false
+	end
+end
+
+# save/load files
+def save
+	if $file_name == ""
+		$file_name = "song.txt" # get a file name, this is just placeholder
+	end
+	File.open "saves/#{$file_name}", "w" do |file|
+		$containers.filter{ |c| c.class.name == "Shawzin_UI" }.each do |c|
+			file.syswrite "s #{c.export}\n"
+		end
+		$containers.filter{ |c| c.class.name == "Mandachord_UI" }.each do |c|
+			file.syswrite "m #{c.export}\n"
+		end
 	end
 end
 
