@@ -1,5 +1,6 @@
 class Top_UI < UI_Element
-	attr_accessor :buttons, :editing, :editing_buttons
+	attr_accessor :buttons, :editing, :editing_buttons, :is_instrument
+	@@is_instrument = false
 	def draw
 		@delete_button.remove # don't delete the top bar
 		@buttons = []

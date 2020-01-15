@@ -1,13 +1,15 @@
 $all_mandachord_instruments = ["Adau", "Alpha", "Beta", "Delta", "Gamma", "Epsilon", "Horos", "Druk", "Plogg"]
 
 class Mandachord_UI < UI_Element
+	attr_accessor :is_instrument
+	@@is_instrument = true
 	def draw
 		@instrument = $all_mandachord_instruments[0]
 		@drawn = [[]]
 		@notes = []
 		@percussion_background = Rectangle.new x: 49, y: @y+30, width: $width-94, height: 65, color: $colors["percussion"]
-		@percussion_background = Rectangle.new x: 49, y: @y+94, width: $width-94, height: 105, color: $colors["bass"]
-		@percussion_background = Rectangle.new x: 49, y: @y+199, width: $width-94, height: 105, color: $colors["melody"]
+		@bass_background = Rectangle.new x: 49, y: @y+94, width: $width-94, height: 105, color: $colors["bass"]
+		@melody_background = Rectangle.new x: 49, y: @y+199, width: $width-94, height: 105, color: $colors["melody"]
 		64.times do |a|
 			3.times do |n|
 				@drawn[0].push Mandachord_Note.new "percussion", 50+a*21, @y, n+1
@@ -19,22 +21,24 @@ class Mandachord_UI < UI_Element
 				@drawn[0].push Mandachord_Note.new "melody", 50+a*21, @y, n+1
 			end
 		end
-		@select_instrument = Dropdown.new (60+determine_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
+		@select_instrument = Dropdown.new (60+get_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
 	end
 	def click event
-		@select_instrument.click event
-		@delete_button.click event
-		@drawn.each do |a| # loops through every column
-			a.each do |n| # loops through everything in column
-				if n.drawn.contains? event.x, event.y
-					n.selected = !n.selected
-					if @notes.include? n
-						@notes = @notes - [n]
-					else
-						@notes.push n
+		if !$playing
+			@select_instrument.click event
+			@delete_button.click event
+			@drawn.each do |a| # loops through every column
+				a.each do |n| # loops through everything in column
+					if n.drawn.contains? event.x, event.y
+						n.selected = !n.selected
+						if @notes.include? n
+							@notes = @notes - [n]
+						else
+							@notes.push n
+						end
+						n.draw
+						return
 					end
-					n.draw
-					return
 				end
 			end
 		end
@@ -61,35 +65,40 @@ class Mandachord_UI < UI_Element
 	def remove
 		@drawn.each do |a| # loops through every column
 			a.each do |n| # loops through everything in column
-				n.remove
+				n.drawn.remove
 			end
 		end
 		@name.remove
 		@select_instrument.remove
 		@delete_button.remove
 		@container.remove
+		@percussion_background.remove
+		@bass_background.remove
+		@melody_background.remove
 		$containers.delete_at $containers.find_index self
 		reposition_all
 	end
 	def reposition_unique
 		@select_instrument.remove
-		@select_instrument = Dropdown.new (70+determine_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
+		@select_instrument = Dropdown.new (60+get_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
+		@percussion_background.remove
+		@bass_background.remove
+		@melody_background.remove
+		@percussion_background = Rectangle.new x: 49, y: @y+30, width: $width-94, height: 65, color: $colors["percussion"]
+		@bass_background = Rectangle.new x: 49, y: @y+94, width: $width-94, height: 105, color: $colors["bass"]
+		@melody_background = Rectangle.new x: 49, y: @y+199, width: $width-94, height: 105, color: $colors["melody"]
 		@drawn.each do |a|
 			a.each do |n|
-				n.reposition @y
+				n.determine_y @y
+				n.draw
 			end
 		end
 	end
 	def export
-		str = ""
+		str = $all_mandachord_instruments.find_index @instrument
 		@notes = @notes.sort_by{ |n| n.x }
 		@notes.each do |n|
-			str += "#{n.number}#{n.type[0]}"
-			if (n.x-50)/21 < 10
-				str += "0#{(n.x-50)/21}"
-			else
-				str += "#{(n.x-50)/21}"
-			end
+			str += "#{n.number}#{n.type[0]}#{add_zeros (n.x-50)/21, 2}"
 		end
 		str
 	end
@@ -133,12 +142,5 @@ class Mandachord_Note
 			return $colors[@type.downcase]
 		end
 		$colors["background"]
-	end
-	def remove
-		@drawn_inner.remove
-	end
-	def reposition container_y
-		determine_y container_y
-		draw
 	end
 end

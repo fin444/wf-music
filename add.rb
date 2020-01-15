@@ -1,4 +1,6 @@
 class Add_UI < UI_Element
+	attr_accessor :is_instrument
+	@@is_instrument = false
 	def draw
 		@buttons = []
 		@buttons.push Text_Button.new "Shawzin", $width/2-192, @y, 22, Proc.new{ new_element "Shawzin" }

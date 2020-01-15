@@ -1,9 +1,11 @@
 $all_animals = ["Virmink", "Sawgaw", "Bolarola", "Horrasque", "Stover", "Kubrodon", "Kuaka", "Condroc", "Mergoo", "Vasca"]
 
 class Lure_UI < UI_Element
+	attr_accessor :is_instrument
+	@@is_instrument = true
 	def draw
 		@animal = $all_animals[0]
-		@select_animal = Dropdown.new (60+determine_text_width("Echo Lure", 17)), @y, $all_animals, @animal, Proc.new{ |s| @animal = s }
+		@select_animal = Dropdown.new (60+get_text_width("Echo Lure", 17)), @y, $all_animals, @animal, Proc.new{ |s| @animal = s }
 		@lines = []
 		@noises = []
 		13.times do |n|
@@ -29,20 +31,31 @@ class Lure_UI < UI_Element
 		end
 	end
 	def mouse_down event
-		if event.y > @y+30
-			if event.x > 50 && event.x < $width-50 && !@noises.any?{ |n| n.x == (((event.x-50)/15).floor)*15+50 && n.y == (((event.y-@y)/15).floor)*15+@y-5 }
-				@noises.push Lure_Noise.new event.x, event.y, @y
-			end
-		else
+		if $open_dropdown != @select_animal && !$playing
+			new_noise event
 			@delete_button.mouse_down event
 		end
 	end
 	def mouse_move event
+		if $open_dropdown != @select_animal && !$playing
+			new_noise event
+		end
+	end
+	def new_noise event
 		if event.y > @y+30 && event.y < @y+220 && event.x > 50 && event.x < $width-50 && !@noises.any?{ |n| n.x == (((event.x-50)/15).floor)*15+50 && n.y == (((event.y-@y)/15).floor)*15+@y-5 }
-			@noises.push Lure_Noise.new event.x, event.y, @y
+			if @noises.any?{ |n| n.x == (((event.x-50)/15).floor)*15+50 }
+				@noises.select{ |n| n.x == (((event.x-50)/15).floor)*15+50 }.each do |n|
+					n.y = (((event.y-@y)/15).floor)*15+@y-5
+					n.determine_color
+					n.draw
+				end
+			else
+				@noises.push Lure_Noise.new event.x, event.y, @y
+			end
 		end
 	end
 	def play x
+		connect_noises
 		@noises.filter{ |n| n.x == x }.each do |n|
 			n.play @animal
 		end
@@ -89,7 +102,20 @@ class Lure_UI < UI_Element
 			n.draw
 		end
 		@select_animal.remove
-		@select_animal = Dropdown.new (70+determine_text_width("Echo Lure", 17)), @y, $all_animals, @animal, Proc.new{ |s| @animal = s }
+		@select_animal = Dropdown.new (70+get_text_width("Echo Lure", 17)), @y, $all_animals, @animal, Proc.new{ |s| @animal = s }
+	end
+	def export # TODO
+		connect_noises
+		self.to_s
+	end
+	def connect_noises
+		# (((x-50)/15).floor)
+		# (((y-container_y)/15).floor)
+		str = ""
+		@noises.each do |n|
+			
+		end
+		str
 	end
 end
 
@@ -99,10 +125,13 @@ class Lure_Noise
 		@x = (((x-50)/15).floor)*15+50 # rounds to nearest 15, adjusting for the 50 pixel margin on left
 		@y = (((y-container_y)/15).floor)*15+container_y-5 # rounds to nearest 15, adjusting for container_y
 		@container_y = container_y
+		@first_draw = true
+		determine_color
+		draw
+	end
+	def determine_color
 		colors = {"25"=>"#00E5FF", "40"=>"#0099FF", "55"=>"#0582FF", "70"=>"#004DFF", "85"=>"#0516FF", "100"=>"#3C00FF", "115"=>"#9900FF", "130"=>"#3C00FF", "145"=>"#0516FF", "160"=>"#004DFF", "175"=>"#0582FF", "190"=>"#0099FF", "205"=>"#00E5FF"}
 		@color = colors[(@y-@container_y).to_s]
-		@first_draw = true
-		draw
 	end
 	def draw
 		if !@first_draw

@@ -1,34 +1,36 @@
 $all_scales = ["Pentatonic Minor", "Pentatonic Major", "Chromatic", "Hexatonic", "Major", "Minor", "Hirajoshi", "Phrygian", "Yo"]
-$shawzin_settings = [false, false, false]
 
 class Shawzin_UI < UI_Element
-	attr_accessor :notes
+	attr_accessor :notes, :is_instrument
+	@@is_instrument = true
 	def draw
 		@scale = $all_scales[0]
 		@line_1 = Line.new x1: 50, y1: @y+80, x2: $width-50, y2: @y+80, width: 4, color: $colors["string"]
 		@line_2 = Line.new x1: 50, y1: @y+160, x2: $width-50, y2: @y+160, width: 4, color: $colors["string"]
 		@line_3 = Line.new x1: 50, y1: @y+240, x2: $width-50, y2: @y+240, width: 4, color: $colors["string"]
 		@notes = []
-		@select_scale = Dropdown.new (60+determine_text_width("Shawzin", 17)), @y, $all_scales, @scale, Proc.new{ |s| @scale = s }
+		@select_scale = Dropdown.new (60+get_text_width("Shawzin", 17)), @y, $all_scales, @scale, Proc.new{ |s| @scale = s }
 		@export = Text_Button.new "Copy Song Code", @select_scale.x+@select_scale.width+10, @y, 17, Proc.new{ Clipboard.copy export }
 	end
 	def click event
-		if event.y > @y+20
-			if event.x < 50 || event.x > $width-50 # don't put outside the strings on left or right
-			elsif event.y <= @y+120 # if below halfway between string 1 and string 2
-				@notes.push Shawzin_Note.new 1, y, $shawzin_settings, event.x
-			elsif event.y <= @y+200 # if below halfway between string 2 and string 3
-				@notes.push Shawzin_Note.new 2, y, $shawzin_settings, event.x
+		if !$playing
+			if event.y > @y+20
+				if event.x < 50 || event.x > $width-50 # don't put outside the strings on left or right
+				elsif event.y <= @y+120 # if below halfway between string 1 and string 2
+					@notes.push Shawzin_Note.new 1, y, event.x
+				elsif event.y <= @y+200 # if below halfway between string 2 and string 3
+					@notes.push Shawzin_Note.new 2, y, event.x
+				else
+					@notes.push Shawzin_Note.new 3, y, event.x
+				end
+				if $containers[0].editing
+					$containers[0].editing_buttons[4].action.call
+				end
 			else
-				@notes.push Shawzin_Note.new 3, y, $shawzin_settings, event.x
+				@select_scale.click event
+				@export.click event
+				@delete_button.click event
 			end
-			if $containers[0].editing
-				$containers[0].editing_buttons[4].action.call
-			end
-		else
-			@select_scale.click event
-			@export.click event
-			@delete_button.click event
 		end
 	end
 	def mouse_down event
@@ -62,7 +64,6 @@ class Shawzin_UI < UI_Element
 		end
 	end
 	def remove
-		puts @notes
 		@notes.each do |n|
 			n.remove
 		end
@@ -73,6 +74,7 @@ class Shawzin_UI < UI_Element
 		@line_2.remove
 		@line_3.remove
 		@container.remove
+		@export.remove
 		$containers.delete_at $containers.find_index self
 		reposition_all
 	end
@@ -81,10 +83,12 @@ class Shawzin_UI < UI_Element
 		@line_2.remove
 		@line_3.remove
 		@select_scale.remove
+		@export.remove
 		@line_1 = Line.new x1: 50, y1: @y+80, x2: $width-50, y2: @y+80, width: 4, color: $colors["string"]
 		@line_2 = Line.new x1: 50, y1: @y+160, x2: $width-50, y2: @y+160, width: 4, color: $colors["string"]
 		@line_3 = Line.new x1: 50, y1: @y+240, x2: $width-50, y2: @y+240, width: 4, color: $colors["string"]
-		@select_scale = Dropdown.new (70+determine_text_width("Shawzin", 17)), @y, $all_scales, @scale, Proc.new{ |s| @scale = s }
+		@select_scale = Dropdown.new (70+get_text_width("Shawzin", 17)), @y, $all_scales, @scale, Proc.new{ |s| @scale = s }
+		@export = Text_Button.new "Copy Song Code", @select_scale.x+@select_scale.width+10, @y, 17, Proc.new{ Clipboard.copy export }
 		@notes.each do |n|
 			n.container_y = @y
 			n.draw
@@ -129,10 +133,19 @@ end
 
 class Shawzin_Note
 	attr_accessor :x, :container_y, :string, :options, :drawn, :color
-	def initialize string, container_y, options, x
+	def initialize string, container_y, x
+		@options = [false, false, false]
+		if $keys_down.include? "a"
+			@options[0] = true
+		end
+		if $keys_down.include? "s"
+			@options[1] = true
+		end
+		if $keys_down.include? "d"
+			@options[2] = true
+		end
 		@string = string
 		@container_y = container_y
-		@options = options.dup
 		@x = x
 		@first_draw = true
 		@color = $colors["note"]
