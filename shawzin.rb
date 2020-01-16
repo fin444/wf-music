@@ -1,8 +1,7 @@
 $all_scales = ["Pentatonic Minor", "Pentatonic Major", "Chromatic", "Hexatonic", "Major", "Minor", "Hirajoshi", "Phrygian", "Yo"]
 
 class Shawzin_UI < UI_Element
-	attr_accessor :notes, :is_instrument
-	@@is_instrument = true
+	attr_accessor :notes
 	def draw
 		@scale = $all_scales[0]
 		@line_1 = Line.new x1: 50, y1: @y+80, x2: $width-50, y2: @y+80, width: 4, color: $colors["string"]
@@ -26,6 +25,7 @@ class Shawzin_UI < UI_Element
 				if $containers[0].editing
 					$containers[0].editing_buttons[4].action.call
 				end
+				$saved = false
 			else
 				@select_scale.click event
 				@export.click event
@@ -64,6 +64,7 @@ class Shawzin_UI < UI_Element
 		end
 	end
 	def remove
+		$saved = false
 		@notes.each do |n|
 			n.remove
 		end

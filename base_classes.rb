@@ -385,7 +385,7 @@ class Text_Button
 		@button = Rectangle.new x: @x, y: @y, width: @width, height: @height, color: @color, z: @z
 		@button_text = Text.new @text, x: @x+5, y: @y, size: @font_size, color: $colors["background"], z: @z
 	end
-	def click event # placeholder, class is extended with this function
+	def click event
 		if @button.contains? event.x, event.y
 			@action.call
 		end

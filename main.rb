@@ -1,7 +1,4 @@
 # TODO
-# cmd n to reset file, ask if not saved
-# file select popup
-# exporting echo lure
 # load files
 # connecting echo lure noises
 # scrolling
@@ -14,6 +11,7 @@ require "ruby2d"
 require "clipboard"
 
 $containers = []
+$saved = true
 $keys_down = []
 $colors = {"background"=>"#14121D", "string"=>"#BBA664", "button_selected"=>"#F2E1AD", "button_deselected"=>"#BDA76C", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"}
 $all_buttons = []
@@ -140,7 +138,7 @@ on :mouse_down do |event|
 	end
 end
 on :mouse_move do |event|
-	if $mouse_down and !$alert.nil?
+	if $mouse_down and $alert.nil?
 		$containers.filter{ |c| c.class.name == "Lure_UI" }.each do |c|
 			c.mouse_move event
 		end
@@ -150,11 +148,13 @@ on :key_down do |event|
 	$keys_down.push event.key
 	if $alert.respond_to? "key_down"
 		$alert.key_down event
-	elsif $keys_down.any? { |k| k == "left command" } or $keys_down.any? { |k| "right command" }
-		if ($keys_down.any? { |k| k == "left shift" } or $keys_down.any? { |k| k == "right shift" }) and $keys_down.any? { |k| k == "s" }
+	elsif $keys_down.any?{ |k| k == "left command" } or $keys_down.any?{ |k| k == "right command" }
+		if ($keys_down.any?{ |k| k == "left shift" } or $keys_down.any?{ |k| k == "right shift" }) and $keys_down.any?{ |k| k == "s" } # cmd + shift + s = save as
 			Popup_Ask.new "File Name", Proc.new{ |t| save_as t }
-		elsif $keys_down.any? { |k| k == "s" }
+		elsif $keys_down.any?{ |k| k == "s" } # cmd + s = save
 			save
+		elsif $keys_down.any?{ |k| k == "n" } # cmd + n = new
+			new_file
 		end
 	end
 end
@@ -180,10 +180,24 @@ def save
 	else
 		File.open "saves/#{$file_name}.txt", "w" do |file|
 			file.syswrite "d v:1\n" # save file version is 1
-			$containers.filter{ |c| c.is_instrument }.each do |c|
+			$containers.filter{ |c| c.class.name == "Shawzin_UI" or c.class.name == "Mandachord_UI" or c.class.name == "Lure_UI" }.each do |c|
 				file.syswrite "#{c.class.name.downcase[0]} #{c.export}\n"
 			end
 		end
+	end
+	$saved = true
+end
+def new_file
+	if $saved
+		$containers.filter{ |c| c.class.name == "Shawzin_UI" or c.class.name == "Mandachord_UI" or c.class.name == "Lure_UI" }.each do |c|
+			c.remove
+		end
+		$file_name = ""
+	else
+		Popup_Confirm.new "Your current work is unsaved. Are you sure you want to go to a new file?", Proc.new{
+			$saved = true
+			new_file
+		}, Proc.new{}
 	end
 end
 

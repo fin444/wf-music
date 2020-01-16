@@ -1,6 +1,5 @@
 class Top_UI < UI_Element
-	attr_accessor :buttons, :editing, :editing_buttons, :is_instrument
-	@@is_instrument = false
+	attr_accessor :buttons, :editing, :editing_buttons
 	def draw
 		@delete_button.remove # don't delete the top bar
 		@buttons = []
@@ -15,7 +14,9 @@ class Top_UI < UI_Element
 				$containers[0].buttons[0].draw
 			end
 		}
-		@buttons.push Quad_Button.new "Save", 140, @y+10, "resources/images/clear.png", Proc.new { save }
+		@buttons.push Quad_Button.new "Save", 140, @y+10, "resources/images/clear.png", Proc.new{ save }
+		@buttons.push Quad_Button.new "Save As", 230, @y+10, "resources/images/clear.png", Proc.new{ save_as }
+		@buttons.push Quad_Button.new "New", 320, @y+10, "resources/images/clear.png", Proc.new{ new_file }
 		# buttons for editing shawzin, will hide until needed
 		@editing = false
 		@note = nil
@@ -36,6 +37,7 @@ class Top_UI < UI_Element
 				if [true, false].include? a # check if boolean
 					@note.options[@editing_buttons.find_index b] = a
 					@note.draw
+					$saved = false
 				end
 			end
 		else
@@ -104,7 +106,7 @@ class Top_UI < UI_Element
 			@note.draw
 		}
 	end
-	def reposition # redefining because it never moves
+	def reposition # redefining as empty because it never moves
 	end
 end
 

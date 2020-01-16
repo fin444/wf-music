@@ -1,8 +1,6 @@
 $all_mandachord_instruments = ["Adau", "Alpha", "Beta", "Delta", "Gamma", "Epsilon", "Horos", "Druk", "Plogg"]
 
 class Mandachord_UI < UI_Element
-	attr_accessor :is_instrument
-	@@is_instrument = true
 	def draw
 		@instrument = $all_mandachord_instruments[0]
 		@drawn = [[]]
@@ -37,6 +35,7 @@ class Mandachord_UI < UI_Element
 							@notes.push n
 						end
 						n.draw
+						$saved = false
 						return
 					end
 				end
@@ -63,6 +62,7 @@ class Mandachord_UI < UI_Element
 		end
 	end
 	def remove
+		$saved = false
 		@drawn.each do |a| # loops through every column
 			a.each do |n| # loops through everything in column
 				n.drawn.remove
@@ -95,7 +95,7 @@ class Mandachord_UI < UI_Element
 		end
 	end
 	def export
-		str = $all_mandachord_instruments.find_index @instrument
+		str = $all_mandachord_instruments.find_index(@instrument).to_s
 		@notes = @notes.sort_by{ |n| n.x }
 		@notes.each do |n|
 			str += "#{n.number}#{n.type[0]}#{add_zeros (n.x-50)/21, 2}"

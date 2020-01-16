@@ -1,8 +1,6 @@
 $all_animals = ["Virmink", "Sawgaw", "Bolarola", "Horrasque", "Stover", "Kubrodon", "Kuaka", "Condroc", "Mergoo", "Vasca"]
 
 class Lure_UI < UI_Element
-	attr_accessor :is_instrument
-	@@is_instrument = true
 	def draw
 		@animal = $all_animals[0]
 		@select_animal = Dropdown.new (60+get_text_width("Echo Lure", 17)), @y, $all_animals, @animal, Proc.new{ |s| @animal = s }
@@ -104,18 +102,16 @@ class Lure_UI < UI_Element
 		@select_animal.remove
 		@select_animal = Dropdown.new (70+get_text_width("Echo Lure", 17)), @y, $all_animals, @animal, Proc.new{ |s| @animal = s }
 	end
-	def export # TODO
-		connect_noises
-		self.to_s
-	end
-	def connect_noises
-		# (((x-50)/15).floor)
-		# (((y-container_y)/15).floor)
-		str = ""
+	def export
+		str = $all_animals.find_index(@animal).to_s
 		@noises.each do |n|
-			
+			str += add_zeros n.x, 4
+			str += add_zeros n.y-@y, 4
 		end
 		str
+	end
+	def connect_noises
+		# TODO
 	end
 end
 
