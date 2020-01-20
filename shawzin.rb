@@ -16,11 +16,11 @@ class Shawzin_UI < UI_Element
 			if event.y > @y+20
 				if event.x < 50 || event.x > $width-50 # don't put outside the strings on left or right
 				elsif event.y <= @y+120 # if below halfway between string 1 and string 2
-					@notes.push Shawzin_Note.new 1, y, event.x
+					@notes.push Shawzin_Note.new 1, @y, event.x
 				elsif event.y <= @y+200 # if below halfway between string 2 and string 3
-					@notes.push Shawzin_Note.new 2, y, event.x
+					@notes.push Shawzin_Note.new 2, @y, event.x
 				else
-					@notes.push Shawzin_Note.new 3, y, event.x
+					@notes.push Shawzin_Note.new 3, @y, event.x
 				end
 				if $containers[0].editing
 					$containers[0].editing_buttons[4].action.call
@@ -95,7 +95,7 @@ class Shawzin_UI < UI_Element
 			n.draw
 		end
 	end
-	def export # all data information is based off of the warframe wiki
+	def export # all data information is based off of https://warframe.fandom.com/wiki/Shawzin#Song_Transcription
 		# TODO: limit 4:16 song with 1666 notes
 		str = (($all_scales.find_index @scale)+1).to_s
 		note_chars = "BCDEFGHJKLMNOPRSTUVWXhijklmnZabcdefpqrstuvxyz012356789+/"
@@ -104,9 +104,9 @@ class Shawzin_UI < UI_Element
 		@notes.each do |n|
 			num = n.string-1
 			if num == 3
-				num = 4
+				num = 4 # slight change to adjust for how notes are stored
 			end
-			case n.options
+			case n.options # num is increased by multiples of 7 according to what fret the note is
 			when [false, false, false]
 				num += 0
 			when [true, false, false]
@@ -129,6 +129,59 @@ class Shawzin_UI < UI_Element
 			str += time_chars[((n.x-50)%670)/60] # third character is 1/64 of measure
 		end
 		str
+	end
+	def import data
+		note_chars = "BCDEFGHJKLMNOPRSTUVWXhijklmnZabcdefpqrstuvxyz012356789+/"
+		time_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+		err = false # return true if error occured
+		# set the scale and update the dropdown
+		@scale = $all_scales[data[0].to_i]
+		@select_scale.selected = @scale
+		@select_scale.draw
+		data.slice! 0
+		# loop through d in sets of three to create notes
+		counter = 0
+		curr_string = 1 # stores string for notes currently being created
+		curr_frets = [false, false, false] # stores frets for note currently being created
+		curr_x = 0 # stores x position for note currently being created
+		data = data.split ""
+		data.length.times do |i|
+			d = data[i]
+			case i%3
+			when 0
+				curr_string = (note_chars.index(d)%7)+1
+				if curr_string == 4
+					curr_string = 3 # slight change to adjust for how notes are stored
+				end
+				case note_chars.index(d)/7
+				when 0
+					curr_frets = [false, false, false]
+				when 1
+					curr_frets = [true, false, false]
+				when 2
+					curr_frets = [false, true, false]
+				when 3
+					curr_frets = [false, false, true]
+				when 4
+					curr_frets = [true, true, false]
+				when 5
+					curr_frets = [true, false, true]
+				when 6
+					curr_frets = [false, true, true]
+				when 7
+					curr_frets = [true, true, true]
+				end
+			when 1
+				curr_x = time_chars.index(d)*670+50
+			when 2
+				curr_x += time_chars.index(d)*60
+				@notes.push Shawzin_Note.new curr_string, @y, curr_x
+				@notes[-1].options = curr_frets
+				@notes[-1].draw
+			end
+			counter += 1
+		end
+		err
 	end
 end
 
@@ -171,8 +224,9 @@ class Shawzin_Note
 			@drawn_sky.remove
 			@drawn_earth.remove
 			@drawn_water.remove
+		else
+			@first_draw = false
 		end
-		@first_draw = false
 		@drawn = Circle.new x: @x, y: @string*80+@container_y, radius: 20, color: @color
 		if !@options[0] # draw either circle to show false
 			@drawn_sky = Circle.new x: @drawn.x-20, y: @drawn.y-35, radius: 4, color: @color

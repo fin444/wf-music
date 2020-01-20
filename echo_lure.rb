@@ -110,6 +110,10 @@ class Lure_UI < UI_Element
 		end
 		str
 	end
+	def import data
+		err = false # return true if error occured
+		err
+	end
 	def connect_noises
 		# TODO
 	end

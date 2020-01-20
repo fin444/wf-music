@@ -16,7 +16,8 @@ class Top_UI < UI_Element
 		}
 		@buttons.push Quad_Button.new "Save", 140, @y+10, "resources/images/clear.png", Proc.new{ save }
 		@buttons.push Quad_Button.new "Save As", 230, @y+10, "resources/images/clear.png", Proc.new{ save_as }
-		@buttons.push Quad_Button.new "New", 320, @y+10, "resources/images/clear.png", Proc.new{ new_file }
+		@buttons.push Quad_Button.new "New", 320, @y+10, "resources/images/clear.png", Proc.new{ new_file false }
+		@buttons.push Quad_Button.new "Open", 410, @y+10, "resources/images/clear.png", Proc.new{ open_file 1 }
 		# buttons for editing shawzin, will hide until needed
 		@editing = false
 		@note = nil

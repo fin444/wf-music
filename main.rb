@@ -1,5 +1,7 @@
 # TODO
-# load files
+# mandachord import
+# echo lure import
+# move shawzin notes left or right in editing
 # connecting echo lure noises
 # scrolling
 # time display on top_bar
@@ -11,6 +13,7 @@ require "ruby2d"
 require "clipboard"
 
 $containers = []
+$file_version = 1 # change if the way songs are stored is modified in the future
 $saved = true
 $keys_down = []
 $colors = {"background"=>"#14121D", "string"=>"#BBA664", "button_selected"=>"#F2E1AD", "button_deselected"=>"#BDA76C", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"}
@@ -154,7 +157,9 @@ on :key_down do |event|
 		elsif $keys_down.any?{ |k| k == "s" } # cmd + s = save
 			save
 		elsif $keys_down.any?{ |k| k == "n" } # cmd + n = new
-			new_file
+			new_file false
+		elsif $keys_down.any?{ |k| k == "o" } # cmd + o = open
+			open_file 1
 		end
 	end
 end
@@ -166,11 +171,11 @@ end
 def save_as t
 	if File.exist? "saves/#{t}.txt"
 		Popup_Confirm.new "The file #{t}.txt already exists. Would you like to overwrite it?", Proc.new{
-			$file_name = t
+			$file_name = "#{t}.txt"
 			save
 		}, Proc.new{ Popup_Info.new "File not saved." }
 	else
-		$file_name = t
+		$file_name = "#{t}.txt"
 		save
 	end
 end
@@ -178,8 +183,8 @@ def save
 	if $file_name == ""
 		$file_name = Popup_Ask.new "File Name", Proc.new{ |t| save_as t }
 	else
-		File.open "saves/#{$file_name}.txt", "w" do |file|
-			file.syswrite "d v:1\n" # save file version is 1
+		File.open "saves/#{$file_name}", "w" do |file|
+			file.syswrite "d v:#{$file_version}\n" # save file version is 1
 			$containers.filter{ |c| c.class.name == "Shawzin_UI" or c.class.name == "Mandachord_UI" or c.class.name == "Lure_UI" }.each do |c|
 				file.syswrite "#{c.class.name.downcase[0]} #{c.export}\n"
 			end
@@ -187,17 +192,74 @@ def save
 	end
 	$saved = true
 end
-def new_file
+def new_file a # if a == true then redirect back to open() phase 2
 	if $saved
 		$containers.filter{ |c| c.class.name == "Shawzin_UI" or c.class.name == "Mandachord_UI" or c.class.name == "Lure_UI" }.each do |c|
 			c.remove
 		end
 		$file_name = ""
+		if a
+			open_file 2
+		end
 	else
 		Popup_Confirm.new "Your current work is unsaved. Are you sure you want to go to a new file?", Proc.new{
 			$saved = true
-			new_file
+			new_file a
 		}, Proc.new{}
+	end
+end
+def open_file a # a defines what phase of the process you are on
+	$containers[-1].remove
+	if a == 1
+		new_file true
+	elsif a == 2
+		Popup_File.new Proc.new{ |f|
+			$file_name = f
+			open_file 3
+		}
+	elsif a == 3
+		File.open "saves/#{$file_name}", "r" do |file|
+			# begin # ruby equivalent of try
+				file.read.split(/\n/).each do |r|
+					case r[0] # first letter of r signifies type of data
+					when "d"
+						if r[-1].to_i < $file_version
+							Popup_Info.new "This file has been made for a newer version of this program. Please update to the latest version in order to use it."
+							break
+						elsif r[-1].to_i > $file_version # in the future, this will be changed to update the file to the current version
+							Popup_Info.new "This file has been made for an older version of this program. That shouldn't happen, as this is the first version of the program. The file may be bugged."
+							break
+						end
+					when "s"
+						r.slice! 0..1
+						ui = Shawzin_UI.new
+						if ui.import r # returns true if error occurred
+							break
+						end
+					when "m"
+						r.slice! 0..1
+						ui = Mandachord_UI.new
+						if ui.import r # returns true if error occurred
+							break
+						end
+					when "l"
+						r.slice! 0..1
+						ui = Lure_UI.new
+						if ui.import r # returns true if error occurred
+							break
+						end
+					else
+						Popup_Info.new "Error in line #{file.read.find_index r} of file: Type of data not known."
+						break
+					end
+				end
+			# rescue => err # ruby equivalent of catch
+			# 	$saved = true
+			# 	new_file false
+			# 	Popup_Info.new "An error has occured in reading the file:\n#{err}"
+			# end
+		end
+		Add_UI.new
 	end
 end
 

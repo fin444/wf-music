@@ -62,7 +62,7 @@ class UI_Element # inherited by all main ui elements
 	end
 	def determine_y index # automatically stack all of the ui elements
 		if $containers.length > 0
-			return $containers[index].container.height+$containers[index].y
+			return $containers[index].y+$containers[index].container.height
 		end
 		0
 	end
@@ -97,7 +97,7 @@ class UI_Element # inherited by all main ui elements
 end
 
 class Dropdown
-	attr_accessor :x, :z, :width
+	attr_accessor :x, :z, :width, :selected
 	def initialize x, y, options, selected, update
 		@x = x
 		@y = y

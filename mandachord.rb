@@ -102,6 +102,10 @@ class Mandachord_UI < UI_Element
 		end
 		str
 	end
+	def import data
+		err = false # return true if error occured
+		err
+	end
 end
 
 class Mandachord_Note

@@ -105,19 +105,20 @@ class Popup_Ask
 		@action = action
 		@text = ""
 		@background = Rectangle.new x: 0, y: 0, width: $width, height: $height, color: [0, 0, 0, 0.8], z: 10
-		@outline = Rectangle.new x: ($width/2)-201, y: ($height/2)-101, width: 402, height: 202, color: $colors["string"], z: 10
-		@container = Rectangle.new x: ($width/2)-200, y: ($height/2)-100, width: 400, height: 200, color: $colors["background"], z: 10
-		@title = Text.new title, x: ($width/2)-(get_text_width(title, 25)/2), y: ($height/2)-90, size: 25, color: $colors["string"], z: 10
+		@outline = Rectangle.new x: ($width/2)-201, y: ($height/2)-51, width: 402, height: 102, color: $colors["string"], z: 10
+		@container = Rectangle.new x: ($width/2)-200, y: ($height/2)-50, width: 400, height: 100, color: $colors["background"], z: 10
+		@title = Text.new title, x: ($width/2)-(get_text_width(title, 25)/2), y: ($height/2)-45, size: 25, color: $colors["string"], z: 10
 		@input_outline = Rectangle.new x: ($width/2)-191, y: ($height/2)-16, width: 382, height: 32, color: $colors["string"], z: 10
 		@input_box = Rectangle.new x: ($width/2)-190, y: ($height/2)-15, width: 380, height: 30, color: $colors["background"], z: 10
 		@writing = Text.new @text, x: ($width/2)-188, y: ($height/2)-12, size: 20, color: $colors["string"], z: 10
-		@button = Text_Button.new "Okay", ($width/2)-(get_text_width("Okay", 20)/2), ($height/2)+70, 20, Proc.new{
+		@button = Text_Button.new "Okay", ($width/2)-(get_text_width("Okay", 20)/2), ($height/2)+20, 20, Proc.new{
 			$alert.remove
 			@action.call @text
 		}
 		@button.z = 10
 		@button.draw
-		@blinker = Line.new x1: ($width/2)-187+get_text_width(@text, 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text, 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
+		@position = 0
+		@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
 		$alert = self
 	end
 	def click event
@@ -129,28 +130,45 @@ class Popup_Ask
 	def key_down event
 		if "abcdefghijklmnopqrstuvwxyz".include? event.key # if letter, add either lowercase or uppercase
 			if $keys_down.include? "left shift" or $keys_down.include? "right shift"
-				@text += event.key.upcase
+				@text = @text[0, @position] + event.key.upcase + @text[@position..-1]
 			else
-				@text += event.key.downcase
+				@text = @text[0, @position] + event.key + @text[@position..-1]
 			end
+			@position += 1
 		elsif "0123456789,./".include? event.key # if special char, add either char or other if shift is down
 			if $keys_down.include? "left shift" or $keys_down.include? "right shift"
-				@text += {"0"=>")", "1"=>"!", "2"=>"@", "3"=>"#", "4"=>"$", "5"=>"%", "6"=>"^", "7"=>"&", "8"=>"*", "9"=>"(", ","=>"<", "."=>">", "/"=>"?"}[event.key]
+				@text = @text[0, @position] + {"0"=>")", "1"=>"!", "2"=>"@", "3"=>"#", "4"=>"$", "5"=>"%", "6"=>"^", "7"=>"&", "8"=>"*", "9"=>"(", ","=>"<", "."=>">", "/"=>"?"}[event.key] + @text[@position..-1]
 			else
-				@text += event.key
+				@text = @text[0, @position] + event.key + @text[@position..-1]
 			end
-		elsif event.key == "backspace" and @text.length > 0
-			@text = @text.delete_suffix! @text[-1] # delete suffix will delete end of string given that it is provided, and also that string is not empty
+			@position += 1
 		elsif event.key == "space"
-			@text += " "
+			@text = "#{@text[0, @position]} #{@text[@position..-1]}"
+			@position += 1
+		elsif event.key == "backspace" and @text.length > 0
+			@text = @text[0, @position-1] + @text[@position, @text.length-(@text.length-@position)]
+			@position -= 1
+		elsif event.key == "return" # submit when enter pressed
+			$alert.remove
+			@action.call @text
+		elsif event.key == "left" && @position != 0
+			@position -= 1
+		elsif event.key == "right" && @position != @text.length
+			@position += 1
+		elsif event.key == "up"
+			@position = 0
+		elsif event.key == "down"
+			@position = @text.length
 		end
-		@writing.remove
-		@writing = Text.new @text, x: ($width/2)-188, y: ($height/2)-12, size: 20, color: $colors["string"], z: 10
+		if event.key != "return"
+			@writing.remove
+			@writing = Text.new @text, x: ($width/2)-188, y: ($height/2)-12, size: 20, color: $colors["string"], z: 10
+		end
 	end
 	def blink # blinking cursor
 		@blinker.remove
 		if Time.now.to_i%2 == 0
-			@blinker = Line.new x1: ($width/2)-187+get_text_width(@text, 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text, 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
+			@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
 		end
 	end
 	def remove
@@ -170,6 +188,11 @@ class Popup_File
 	def initialize action
 		@action = action
 		@file_list = Dir.children("saves").filter{ |s| s[-4, 4] == ".txt" }
+		if @file_list.length == 0
+			$alert = nil
+			Popup_Info.new "There are no files in the saves folder."
+			return
+		end
 		# find height and width of window
 		@height = 100+@file_list.length*20
 		@width = get_text_width "Choose a File", 40
@@ -237,4 +260,3 @@ class Popup_File
 		$alert = nil
 	end
 end
-Popup_File.new Proc.new{ |f| puts f }
