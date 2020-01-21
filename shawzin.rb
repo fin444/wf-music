@@ -100,47 +100,29 @@ class Shawzin_UI < UI_Element
 		str = (($all_scales.find_index @scale)+1).to_s
 		note_chars = "BCDEFGHJKLMNOPRSTUVWXhijklmnZabcdefpqrstuvxyz012356789+/"
 		time_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+		fret_to_num = {[false, false, false]=>"0", [true, false, false]=>"7", [false, true, false]=>"14", [false, false, true]=>"21", [true, true, false]=>"28", [true, false, true]=>"35", [false, true, true]=>"42", [true, true, true]=>"49"}
 		@notes = @notes.sort_by { |n| n.x }
 		@notes.each do |n|
 			num = n.string-1
 			if num == 3
 				num = 4 # slight change to adjust for how notes are stored
 			end
-			case n.options # num is increased by multiples of 7 according to what fret the note is
-			when [false, false, false]
-				num += 0
-			when [true, false, false]
-				num += 7
-			when [false, true, false]
-				num += 14
-			when [false, false, true]
-				num += 21
-			when [true, true, false]
-				num += 28
-			when [true, false, true]
-				num += 35
-			when [false, true, true]
-				num += 42
-			when [true, true, true]
-				num += 49
-			end
-			str += note_chars[num] # first character is note
+			str += note_chars[num+fret_to_num[n.options].to_i] # first character is note, num is increased by multiples of 7 according to what fret the note is
 			str += time_chars[(n.x-50)/670] # second character is measure (1/64 of song)
-			str += time_chars[((n.x-50)%670)/60] # third character is 1/64 of measure
+			str += time_chars[((n.x-50)%670)/32] # third character is 1/64 of measure
 		end
 		str
 	end
 	def import data
 		note_chars = "BCDEFGHJKLMNOPRSTUVWXhijklmnZabcdefpqrstuvxyz012356789+/"
 		time_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
-		err = false # return true if error occured
+		num_to_fret = {"0"=>[false, false, false], "1"=>[true, false, false], "2"=>[false, true, false], "3"=>[false, false, true], "4"=>[true, true, false], "5"=>[true, false, true], "6"=>[false, true, true], "7"=>[true, true, true]}
 		# set the scale and update the dropdown
-		@scale = $all_scales[data[0].to_i]
+		@scale = $all_scales[data[0].to_i-1]
 		@select_scale.selected = @scale
 		@select_scale.draw
 		data.slice! 0
-		# loop through d in sets of three to create notes
-		counter = 0
+		# loop through data in sets of three to create notes
 		curr_string = 1 # stores string for notes currently being created
 		curr_frets = [false, false, false] # stores frets for note currently being created
 		curr_x = 0 # stores x position for note currently being created
@@ -153,24 +135,7 @@ class Shawzin_UI < UI_Element
 				if curr_string == 4
 					curr_string = 3 # slight change to adjust for how notes are stored
 				end
-				case note_chars.index(d)/7
-				when 0
-					curr_frets = [false, false, false]
-				when 1
-					curr_frets = [true, false, false]
-				when 2
-					curr_frets = [false, true, false]
-				when 3
-					curr_frets = [false, false, true]
-				when 4
-					curr_frets = [true, true, false]
-				when 5
-					curr_frets = [true, false, true]
-				when 6
-					curr_frets = [false, true, true]
-				when 7
-					curr_frets = [true, true, true]
-				end
+				curr_frets = num_to_fret[(note_chars.index(d)/7).to_s]
 			when 1
 				curr_x = time_chars.index(d)*670+50
 			when 2
@@ -179,9 +144,7 @@ class Shawzin_UI < UI_Element
 				@notes[-1].options = curr_frets
 				@notes[-1].draw
 			end
-			counter += 1
 		end
-		err
 	end
 end
 
@@ -200,7 +163,7 @@ class Shawzin_Note
 		end
 		@string = string
 		@container_y = container_y
-		@x = x
+		@x = (x/21.0).ceil*21
 		@first_draw = true
 		@color = $colors["note"]
 		draw

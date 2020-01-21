@@ -135,9 +135,9 @@ class Popup_Ask
 				@text = @text[0, @position] + event.key + @text[@position..-1]
 			end
 			@position += 1
-		elsif "0123456789,./".include? event.key # if special char, add either char or other if shift is down
+		elsif "0123456789,./-".include? event.key # if special char, add either char or other if shift is down
 			if $keys_down.include? "left shift" or $keys_down.include? "right shift"
-				@text = @text[0, @position] + {"0"=>")", "1"=>"!", "2"=>"@", "3"=>"#", "4"=>"$", "5"=>"%", "6"=>"^", "7"=>"&", "8"=>"*", "9"=>"(", ","=>"<", "."=>">", "/"=>"?"}[event.key] + @text[@position..-1]
+				@text = @text[0, @position] + {"0"=>")", "1"=>"!", "2"=>"@", "3"=>"#", "4"=>"$", "5"=>"%", "6"=>"^", "7"=>"&", "8"=>"*", "9"=>"(", ","=>"<", "."=>">", "/"=>"?", "-"=>"_"}[event.key] + @text[@position..-1]
 			else
 				@text = @text[0, @position] + event.key + @text[@position..-1]
 			end

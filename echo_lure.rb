@@ -44,7 +44,6 @@ class Lure_UI < UI_Element
 			if @noises.any?{ |n| n.x == (((event.x-50)/15).floor)*15+50 }
 				@noises.select{ |n| n.x == (((event.x-50)/15).floor)*15+50 }.each do |n|
 					n.y = (((event.y-@y)/15).floor)*15+@y-5
-					n.determine_color
 					n.draw
 				end
 			else
@@ -105,20 +104,30 @@ class Lure_UI < UI_Element
 	def export
 		str = $all_animals.find_index(@animal).to_s
 		@noises.each do |n|
-			str += add_zeros n.x, 4
-			str += add_zeros n.y-@y, 4
+			str += "#{add_zeros n.x, 4}#{add_zeros n.y-@y, 4}"
 		end
 		str
 	end
 	def import data
-		err = false # return true if error occured
-		err
+		# set the animal and update dropdown
+		@animal = $all_animals[data[0].to_i]
+		@select_animal.selected = @animal
+		@select_animal.draw
+		data.slice! 0
+		# loop through data in sets of 8
+		data = data.split ""
+		data.length.times do |i|
+			if i%8 == 0
+				@noises.push Lure_Noise.new data[i, 4].join("").to_i, data[i+4, 4].join("").to_i+@y+5, @y
+			end
+		end
 	end
 	def connect_noises
 		# TODO
 	end
 end
 
+$lure_noise_colors = {"25"=>"#00E5FF", "40"=>"#0099FF", "55"=>"#0582FF", "70"=>"#004DFF", "85"=>"#0516FF", "100"=>"#3C00FF", "115"=>"#9900FF", "130"=>"#3C00FF", "145"=>"#0516FF", "160"=>"#004DFF", "175"=>"#0582FF", "190"=>"#0099FF", "205"=>"#00E5FF"}
 class Lure_Noise
 	attr_accessor :x, :y, :container_y, :drawn
 	def initialize x, y, container_y
@@ -126,12 +135,7 @@ class Lure_Noise
 		@y = (((y-container_y)/15).floor)*15+container_y-5 # rounds to nearest 15, adjusting for container_y
 		@container_y = container_y
 		@first_draw = true
-		determine_color
 		draw
-	end
-	def determine_color
-		colors = {"25"=>"#00E5FF", "40"=>"#0099FF", "55"=>"#0582FF", "70"=>"#004DFF", "85"=>"#0516FF", "100"=>"#3C00FF", "115"=>"#9900FF", "130"=>"#3C00FF", "145"=>"#0516FF", "160"=>"#004DFF", "175"=>"#0582FF", "190"=>"#0099FF", "205"=>"#00E5FF"}
-		@color = colors[(@y-@container_y).to_s]
 	end
 	def draw
 		if !@first_draw
@@ -139,7 +143,7 @@ class Lure_Noise
 		else
 			@first_draw = false
 		end
-		@drawn = Rectangle.new x: @x, y: @y, width: 15, height: 10, color: @color
+		@drawn = Rectangle.new x: @x, y: @y, width: 15, height: 10, color: $lure_noise_colors[(@y-@container_y).to_s]
 	end
 	def play animal
 		puts "[#{Time.now.strftime("%I:%M:%S")}] resources/sounds/echo_lure/#{(@y-@container_y)/15}#{animal.downcase}"

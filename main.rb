@@ -1,13 +1,15 @@
 # TODO
-# mandachord import
-# echo lure import
-# move shawzin notes left or right in editing
-# connecting echo lure noises
+# shawzin note saving is all fucked in the 3rd character of each note
+# echo lure noise creation is angled upwards
+# connect echo lure noises
 # scrolling
 # time display on top_bar
+# show that shawzin has specifically 8 per second
+# align echo lure to shawzin note speed
 # note/time limits on mandachord/shawzin
 # options
 # way to signify that can't add notes to instruments while playing
+# allow mandachord to not repeat
 
 require "ruby2d"
 require "clipboard"
@@ -209,7 +211,6 @@ def new_file a # if a == true then redirect back to open() phase 2
 	end
 end
 def open_file a # a defines what phase of the process you are on
-	$containers[-1].remove
 	if a == 1
 		new_file true
 	elsif a == 2
@@ -218,6 +219,7 @@ def open_file a # a defines what phase of the process you are on
 			open_file 3
 		}
 	elsif a == 3
+		$containers[-1].remove
 		File.open "saves/#{$file_name}", "r" do |file|
 			# begin # ruby equivalent of try
 				file.read.split(/\n/).each do |r|
@@ -233,21 +235,15 @@ def open_file a # a defines what phase of the process you are on
 					when "s"
 						r.slice! 0..1
 						ui = Shawzin_UI.new
-						if ui.import r # returns true if error occurred
-							break
-						end
+						ui.import r
 					when "m"
 						r.slice! 0..1
 						ui = Mandachord_UI.new
-						if ui.import r # returns true if error occurred
-							break
-						end
+						ui.import r
 					when "l"
 						r.slice! 0..1
 						ui = Lure_UI.new
-						if ui.import r # returns true if error occurred
-							break
-						end
+						ui.import r
 					else
 						Popup_Info.new "Error in line #{file.read.find_index r} of file: Type of data not known."
 						break
