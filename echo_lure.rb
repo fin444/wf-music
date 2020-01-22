@@ -1,4 +1,4 @@
-$all_animals = ["Virmink", "Sawgaw", "Bolarola", "Horrasque", "Stover", "Kubrodon", "Kuaka", "Condroc", "Mergoo", "Vasca"]
+$all_animals = ["Pobbers", "Virmink", "Sawgaw", "Bolarola", "Horrasque", "Stover", "Kubrodon", "Kuaka", "Condroc", "Mergoo", "Vasca"]
 
 class Lure_UI < UI_Element
 	def draw
@@ -40,10 +40,10 @@ class Lure_UI < UI_Element
 		end
 	end
 	def new_noise event
-		if event.y > @y+30 && event.y < @y+220 && event.x > 50 && event.x < $width-50 && !@noises.any?{ |n| n.x == (((event.x-50)/15).floor)*15+50 && n.y == (((event.y-@y)/15).floor)*15+@y-5 }
+		if event.y > @y+30 && event.y < @y+220 && event.x > 50 && event.x < $width-50
 			if @noises.any?{ |n| n.x == (((event.x-50)/15).floor)*15+50 }
 				@noises.select{ |n| n.x == (((event.x-50)/15).floor)*15+50 }.each do |n|
-					n.y = (((event.y-@y)/15).floor)*15+@y-5
+					n.y = (event.y-@y).round_to(15)+@y-5
 					n.draw
 				end
 			else
@@ -52,12 +52,12 @@ class Lure_UI < UI_Element
 		end
 	end
 	def play x
-		connect_noises
 		@noises.filter{ |n| n.x == x }.each do |n|
 			n.play @animal
 		end
 	end
 	def get_last_sound
+		connect_noises
 		h = 0
 		@noises.each do |n|
 			if n.x+10 > h
@@ -102,7 +102,7 @@ class Lure_UI < UI_Element
 		@select_animal = Dropdown.new (70+get_text_width("Echo Lure", 17)), @y, $all_animals, @animal, Proc.new{ |s| @animal = s }
 	end
 	def export
-		str = $all_animals.find_index(@animal).to_s
+		str = add_zeros($all_animals.find_index(@animal), 2).to_s
 		@noises.each do |n|
 			str += "#{add_zeros n.x, 4}#{add_zeros n.y-@y, 4}"
 		end
@@ -110,7 +110,7 @@ class Lure_UI < UI_Element
 	end
 	def import data
 		# set the animal and update dropdown
-		@animal = $all_animals[data[0].to_i]
+		@animal = $all_animals[data[0, 2].to_i]
 		@select_animal.selected = @animal
 		@select_animal.draw
 		data.slice! 0
@@ -123,16 +123,37 @@ class Lure_UI < UI_Element
 		end
 	end
 	def connect_noises
-		# TODO
+		@noises.sort_by! { |n| n.x }
+		@connected_noises = []
+		curr_start = 0 # have to define in higher scope
+		curr_length = 1 # have to define in higher scope
+		@noises.each do |n|
+			if @noises[0] == n
+				curr_start = ((n.x-50)/15)
+			elsif curr_start*15+curr_length*15 == n.x-50
+				curr_length += 1
+			else
+				@connected_noises.push [curr_start, curr_length]
+				curr_start = ((n.x-50)/15) # also sets up for next connection
+				curr_length = 1
+			end
+		end
+		if curr_start != -1
+			@connected_noises.push [curr_start, curr_length]
+		end
+		@connected_noises.each do |n|
+			puts "#{n[0]}, #{n[1]}"
+		end
 	end
 end
 
 $lure_noise_colors = {"25"=>"#00E5FF", "40"=>"#0099FF", "55"=>"#0582FF", "70"=>"#004DFF", "85"=>"#0516FF", "100"=>"#3C00FF", "115"=>"#9900FF", "130"=>"#3C00FF", "145"=>"#0516FF", "160"=>"#004DFF", "175"=>"#0582FF", "190"=>"#0099FF", "205"=>"#00E5FF"}
+
 class Lure_Noise
 	attr_accessor :x, :y, :container_y, :drawn
 	def initialize x, y, container_y
-		@x = (((x-50)/15).floor)*15+50 # rounds to nearest 15, adjusting for the 50 pixel margin on left
-		@y = (((y-container_y)/15).floor)*15+container_y-5 # rounds to nearest 15, adjusting for container_y
+		@x = (((x-50)/15).floor)*15+50 # floors to 15, adjusting for the 50 pixel margin on left
+		@y = (y-container_y).round_to(15)+container_y-5 # rounds to nearest 15, adjusting for container_y
 		@container_y = container_y
 		@first_draw = true
 		draw

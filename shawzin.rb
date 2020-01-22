@@ -109,7 +109,8 @@ class Shawzin_UI < UI_Element
 			end
 			str += note_chars[num+fret_to_num[n.options].to_i] # first character is note, num is increased by multiples of 7 according to what fret the note is
 			str += time_chars[(n.x-50)/670] # second character is measure (1/64 of song)
-			str += time_chars[((n.x-50)%670)/32] # third character is 1/64 of measure
+			str += time_chars[(((n.x-50)%670)/21)*2]
+			#str += time_chars[((n.x-50)%670)/32] # third character is 1/64 of measure
 		end
 		str
 	end
@@ -139,7 +140,8 @@ class Shawzin_UI < UI_Element
 			when 1
 				curr_x = time_chars.index(d)*670+50
 			when 2
-				curr_x += time_chars.index(d)*60
+				#time_chars[(((n.x-50)%670)/21)*2]
+				curr_x += ((time_chars.index(d)/2)*21)
 				@notes.push Shawzin_Note.new curr_string, @y, curr_x
 				@notes[-1].options = curr_frets
 				@notes[-1].draw

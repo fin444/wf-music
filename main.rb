@@ -1,7 +1,4 @@
 # TODO
-# shawzin note saving is all fucked in the 3rd character of each note
-# echo lure noise creation is angled upwards
-# connect echo lure noises
 # scrolling
 # time display on top_bar
 # show that shawzin has specifically 8 per second
@@ -13,9 +10,10 @@
 
 require "ruby2d"
 require "clipboard"
+require "os"
+require "rounding"
 
 $containers = []
-$file_version = 1 # change if the way songs are stored is modified in the future
 $saved = true
 $keys_down = []
 $colors = {"background"=>"#14121D", "string"=>"#BBA664", "button_selected"=>"#F2E1AD", "button_deselected"=>"#BDA76C", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"}
@@ -25,7 +23,12 @@ $fps = Text.new get(:fps).round(2), x: 0, y: 0, size: 15, color: "white", z: 20
 
 $width = 1440
 $height = 900
-set background: $colors["background"], width: $width, height: $height, fullscreen: true
+set background: $colors["background"], width: $width, height: $height
+if OS.windows?
+	set borderless: true
+else
+	set fullscreen: true
+end
 
 load "base_classes.rb"
 load "top_bar.rb"
@@ -40,7 +43,7 @@ $playing = false # set to true to move bar and play song
 
 def play_all
 	$playing_highest = 0
-	$containers.each do |c| # go through every container to find out how long the song is
+	$containers.filter{ |c| c.respond_to? "get_last_sound" }.each do |c| # go through every container to find out how long the song is
 		h = c.get_last_sound
 		if h > $playing_highest
 			$playing_highest = h+5
@@ -71,7 +74,7 @@ update do
 		$playing_bar.remove
 		$playing_bar = Line.new x1: $playing_counter, y1: $containers[0].container.height, x2: $playing_counter, y2: $height, color: $colors["note"], width: 3, z: 8
 		($playing_counter.floor-$playing_previous).times do |t|
-			$containers.each do |c|
+			$containers.filter{ |c| c.respond_to? "play" }.each do |c|
 				c.play $playing_previous+t
 			end
 		end
@@ -170,6 +173,8 @@ on :key_up do |event|
 end
 
 # save/load
+$file_version = 1 # change if the way songs are stored is modified in the future
+
 def save_as t
 	if File.exist? "saves/#{t}.txt"
 		Popup_Confirm.new "The file #{t}.txt already exists. Would you like to overwrite it?", Proc.new{
@@ -200,6 +205,7 @@ def new_file a # if a == true then redirect back to open() phase 2
 			c.remove
 		end
 		$file_name = ""
+		$saved = true
 		if a
 			open_file 2
 		end

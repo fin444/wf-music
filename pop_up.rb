@@ -207,8 +207,8 @@ class Popup_File
 		@outline = Rectangle.new x: ($width/2)-(@width/2)-1, y: ($height/2)-(@height/2)-1, width: @width+2, height: @height+2, color: $colors["string"], z: 10
 		@container = Rectangle.new x: ($width/2)-(@width/2), y: ($height/2)-(@height/2), width: @width, height: @height, color: $colors["background"], z: 10
 		@title = Text.new "Choose a File", x: ($width/2)-(@width/2)+10, y: ($height/2)-(@height/2)+10, size: 40, color: $colors["string"], z: 10
-		@selector_containers = []
-		@selector_names = []
+		@selector_containers = [] # bounding boxes for each file selector
+		@selector_names = [] # the actual names of the file
 		@file_list.each do |f|
 			@selector_containers.push Rectangle.new x: ($width/2)-(@width/2), y: ($height/2)-(@height/2)+60+@file_list.find_index(f)*20, width: @width-20, height: 20, color: $colors["background"], z: 10
 			@selector_names.push Text.new f, x: ($width/2)-(@width/2)+15, y: ($height/2)-(@height/2)+60+@file_list.find_index(f)*20, size: 17, color: $colors["string"], z: 10
@@ -216,6 +216,7 @@ class Popup_File
 		@button = Text_Button.new "Select", ($width/2)-(get_text_width("Select", 20)/2), ($height/2)+(@height/2)-30, 20, Proc.new{ $alert.remove }
 		@button.z = 10
 		@button.draw
+		# set the first file to be currently selected
 		@selected = @file_list[0]
 		@selector_containers[0].remove
 		@selector_names[0].remove
@@ -228,10 +229,12 @@ class Popup_File
 			if s.contains? event.x, event.y
 				old_index = @file_list.find_index @selected
 				new_index = @selector_containers.find_index s
+				# unselect the old file
 				@selector_containers[old_index].remove
 				@selector_names[old_index].remove
 				@selector_containers[old_index] = Rectangle.new x: ($width/2)-(@width/2)+10, y: ($height/2)-(@height/2)+60+@file_list.find_index(@selected)*20, width: @width-20, height: 20, color: $colors["background"], z: 10
 				@selector_names[old_index] = Text.new @selected, x: ($width/2)-(@width/2)+15, y: ($height/2)-(@height/2)+60+@file_list.find_index(@selected)*20, size: 17, color: $colors["string"], z: 10
+				# select the new file
 				@selected = @file_list[new_index]
 				@selector_containers[new_index].remove
 				@selector_names[new_index].remove
