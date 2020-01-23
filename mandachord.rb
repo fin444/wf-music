@@ -1,13 +1,20 @@
 $all_mandachord_instruments = ["Adau", "Alpha", "Beta", "Delta", "Gamma", "Epsilon", "Horos", "Druk", "Plogg"]
 
 class Mandachord_UI < UI_Element
-	def draw
+	def init
 		@instrument = $all_mandachord_instruments[0]
 		@drawn = Array.new
 		@notes = Array.new
-		@percussion_background = Rectangle.new x: 49, y: @y+30, width: $width-94, height: 65, color: $colors["percussion"]
-		@bass_background = Rectangle.new x: 49, y: @y+94, width: $width-94, height: 105, color: $colors["bass"]
-		@melody_background = Rectangle.new x: 49, y: @y+199, width: $width-94, height: 105, color: $colors["melody"]
+		@percussion_background = Rectangle.new x: 49, y: @y+30, width: $width-94, height: 66, color: $colors["percussion"], z: 4
+		@bass_background = Rectangle.new x: 49, y: @y+95, width: $width-94, height: 106, color: $colors["bass"], z: 4
+		@melody_background = Rectangle.new x: 49, y: @y+201, width: $width-94, height: 106, color: $colors["melody"], z: 4
+		@line_1 = Line.new x1: 50+(336+$scrolled_x)%1344, y1: @y+30, x2: 50+(336+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
+		@line_2 = Line.new x1: 50+(672+$scrolled_x)%1344, y1: @y+30, x2: 50+(672+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
+		@line_3 = Line.new x1: 50+(1008+$scrolled_x)%1344, y1: @y+30, x2: 50+(1008+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
+		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
+		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
+			@line_5 = Line.new x1: 50, y1: @y+30, x2: 50, y2: @y+307, width: 2, color: "white", z: 4
+		end
 		64.times do |a|
 			arr = Array.new
 			3.times do |n|
@@ -22,6 +29,7 @@ class Mandachord_UI < UI_Element
 			@drawn.push arr
 		end
 		@select_instrument = Dropdown.new (60+get_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
+		$scroll_list_x.push self
 	end
 	def click event
 		if !$playing
@@ -29,7 +37,7 @@ class Mandachord_UI < UI_Element
 			@delete_button.click event
 			@drawn.each do |a| # loops through every column
 				a.each do |n| # loops through everything in column
-					if n.drawn.contains? event.x, event.y
+					if event.x >= n.drawn.x-1 and event.x <= n.drawn.x+20 and event.y >= n.drawn.y-1 and event.y <= n.drawn.y+20
 						n.selected = !n.selected
 						if @notes.include? n
 							@notes = @notes - [n]
@@ -137,6 +145,25 @@ class Mandachord_UI < UI_Element
 			end
 		end
 	end
+	def scroll_x
+		@drawn.each do |d|
+			d.each do |n|
+				n.draw
+			end
+		end
+		@line_1.remove
+		@line_2.remove
+		@line_3.remove
+		@line_4.remove
+		@line_5.remove
+		@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30, x2: 50+(335+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
+		@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30, x2: 50+(671+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
+		@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
+		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
+		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
+			@line_5 = Line.new x1: 50, y1: @y+30, x2: 50, y2: @y+307, width: 2, color: "white", z: 4
+		end
+	end
 end
 
 class Mandachord_Note
@@ -158,16 +185,16 @@ class Mandachord_Note
 			@drawn.remove
 		end
 		@first_draw = false
-		@drawn = Rectangle.new x: @x+1, y: @y+1, width: 19, height: 19, color: determine_color
+		@drawn = Rectangle.new x: 43+(@x+$scrolled_x)%1344, y: @y+1, width: 19, height: 19, color: determine_color, z: 4
 	end
 	def determine_y container_y
 		case @type
 		when "percussion"
 			@y = container_y+@number*21+10
 		when "bass"
-			@y = container_y+@number*21+73
+			@y = container_y+@number*21+74
 		when "melody"
-			@y = container_y+@number*21+178
+			@y = container_y+@number*21+180
 		end
 	end
 	def determine_color

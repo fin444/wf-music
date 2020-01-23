@@ -1,6 +1,16 @@
 # TODO
-# scrolling
-# time display on top_bar
+# scroll y on shawzin
+# scroll y on mandachord
+# scroll y on echo lure
+# scroll y on Add_UI
+# actual bar when scrolling
+# make all scrolling stuff z=5
+# dynamic full_size variables
+# loop mandachord playing
+# echo lure saving is fucked, doesn't save sets of 8 digits (i think)
+# echo lure changing y value in column doesn't work
+# when importing, hide all things that aren't currently on screen
+# time display on top bar
 # show that shawzin has specifically 8 per second
 # align echo lure to shawzin note speed
 # note/time limits on mandachord/shawzin
@@ -31,6 +41,7 @@ else
 end
 
 load "base_classes.rb"
+load "scrolling.rb"
 load "top_bar.rb"
 load "shawzin.rb"
 load "mandachord.rb"
@@ -38,8 +49,14 @@ load "echo_lure.rb"
 load "add.rb"
 load "pop_up.rb"
 
+# blockers to cover up things in scrolling
+Rectangle.new x: 0, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
+Rectangle.new x: $width-50, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
+
 # playing
-$playing = false # set to true to move bar and play song
+$playing = false
+$playing_bar = Line.new x1: 0, y1: 0, x2: 0, y2: 0, width: 0, color: [0, 0, 0, 0]
+$playing_counter = 50
 
 def play_all
 	$playing_highest = 0
@@ -53,9 +70,8 @@ def play_all
 		$playing = true
 		$playing_counter = 50
 		$playing_previous = 47
-		if $playing_bar.nil?
-			$playing_bar = Line.new x1: 50, y1: $containers[0].container.height, x2: 50, y2: $height, color: $colors["note"], width: 3, z: 8
-		end
+		$playing_bar.remove
+		$playing_bar = Line.new x1: 50-$scrolled_x, y1: $containers[0].container.height, x2: 50-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
 	end
 end
 def pause_all
@@ -72,7 +88,7 @@ update do
 		$playing_previous = $playing_counter.floor
 		$playing_counter += (1340.0/480.0).round 3
 		$playing_bar.remove
-		$playing_bar = Line.new x1: $playing_counter, y1: $containers[0].container.height, x2: $playing_counter, y2: $height, color: $colors["note"], width: 3, z: 8
+		$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
 		($playing_counter.floor-$playing_previous).times do |t|
 			$containers.filter{ |c| c.respond_to? "play" }.each do |c|
 				c.play $playing_previous+t
@@ -89,7 +105,7 @@ end
 # inputs
 on :mouse_up do |event|
 	$mouse_down = false
-	if event.button == :left
+	if event.button == :left # remove mouse_down color state from all buttons
 		$all_buttons.each do |b|
 			if !b.hidden
 				b.mouse_up
@@ -99,6 +115,8 @@ on :mouse_up do |event|
 	if $alert.nil?
 		case event.button
 		when :left
+			$scroll_bar_x.click event
+			$scroll_bar_y.click event
 			if !$open_dropdown.nil?
 				if $open_dropdown.click event
 					dont = true # used to signify that click was handled on dropdown
@@ -131,6 +149,8 @@ on :mouse_down do |event|
 	if $alert.nil?
 		case event.button
 		when :left
+			$scroll_bar_x.mouse_down event
+			$scroll_bar_y.mouse_down event
 			$containers.each do |c|
 				if c.container.contains? event.x, event.y
 					c.mouse_down event

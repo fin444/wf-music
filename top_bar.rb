@@ -1,6 +1,6 @@
 class Top_UI < UI_Element
 	attr_accessor :buttons, :editing, :editing_buttons
-	def draw
+	def init
 		@delete_button.remove # don't delete the top bar
 		@buttons = []
 		@buttons.push Quad_Button.new "Play", 50, @y+10, "resources/images/play_icon.png", Proc.new{

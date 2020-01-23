@@ -1,5 +1,5 @@
 class Add_UI < UI_Element
-	def draw
+	def init
 		@buttons = []
 		@buttons.push Text_Button.new "Shawzin", $width/2-192, @y, 22, Proc.new{ new_element "Shawzin" }
 		@buttons.push Text_Button.new "Mandachord", $width/2-90, @y, 22, Proc.new{ new_element "Mandachord" }

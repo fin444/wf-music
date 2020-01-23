@@ -2,7 +2,7 @@ $all_scales = ["Pentatonic Minor", "Pentatonic Major", "Chromatic", "Hexatonic",
 
 class Shawzin_UI < UI_Element
 	attr_accessor :notes
-	def draw
+	def init
 		@scale = $all_scales[0]
 		@line_1 = Line.new x1: 50, y1: @y+80, x2: $width-50, y2: @y+80, width: 4, color: $colors["string"]
 		@line_2 = Line.new x1: 50, y1: @y+160, x2: $width-50, y2: @y+160, width: 4, color: $colors["string"]
@@ -10,17 +10,18 @@ class Shawzin_UI < UI_Element
 		@notes = []
 		@select_scale = Dropdown.new (60+get_text_width("Shawzin", 17)), @y, $all_scales, @scale, Proc.new{ |s| @scale = s }
 		@export = Text_Button.new "Copy Song Code", @select_scale.x+@select_scale.width+10, @y, 17, Proc.new{ Clipboard.copy export }
+		$scroll_list_x.push self
 	end
 	def click event
 		if !$playing
 			if event.y > @y+20
 				if event.x < 50 || event.x > $width-50 # don't put outside the strings on left or right
 				elsif event.y <= @y+120 # if below halfway between string 1 and string 2
-					@notes.push Shawzin_Note.new 1, @y, event.x
+					@notes.push Shawzin_Note.new 1, @y, event.x+$scrolled_x
 				elsif event.y <= @y+200 # if below halfway between string 2 and string 3
-					@notes.push Shawzin_Note.new 2, @y, event.x
+					@notes.push Shawzin_Note.new 2, @y, event.x+$scrolled_x
 				else
-					@notes.push Shawzin_Note.new 3, @y, event.x
+					@notes.push Shawzin_Note.new 3, @y, event.x+$scrolled_x
 				end
 				if $containers[0].editing
 					$containers[0].editing_buttons[4].action.call
@@ -110,7 +111,6 @@ class Shawzin_UI < UI_Element
 			str += note_chars[num+fret_to_num[n.options].to_i] # first character is note, num is increased by multiples of 7 according to what fret the note is
 			str += time_chars[(n.x-50)/670] # second character is measure (1/64 of song)
 			str += time_chars[(((n.x-50)%670)/21)*2]
-			#str += time_chars[((n.x-50)%670)/32] # third character is 1/64 of measure
 		end
 		str
 	end
@@ -140,12 +140,19 @@ class Shawzin_UI < UI_Element
 			when 1
 				curr_x = time_chars.index(d)*670+50
 			when 2
-				#time_chars[(((n.x-50)%670)/21)*2]
 				curr_x += ((time_chars.index(d)/2)*21)
 				@notes.push Shawzin_Note.new curr_string, @y, curr_x
 				@notes[-1].options = curr_frets
 				@notes[-1].draw
 			end
+		end
+	end
+	def scroll_x
+		@notes.each do |n|
+			n.remove
+		end
+		@notes.filter{ |n| n.x-20 > $scrolled_x && n.x+20 < $scrolled_x+$width }.each do |n|
+			n.draw
 		end
 	end
 end
@@ -192,7 +199,7 @@ class Shawzin_Note
 		else
 			@first_draw = false
 		end
-		@drawn = Circle.new x: @x, y: @string*80+@container_y, radius: 20, color: @color
+		@drawn = Circle.new x: @x-$scrolled_x, y: @string*80+@container_y, radius: 20, color: @color
 		if !@options[0] # draw either circle to show false
 			@drawn_sky = Circle.new x: @drawn.x-20, y: @drawn.y-35, radius: 4, color: @color
 		else # or mouse button to show true

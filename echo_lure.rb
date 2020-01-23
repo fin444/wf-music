@@ -1,7 +1,7 @@
 $all_animals = ["Pobbers", "Virmink", "Sawgaw", "Bolarola", "Horrasque", "Stover", "Kubrodon", "Kuaka", "Condroc", "Mergoo", "Vasca"]
 
 class Lure_UI < UI_Element
-	def draw
+	def init
 		@animal = $all_animals[0]
 		@select_animal = Dropdown.new (60+get_text_width("Echo Lure", 17)), @y, $all_animals, @animal, Proc.new{ |s| @animal = s }
 		@lines = []
@@ -15,6 +15,7 @@ class Lure_UI < UI_Element
 				@lines[n].opacity = 0.3
 			end
 		end
+		$scroll_list_x.push self
 	end
 	def click event
 		@select_animal.click event
@@ -41,13 +42,13 @@ class Lure_UI < UI_Element
 	end
 	def new_noise event
 		if event.y > @y+30 && event.y < @y+220 && event.x > 50 && event.x < $width-50
-			if @noises.any?{ |n| n.x == (((event.x-50)/15).floor)*15+50 }
-				@noises.select{ |n| n.x == (((event.x-50)/15).floor)*15+50 }.each do |n|
+			if @noises.any?{ |n| n.x == (((event.x-50)/21).floor)*15+50+$scrolled_x } # detection here dont work
+				@noises.select{ |n| n.x == (((event.x-50)/21).floor)*15+50+$scrolled_x }.each do |n|
 					n.y = (event.y-@y).round_to(15)+@y-5
 					n.draw
 				end
 			else
-				@noises.push Lure_Noise.new event.x, event.y, @y
+				@noises.push Lure_Noise.new event.x+$scrolled_x, event.y, @y
 			end
 		end
 	end
@@ -116,6 +117,7 @@ class Lure_UI < UI_Element
 		data.slice! 0
 		# loop through data in sets of 8
 		data = data.split ""
+		puts data.length
 		data.length.times do |i|
 			if i%8 == 0
 				@noises.push Lure_Noise.new data[i, 4].join("").to_i, data[i+4, 4].join("").to_i+@y+5, @y
@@ -129,12 +131,12 @@ class Lure_UI < UI_Element
 		curr_length = 1 # have to define in higher scope
 		@noises.each do |n|
 			if @noises[0] == n
-				curr_start = ((n.x-50)/15)
-			elsif curr_start*15+curr_length*15 == n.x-50
+				curr_start = ((n.x-50)/21)
+			elsif curr_start*21+curr_length*21 == n.x-50
 				curr_length += 1
 			else
 				@connected_noises.push [curr_start, curr_length]
-				curr_start = ((n.x-50)/15) # also sets up for next connection
+				curr_start = ((n.x-50)/21) # also sets up for next connection
 				curr_length = 1
 			end
 		end
@@ -145,6 +147,14 @@ class Lure_UI < UI_Element
 			puts "#{n[0]}, #{n[1]}"
 		end
 	end
+	def scroll_x
+		@noises.each do |n|
+			n.remove
+		end
+		@noises.filter{ |n| n.x > $scrolled_x && n.x < $width+$scrolled_x }.each do |n|
+			n.draw
+		end
+	end
 end
 
 $lure_noise_colors = {"25"=>"#00E5FF", "40"=>"#0099FF", "55"=>"#0582FF", "70"=>"#004DFF", "85"=>"#0516FF", "100"=>"#3C00FF", "115"=>"#9900FF", "130"=>"#3C00FF", "145"=>"#0516FF", "160"=>"#004DFF", "175"=>"#0582FF", "190"=>"#0099FF", "205"=>"#00E5FF"}
@@ -152,7 +162,7 @@ $lure_noise_colors = {"25"=>"#00E5FF", "40"=>"#0099FF", "55"=>"#0582FF", "70"=>"
 class Lure_Noise
 	attr_accessor :x, :y, :container_y, :drawn
 	def initialize x, y, container_y
-		@x = (((x-50)/15).floor)*15+50 # floors to 15, adjusting for the 50 pixel margin on left
+		@x = (((x-50)/21).floor)*21+50 # floors to 21, adjusting for the 50 pixel margin on left
 		@y = (y-container_y).round_to(15)+container_y-5 # rounds to nearest 15, adjusting for container_y
 		@container_y = container_y
 		@first_draw = true
@@ -164,7 +174,7 @@ class Lure_Noise
 		else
 			@first_draw = false
 		end
-		@drawn = Rectangle.new x: @x, y: @y, width: 15, height: 10, color: $lure_noise_colors[(@y-@container_y).to_s]
+		@drawn = Rectangle.new x: @x-$scrolled_x, y: @y, width: 21, height: 10, color: $lure_noise_colors[(@y-@container_y).to_s]
 	end
 	def play animal
 		puts "[#{Time.now.strftime("%I:%M:%S")}] resources/sounds/echo_lure/#{(@y-@container_y)/15}#{animal.downcase}"

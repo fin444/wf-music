@@ -12,10 +12,6 @@ def reposition_all # make all containers have proper y value after one is delete
 	$containers.each do |c|
 		c.reposition
 	end
-	if !$playing_bar.nil?
-		$playing_bar.remove
-		$playing_bar = Line.new x1: $playing_counter, y1: $containers[0].container.height, x2: $playing_counter, y2: $height, color: $colors["note"], width: 3, z: 8
-	end
 end
 def get_text_width text, size
 	width_getter = Text.new text, x: 0, y: 0, size: size, color: [0, 0, 0, 0]
@@ -43,7 +39,7 @@ class UI_Element # inherited by all main ui elements
 			@height = 280
 			@text = "Shawzin"
 		when "Mandachord_UI"
-			@height = 310
+			@height = 315
 			@text = "Mandachord"
 		when "Lure_UI"
 			@height = 220
@@ -57,7 +53,7 @@ class UI_Element # inherited by all main ui elements
 		@container = Rectangle.new x: 50, y: @y, width: $width-100, height: @height, color: [0, 0, 0, 0]
 		@name = Text.new @text, x: 55, y: @y, size: 17, color: $colors["string"]
 		@delete_button = Delete_Button.new $width-70, @y, self
-		draw # individual for each sub-class
+		init # individual for each sub-class
 		$containers.push self
 	end
 	def determine_y index # automatically stack all of the ui elements
