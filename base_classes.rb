@@ -50,15 +50,15 @@ class UI_Element # inherited by all main ui elements
 		end
 		# generate base stuff
 		@y = determine_y -1
-		@container = Rectangle.new x: 50, y: @y, width: $width-100, height: @height, color: [0, 0, 0, 0]
-		@name = Text.new @text, x: 55, y: @y, size: 17, color: $colors["string"]
-		@delete_button = Delete_Button.new $width-70, @y, self
+		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
+		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
 		init # individual for each sub-class
 		$containers.push self
 	end
 	def determine_y index # automatically stack all of the ui elements
 		if $containers.length > 0
-			return $containers[index].y+$containers[index].container.height
+			return $containers[index].y+$containers[index].container.height+5
 		end
 		0
 	end
@@ -67,15 +67,15 @@ class UI_Element # inherited by all main ui elements
 		@container.remove
 		@name.remove
 		@delete_button.remove
-		@container = Rectangle.new x: 50, y: @y, width: $width-100, height: @height, color: $colors["background"]
-		@name = Text.new @text, x: 55, y: @y, size: 17, color: $colors["string"]
-		@delete_button = Delete_Button.new $width-70, @y, self
+		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
+		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
 		reposition_unique
 	end
 end
 
 class Dropdown
-	attr_accessor :x, :z, :width, :selected
+	attr_accessor :x, :y, :z, :width, :selected
 	def initialize x, y, options, selected, update
 		@x = x
 		@y = y
@@ -186,7 +186,6 @@ class Delete_Button
 		@z = 0 # can be manipulated by outside scripts if need be
 		@hidden = false
 		@color = $colors["button_deselected"]
-		@container = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: [0, 0, 0, 0]
 		@first_draw = true
 		draw
 		$all_buttons.push self
@@ -194,10 +193,13 @@ class Delete_Button
 	def draw
 		if !@first_draw
 			@text.remove
+			@container.remove
 		else
 			@first_draw = false
 		end
+		@container = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: [0, 0, 0, 0]
 		@text = Text.new "x", x: @x, y: @y-15, size: 35, color: @color, z: @z
+		@hidden = false
 	end
 	def click event
 		if @container.contains? event.x, event.y
@@ -218,6 +220,11 @@ class Delete_Button
 		@container.remove
 		@text.remove
 		$all_buttons.delete_at $all_buttons.find_index self
+	end
+	def hide
+		@container.remove
+		@text.remove
+		@hidden = true
 	end
 end
 class Quad_Button

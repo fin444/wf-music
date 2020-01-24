@@ -5,15 +5,15 @@ class Mandachord_UI < UI_Element
 		@instrument = $all_mandachord_instruments[0]
 		@drawn = Array.new
 		@notes = Array.new
-		@percussion_background = Rectangle.new x: 49, y: @y+30, width: $width-94, height: 66, color: $colors["percussion"], z: 4
-		@bass_background = Rectangle.new x: 49, y: @y+95, width: $width-94, height: 106, color: $colors["bass"], z: 4
-		@melody_background = Rectangle.new x: 49, y: @y+201, width: $width-94, height: 106, color: $colors["melody"], z: 4
-		@line_1 = Line.new x1: 50+(336+$scrolled_x)%1344, y1: @y+30, x2: 50+(336+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
-		@line_2 = Line.new x1: 50+(672+$scrolled_x)%1344, y1: @y+30, x2: 50+(672+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
-		@line_3 = Line.new x1: 50+(1008+$scrolled_x)%1344, y1: @y+30, x2: 50+(1008+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
-		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
+		@percussion_background = Rectangle.new x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 66, color: $colors["percussion"], z: 4
+		@bass_background = Rectangle.new x: 49, y: @y+95+$scrolled_y, width: $width-94, height: 106, color: $colors["bass"], z: 4
+		@melody_background = Rectangle.new x: 49, y: @y+201+$scrolled_y, width: $width-94, height: 106, color: $colors["melody"], z: 4
+		@line_1 = Line.new x1: 50+(336+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(336+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@line_2 = Line.new x1: 50+(672+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(672+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@line_3 = Line.new x1: 50+(1008+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1008+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
 		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
-			@line_5 = Line.new x1: 50, y1: @y+30, x2: 50, y2: @y+307, width: 2, color: "white", z: 4
+			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
 		end
 		64.times do |a|
 			arr = Array.new
@@ -28,8 +28,11 @@ class Mandachord_UI < UI_Element
 			end
 			@drawn.push arr
 		end
-		@select_instrument = Dropdown.new (60+get_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
+		@select_instrument = Dropdown.new (60+get_text_width("Mandachord", 17)), @y+$scrolled_y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
+		@select_instrument.z = 4
+		@select_instrument.draw
 		$scroll_list_x.push self
+		$scroll_list_y.push self
 	end
 	def click event
 		if !$playing
@@ -85,6 +88,13 @@ class Mandachord_UI < UI_Element
 		@percussion_background.remove
 		@bass_background.remove
 		@melody_background.remove
+		@line_1.remove
+		@line_2.remove
+		@line_3.remove
+		@line_4.remove
+		@line_5.remove
+		$scroll_list_x.delete_at $scroll_list_x.find_index self
+		$scroll_list_y.delete_at $scroll_list_y.find_index self
 		$containers.delete_at $containers.find_index self
 		reposition_all
 	end
@@ -94,9 +104,21 @@ class Mandachord_UI < UI_Element
 		@percussion_background.remove
 		@bass_background.remove
 		@melody_background.remove
-		@percussion_background = Rectangle.new x: 49, y: @y+30, width: $width-94, height: 65, color: $colors["percussion"]
-		@bass_background = Rectangle.new x: 49, y: @y+94, width: $width-94, height: 105, color: $colors["bass"]
-		@melody_background = Rectangle.new x: 49, y: @y+199, width: $width-94, height: 105, color: $colors["melody"]
+		@line_1.remove
+		@line_2.remove
+		@line_3.remove
+		@line_4.remove
+		@line_5.remove
+		@percussion_background = Rectangle.new x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 66, color: $colors["percussion"], z: 4
+		@bass_background = Rectangle.new x: 49, y: @y+95+$scrolled_y, width: $width-94, height: 106, color: $colors["bass"], z: 4
+		@melody_background = Rectangle.new x: 49, y: @y+201+$scrolled_y, width: $width-94, height: 106, color: $colors["melody"], z: 4
+		@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
+			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		end
 		@drawn.each do |a|
 			a.each do |n|
 				n.determine_y @y
@@ -156,12 +178,54 @@ class Mandachord_UI < UI_Element
 		@line_3.remove
 		@line_4.remove
 		@line_5.remove
-		@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30, x2: 50+(335+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
-		@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30, x2: 50+(671+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
-		@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
-		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307, width: 2, color: "white", z: 4
+		@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
 		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
-			@line_5 = Line.new x1: 50, y1: @y+30, x2: 50, y2: @y+307, width: 2, color: "white", z: 4
+			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		end
+	end
+	def scroll_y
+		@drawn.each do |a| # loops through every column
+			a.each do |n| # loops through everything in column
+				n.drawn.remove
+			end
+		end
+		@name.remove
+		@select_instrument.remove
+		@delete_button.hide
+		@container.remove
+		@percussion_background.remove
+		@bass_background.remove
+		@melody_background.remove
+		@line_1.remove
+		@line_2.remove
+		@line_3.remove
+		@line_4.remove
+		@line_5.remove
+		if @y+@height > $scrolled_y and @y < $scrolled_y+$height
+			@select_instrument.y = @y+$scrolled_y
+			@select_instrument.draw
+			@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
+			@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+			@delete_button.y = @y+$scrolled_y
+			@delete_button.draw
+			@percussion_background = Rectangle.new x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 66, color: $colors["percussion"], z: 4
+			@bass_background = Rectangle.new x: 49, y: @y+95+$scrolled_y, width: $width-94, height: 106, color: $colors["bass"], z: 4
+			@melody_background = Rectangle.new x: 49, y: @y+201+$scrolled_y, width: $width-94, height: 106, color: $colors["melody"], z: 4
+			@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+			@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+			@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+			@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+			if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
+				@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+			end
+			@drawn.each do |a| # loops through every column
+				a.each do |n| # loops through everything in column
+					n.draw
+				end
+			end
 		end
 	end
 end
@@ -185,7 +249,7 @@ class Mandachord_Note
 			@drawn.remove
 		end
 		@first_draw = false
-		@drawn = Rectangle.new x: 43+(@x+$scrolled_x)%1344, y: @y+1, width: 19, height: 19, color: determine_color, z: 4
+		@drawn = Rectangle.new x: 43+(@x+$scrolled_x)%1344, y: @y+1+$scrolled_y, width: 19, height: 19, color: determine_color, z: 4
 	end
 	def determine_y container_y
 		case @type

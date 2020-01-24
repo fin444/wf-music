@@ -12,7 +12,7 @@ class Scroll_Button
 		@y = y
 		@image = image
 		@action = action
-		@selected = false
+		@color = $colors["button_deselected"]
 		@hidden = false # this is just to ignore errors with the mouse_up script
 		@first_draw = true
 		draw
@@ -25,33 +25,33 @@ class Scroll_Button
 		else
 			@first_draw = false
 		end
-		@button = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: {"true"=>$colors["button_selected"], "false"=>$colors["button_deselected"]}[@selected.to_s], z: 5
-		@button_image = Image.new @image, x: @x, y: @y, width: 20, height: 20, color: $colors["background"], z: 5
+		@button = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: @color, z: 6
+		@button_image = Image.new @image, x: @x, y: @y, width: 20, height: 20, color: $colors["background"], z: 6
 	end
 	def click event
 		if @button.contains? event.x, event.y
-			@selected = false
+			@color = $colors["button_deselected"]
 			draw
 			@action.call
 		end
 	end
 	def mouse_down event
 		if @button.contains? event.x, event.y
-			@selected = true
+			@color = $colors["button_selected"]
 			draw
 		end
 	end
 	def mouse_up
-		@selected = false
+		@color = $colors["button_deselected"]
 		draw
 	end
 end
 
-class Scroll_Bar_Horizontal
+class Scroll_Bar_X
 	def initialize
 		@container = Rectangle.new x: 0, y: $height-20, width: $width-20, height: 20, color: [0, 0, 0, 0]
-		@button_left = Scroll_Button.new 0, $height-20, "resources/images/clear.png", Proc.new { $scroll_bar_x.scroll_left 21 }
-		@button_right = Scroll_Button.new $width-40, $height-20, "resources/images/clear.png", Proc.new { $scroll_bar_x.scroll_right 21 }
+		@button_left = Scroll_Button.new 0, $height-20, "resources/images/left_scroll.png", Proc.new { $scroll_bar_x.scroll_left 21 }
+		@button_right = Scroll_Button.new $width-40, $height-20, "resources/images/right_scroll.png", Proc.new { $scroll_bar_x.scroll_right 21 }
 		@first_draw = true
 		draw
 		$scroll_bar_x = self
@@ -107,11 +107,11 @@ class Scroll_Bar_Horizontal
 		end
 	end
 end
-class Scroll_Bar_Vertical
+class Scroll_Bar_Y
 	def initialize
-		@container = Rectangle.new x: 0, y: $height-20, width: $width-20, height: 20, color: [0, 0, 0, 0]
-		@button_up = Scroll_Button.new $width-20, 0, "resources/images/clear.png", Proc.new { $scroll_bar_y.scroll_up 21 }
-		@button_down = Scroll_Button.new $width-20, $height-40, "resources/images/clear.png", Proc.new { $scroll_bar_y.scroll_down 21 }
+		@container = Rectangle.new x: $width-20, y: 00, width: 20, height: $height-20, color: [0, 0, 0, 0]
+		@button_up = Scroll_Button.new $width-20, 0, "resources/images/up_scroll.png", Proc.new{ $scroll_bar_y.scroll_up 21 }
+		@button_down = Scroll_Button.new $width-20, $height-40, "resources/images/down_scroll.png", Proc.new{ $scroll_bar_y.scroll_down 21 }
 		@first_draw = true
 		draw
 		$scroll_bar_y = self
@@ -136,18 +136,6 @@ class Scroll_Bar_Vertical
 	end
 	def scroll_up increment
 		if $scrolled_y != 0
-			if $scrolled_y-increment < 0
-				$scrolled_y = 0
-			else
-				$scrolled_y -= increment
-			end
-			$scroll_list_y.each do |c|
-				c.scroll_y
-			end
-		end
-	end
-	def scroll_down increment
-		if $scrolled_y+$width != $full_size_x
 			if $scrolled_y+$width+increment > $full_size_x
 				$scrolled_y = $full_size_x-$width
 			else
@@ -158,7 +146,19 @@ class Scroll_Bar_Vertical
 			end
 		end
 	end
+	def scroll_down increment
+		if 1-$scrolled_y != $full_size_y
+			if $scrolled_y-increment < 1-$full_size_y
+				$scrolled_y = 1-$full_size_y
+			else
+				$scrolled_y -= increment
+			end
+			$scroll_list_y.each do |c|
+				c.scroll_y
+			end
+		end
+	end
 end
 
-Scroll_Bar_Vertical.new
-Scroll_Bar_Horizontal.new
+Scroll_Bar_X.new
+Scroll_Bar_Y.new

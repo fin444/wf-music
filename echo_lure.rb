@@ -3,19 +3,20 @@ $all_animals = ["Pobbers", "Virmink", "Sawgaw", "Bolarola", "Horrasque", "Stover
 class Lure_UI < UI_Element
 	def init
 		@animal = $all_animals[0]
-		@select_animal = Dropdown.new (60+get_text_width("Echo Lure", 17)), @y, $all_animals, @animal, Proc.new{ |s| @animal = s }
+		@select_animal = Dropdown.new (60+get_text_width("Echo Lure", 17)), @y+$scrolled_y, $all_animals, @animal, Proc.new{ |s| @animal = s }
 		@lines = []
 		@noises = []
 		13.times do |n|
 			if n == 3 || n == 9
-				@lines.push Line.new x1: 50, y1: @y+30+n*15, x2: $width-50, y2: @y+30+n*15, width: 2, color: $colors["note"]
+				@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 2, color: $colors["note"]
 				@lines[n].opacity = 0.4
 			else
-				@lines.push Line.new x1: 50, y1: @y+30+n*15, x2: $width-50, y2: @y+30+n*15, width: 1, color: $colors["note"]
+				@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 1, color: $colors["note"]
 				@lines[n].opacity = 0.3
 			end
 		end
 		$scroll_list_x.push self
+		$scroll_list_y.push self
 	end
 	def click event
 		@select_animal.click event
@@ -41,14 +42,14 @@ class Lure_UI < UI_Element
 		end
 	end
 	def new_noise event
-		if event.y > @y+30 && event.y < @y+220 && event.x > 50 && event.x < $width-50
+		if event.y-$scrolled_y > @y+30 && event.y-$scrolled_y < @y+220 && event.x > 50 && event.x < $width-50
 			if @noises.any?{ |n| n.x == (((event.x-50)/21).floor)*15+50+$scrolled_x } # detection here dont work
 				@noises.select{ |n| n.x == (((event.x-50)/21).floor)*15+50+$scrolled_x }.each do |n|
-					n.y = (event.y-@y).round_to(15)+@y-5
+					n.y = (event.y-$scrolled_y-@y).round_to(15)+@y-5
 					n.draw
 				end
 			else
-				@noises.push Lure_Noise.new event.x+$scrolled_x, event.y, @y
+				@noises.push Lure_Noise.new event.x+$scrolled_x, event.y-$scrolled_y, @y
 			end
 		end
 	end
@@ -77,6 +78,8 @@ class Lure_UI < UI_Element
 		@noises.each do |n|
 			n.remove
 		end
+		$scroll_list_x.delete_at $scroll_list_x.find_index self
+		$scroll_list_y.delete_at $scroll_list_y.find_index self
 		$containers.delete_at $containers.find_index self
 		reposition_all
 	end
@@ -87,10 +90,10 @@ class Lure_UI < UI_Element
 		@lines = []
 		13.times do |n|
 			if n == 3 || n == 9
-				@lines.push Line.new x1: 50, y1: @y+30+n*15, x2: $width-50, y2: @y+30+n*15, width: 2, color: $colors["note"]
+				@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 2, color: $colors["note"]
 				@lines[n].opacity = 0.4
 			else
-				@lines.push Line.new x1: 50, y1: @y+30+n*15, x2: $width-50, y2: @y+30+n*15, width: 1, color: $colors["note"]
+				@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 1, color: $colors["note"]
 				@lines[n].opacity = 0.3
 			end
 		end
@@ -99,8 +102,8 @@ class Lure_UI < UI_Element
 			n.container_y = @y
 			n.draw
 		end
-		@select_animal.remove
-		@select_animal = Dropdown.new (70+get_text_width("Echo Lure", 17)), @y, $all_animals, @animal, Proc.new{ |s| @animal = s }
+		@select_animal.y = @y+$scrolled_y
+		@select_animal.draw
 	end
 	def export
 		str = add_zeros($all_animals.find_index(@animal), 2).to_s
@@ -117,7 +120,6 @@ class Lure_UI < UI_Element
 		data.slice! 0
 		# loop through data in sets of 8
 		data = data.split ""
-		puts data.length
 		data.length.times do |i|
 			if i%8 == 0
 				@noises.push Lure_Noise.new data[i, 4].join("").to_i, data[i+4, 4].join("").to_i+@y+5, @y
@@ -155,6 +157,38 @@ class Lure_UI < UI_Element
 			n.draw
 		end
 	end
+	def scroll_y
+		@select_animal.remove
+		@delete_button.hide
+		@name.remove
+		@lines.each do |l|
+			l.remove
+		end
+		@noises.each do |n|
+			n.remove
+		end
+		if @y+@height > $scrolled_y and @y < $scrolled_y+$height
+			@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+			@select_animal.y = @y+$scrolled_y
+			@select_animal.draw
+			@delete_button.y = @y+$scrolled_y
+			@delete_button.draw
+			# redraw lines
+			@lines = []
+			13.times do |n|
+				if n == 3 || n == 9
+					@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 2, color: $colors["note"]
+					@lines[n].opacity = 0.4
+				else
+					@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 1, color: $colors["note"]
+					@lines[n].opacity = 0.3
+				end
+			end
+			@noises.each do |n|
+				n.draw
+			end
+		end
+	end
 end
 
 $lure_noise_colors = {"25"=>"#00E5FF", "40"=>"#0099FF", "55"=>"#0582FF", "70"=>"#004DFF", "85"=>"#0516FF", "100"=>"#3C00FF", "115"=>"#9900FF", "130"=>"#3C00FF", "145"=>"#0516FF", "160"=>"#004DFF", "175"=>"#0582FF", "190"=>"#0099FF", "205"=>"#00E5FF"}
@@ -174,7 +208,7 @@ class Lure_Noise
 		else
 			@first_draw = false
 		end
-		@drawn = Rectangle.new x: @x-$scrolled_x, y: @y, width: 21, height: 10, color: $lure_noise_colors[(@y-@container_y).to_s]
+		@drawn = Rectangle.new x: @x-$scrolled_x, y: @y+$scrolled_y, width: 21, height: 10, color: $lure_noise_colors[(@y-@container_y).to_s]
 	end
 	def play animal
 		puts "[#{Time.now.strftime("%I:%M:%S")}] resources/sounds/echo_lure/#{(@y-@container_y)/15}#{animal.downcase}"

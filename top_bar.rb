@@ -1,6 +1,7 @@
 class Top_UI < UI_Element
 	attr_accessor :buttons, :editing, :editing_buttons
 	def init
+		@container = Rectangle.new x: 0, y: @y+$scrolled_y, width: $width, height: @height, color: $colors["background"], z: 5
 		@delete_button.remove # don't delete the top bar
 		@buttons = []
 		@buttons.push Quad_Button.new "Play", 50, @y+10, "resources/images/play_icon.png", Proc.new{
@@ -18,6 +19,10 @@ class Top_UI < UI_Element
 		@buttons.push Quad_Button.new "Save As", 230, @y+10, "resources/images/clear.png", Proc.new{ save_as }
 		@buttons.push Quad_Button.new "New", 320, @y+10, "resources/images/clear.png", Proc.new{ new_file false }
 		@buttons.push Quad_Button.new "Open", 410, @y+10, "resources/images/clear.png", Proc.new{ open_file 1 }
+		@buttons.each do |b|
+			b.z = 5
+			b.draw
+		end
 		# buttons for editing shawzin, will hide until needed
 		@editing = false
 		@note = nil
@@ -28,6 +33,7 @@ class Top_UI < UI_Element
 		@editing_buttons.push Quad_Button.new "Delete", 320, @y+10, "resources/images/clear.png", Proc.new{ } # Proc filled in later
 		@editing_buttons.push Quad_Button.new "Stop Editing", 410, @y+10, "resources/images/clear.png", Proc.new{ } # Proc filled in later
 		@editing_buttons.each do |b|
+			b.z = 5
 			b.hide
 		end
 	end

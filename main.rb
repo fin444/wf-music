@@ -1,22 +1,22 @@
-# TODO
-# scroll y on shawzin
-# scroll y on mandachord
-# scroll y on echo lure
-# scroll y on Add_UI
-# actual bar when scrolling
-# make all scrolling stuff z=5
-# dynamic full_size variables
-# loop mandachord playing
+# BUGS
+# fix scroll hiding instruments that are farther down
+# fix echo lure deleting
 # echo lure saving is fucked, doesn't save sets of 8 digits (i think)
 # echo lure changing y value in column doesn't work
+
+# FEATURES
+# actual bar when scrolling
+# dynamic full_size variables
+# loop mandachord playing
 # when importing, hide all things that aren't currently on screen
 # time display on top bar
 # show that shawzin has specifically 8 per second
 # align echo lure to shawzin note speed
 # note/time limits on mandachord/shawzin
+# settings pop up on instruments instead of ugly buttons/dropdowns
 # options
 # way to signify that can't add notes to instruments while playing
-# allow mandachord to not repeat
+# allow mandachord to not loop
 
 require "ruby2d"
 require "clipboard"
@@ -247,7 +247,7 @@ def open_file a # a defines what phase of the process you are on
 	elsif a == 3
 		$containers[-1].remove
 		File.open "saves/#{$file_name}", "r" do |file|
-			# begin # ruby equivalent of try
+			begin # ruby equivalent of try
 				file.read.split(/\n/).each do |r|
 					case r[0] # first letter of r signifies type of data
 					when "d"
@@ -275,11 +275,11 @@ def open_file a # a defines what phase of the process you are on
 						break
 					end
 				end
-			# rescue => err # ruby equivalent of catch
-			# 	$saved = true
-			# 	new_file false
-			# 	Popup_Info.new "An error has occured in reading the file:\n#{err}"
-			# end
+			rescue => err # ruby equivalent of catch
+				$saved = true
+				new_file false
+				Popup_Info.new "An error has occured in reading the file:\n#{err}"
+			end
 		end
 		Add_UI.new
 	end
