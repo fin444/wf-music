@@ -55,8 +55,7 @@ def new_element type
 		Lure_UI.new
 	end
 	Add_UI.new
-	$saved = false
-	$scroll_bar_y.determine
+	change
 end
 
 Add_UI.new

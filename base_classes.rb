@@ -8,13 +8,19 @@ def add_zeros number, length
 	end
 	number
 end
+
 def reposition_all # make all containers have proper y value after one is deleted
 	$containers.each do |c|
 		c.reposition
 	end
-	$scroll_bar_y.determine
 	change
 end
+def change # will be used for undo/redo functions in future
+	$saved = false
+	$scroll_bar_x.determine
+	$scroll_bar_y.determine
+end
+
 def get_text_width text, size
 	width_getter = Text.new text, x: 0, y: 0, size: size, color: [0, 0, 0, 0]
 	w = width_getter.width
@@ -35,7 +41,7 @@ class UI_Element # inherited by all main ui elements
 		# determine what type it is, and have some values from that
 		case self.class.name
 		when "Top_UI"
-			@height = 120
+			@height = 125
 			@text = ""
 		when "Shawzin_UI"
 			@height = 280

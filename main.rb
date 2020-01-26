@@ -1,20 +1,20 @@
 # BUGS
-# echo lure saving is fucked, remake it from scratch
-# scrolling goes backwards at a weird speed on mandachord
-# playing is misaligned on mandachord
+# blinker is weird on popup_ask
+# playing doesn't go as far as it should when scrolled to x
 # y scroll bar goes too far down
+# both scroll bars don't get sized right
+# echo lure loading is very wonky
 
 # FEATURES
 # click and drag scroll bar
 # loop mandachord playing
-# when importing, hide all things that aren't currently on screen
-# time display on top bar
 # show that shawzin has specifically 8 per second
 # note/time limits on mandachord/shawzin
 # settings pop up on instruments instead of ugly buttons/dropdowns
 # options
 # way to signify that can't add notes to instruments while playing
 # allow mandachord to not loop
+# manually increase x scroll size
 
 require "ruby2d"
 require "clipboard"
@@ -52,7 +52,7 @@ $scroll_bar_y.determine
 
 # blockers to cover up things in scrolling
 Rectangle.new x: 0, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
-Rectangle.new x: $width-50, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
+Rectangle.new x: 1390, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
 
 # core loop
 $time_counter = 0
@@ -266,7 +266,7 @@ def save
 	end
 	$saved = true
 end
-def new_file a # if a == true then redirect back to open() phase 2
+def new_file a # if a == true then redirect back to open_file() phase 2
 	if $saved
 		$containers.filter{ |c| c.class.name == "Shawzin_UI" or c.class.name == "Mandachord_UI" or c.class.name == "Lure_UI" }.each do |c|
 			c.remove
@@ -294,7 +294,7 @@ def open_file a # a defines what phase of the process you are on
 	elsif a == 3
 		$containers[-1].remove
 		File.open "saves/#{$file_name}", "r" do |file|
-			begin # ruby equivalent of try
+			# begin # ruby equivalent of try
 				file.read.split(/\n/).each do |r|
 					case r[0] # first letter of r signifies type of data
 					when "d"
@@ -322,19 +322,14 @@ def open_file a # a defines what phase of the process you are on
 						break
 					end
 				end
-			rescue => err # ruby equivalent of catch
-				$saved = true
-				new_file false
-				Popup_Info.new "An error has occured in reading the file:\n#{err}"
-			end
+			# rescue => err # ruby equivalent of catch
+			# 	$saved = true
+			# 	new_file false
+			# 	Popup_Info.new "An error has occured in reading the file:\n#{err}"
+			# end
 		end
 		Add_UI.new
 	end
-end
-
-def change # will be used for undo/redo functions in future
-	$saved = false
-	$scroll_bar_x.determine
 end
 
 show # show the window

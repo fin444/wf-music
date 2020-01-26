@@ -105,7 +105,7 @@ class Scroll_Bar_X
 				h = a
 			end
 		end
-		$full_size_x = h
+		$full_size_x = h+$scrolled_x
 		draw
 	end
 end

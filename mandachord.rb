@@ -3,12 +3,12 @@ $all_mandachord_instruments = ["Adau", "Alpha", "Beta", "Delta", "Gamma", "Epsil
 class Mandachord_UI < UI_Element
 	def init
 		@instrument = $all_mandachord_instruments[0]
-		@drawn = Array.new
+		@drawn = []
 		@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
-		@line_1 = Line.new x1: 50+(336+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(336+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-		@line_2 = Line.new x1: 50+(672+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(672+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-		@line_3 = Line.new x1: 50+(1008+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1008+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_1 = Line.new x1: 50+(336-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(336-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_2 = Line.new x1: 50+(672-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(672-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_3 = Line.new x1: 50+(1008-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1008-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_4 = Line.new x1: 50+(1343-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
 			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		end
@@ -93,10 +93,10 @@ class Mandachord_UI < UI_Element
 		@line_4.remove
 		@line_5.remove
 		@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
-		@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-		@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-		@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_1 = Line.new x1: 50+(335-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_2 = Line.new x1: 50+(671-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_3 = Line.new x1: 50+(1007-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_4 = Line.new x1: 50+(1343-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
 			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		end
@@ -155,10 +155,10 @@ class Mandachord_UI < UI_Element
 		@line_3.remove
 		@line_4.remove
 		@line_5.remove
-		@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-		@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-		@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_1 = Line.new x1: 50+(335-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_2 = Line.new x1: 50+(671-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_3 = Line.new x1: 50+(1007-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_4 = Line.new x1: 50+(1343-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
 			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		end
@@ -185,10 +185,10 @@ class Mandachord_UI < UI_Element
 			@delete_button.y = @y+$scrolled_y
 			@delete_button.draw
 			@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
-			@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-			@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-			@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
-			@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+			@line_1 = Line.new x1: 50+(335-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+			@line_2 = Line.new x1: 50+(671-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+			@line_3 = Line.new x1: 50+(1007-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+			@line_4 = Line.new x1: 50+(1343-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 			if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
 				@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 			end
@@ -216,7 +216,7 @@ class Mandachord_Note
 			@drawn.remove
 		end
 		@first_draw = false
-		@drawn = Rectangle.new x: 43+(@x+$scrolled_x)%1344, y: @y+1+$scrolled_y, width: 21, height: 21, color: $colors[@type.downcase], z: 4
+		@drawn = Rectangle.new x: 43+(@x-$scrolled_x)%1344, y: @y+1+$scrolled_y, width: 21, height: 21, color: $colors[@type.downcase], z: 4
 	end
 	def determine_y container_y
 		case @type

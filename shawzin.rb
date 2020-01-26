@@ -150,12 +150,15 @@ class Shawzin_UI < UI_Element
 				@notes[-1].draw
 			end
 		end
+		@notes.filter{ |n| n.x-20 < $scrolled_x && n.x+20 > $scrolled_x+1440 }.each do |n|
+			n.remove
+		end
 	end
 	def scroll_x
 		@notes.each do |n|
 			n.remove
 		end
-		@notes.filter{ |n| n.x-20 > $scrolled_x && n.x+20 < $scrolled_x+$width }.each do |n|
+		@notes.filter{ |n| n.x-20 > $scrolled_x && n.x+20 < $scrolled_x+1440 }.each do |n|
 			n.draw
 		end
 	end
@@ -172,7 +175,7 @@ class Shawzin_UI < UI_Element
 		@line_3.remove
 		@container.remove
 		if @y+@height > $scrolled_y and @y < $height-$scrolled_y
-			@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
+			@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: 1340, height: @height, color: [0, 0, 0, 0]
 			@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 			@select_scale.y = @y+$scrolled_y
 			@select_scale.draw

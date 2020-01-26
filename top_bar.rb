@@ -36,6 +36,17 @@ class Top_UI < UI_Element
 			b.z = 6
 			b.hide
 		end
+		# time marker
+		@time_bottom_line = Line.new x1: 50, y1: @y+120, x2: 1394, y2: @y+120, width: 1, color: $colors["string"], z: 6
+		@time_markers = []
+		@time_numbers = []
+		33.times do |i|
+			@time_markers.push Line.new x1: (i)*42+50, y1: @y+110, x2: (i)*42+50, y2: @y+120, width: 1, color: $colors["string"], z: 6
+		end
+		9.times do |i|
+			@time_numbers.push Text.new "#{(i+($scrolled_x/168))/60}:#{add_zeros (i+($scrolled_x/168))%60, 2}", x: (i)*168+46, y: @y+95, size: 12, color: $colors["string"], z: 6
+		end
+		$scroll_list_x.push self
 	end
 	def click event
 		if @editing # two sets of buttons, has to determine which ones to click
@@ -114,6 +125,22 @@ class Top_UI < UI_Element
 		}
 	end
 	def reposition # redefining as empty because it never moves
+	end
+	def scroll_x
+		@time_markers.each do |t|
+			t.remove
+		end
+		@time_numbers.each do |t|
+			t.remove
+		end
+		@time_markers = []
+		@time_numbers = []
+		33.times do |i|
+			@time_markers.push Line.new x1: (i)*42+50-($scrolled_x%42), y1: @y+110, x2: (i)*42+50-($scrolled_x%42), y2: @y+120, width: 1, color: $colors["string"], z: 6
+		end
+		9.times do |i|
+			@time_numbers.push Text.new "#{(i+($scrolled_x/168))/60}:#{add_zeros (i+($scrolled_x/168))%60, 2}", x: (i)*168-($scrolled_x%168), y: @y+95, size: 12, color: $colors["string"], z: 6
+		end
 	end
 end
 

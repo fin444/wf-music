@@ -118,7 +118,9 @@ class Popup_Ask
 		@button.z = 10
 		@button.draw
 		@position = 0
-		@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
+		# if $time_counter >= 30
+		# 	@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
+		# end
 		$alert = self
 	end
 	def click event
@@ -163,7 +165,7 @@ class Popup_Ask
 		if event.key != "return"
 			@writing.remove
 			@writing = Text.new @text, x: ($width/2)-188, y: ($height/2)-12, size: 20, color: $colors["string"], z: 10
-			if $time_counter < 30
+			if $time_counter >= 30
 				@blinker.remove
 				@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
 			end
