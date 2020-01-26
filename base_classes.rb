@@ -12,6 +12,8 @@ def reposition_all # make all containers have proper y value after one is delete
 	$containers.each do |c|
 		c.reposition
 	end
+	$scroll_bar_y.determine
+	change
 end
 def get_text_width text, size
 	width_getter = Text.new text, x: 0, y: 0, size: size, color: [0, 0, 0, 0]

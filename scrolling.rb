@@ -1,8 +1,10 @@
-$scrolled_x = 0 # amount of x to adjust everything by
+$scrolled_x = 0 # scroll progress for each direction
 $scrolled_y = 0
-$full_size_x = $width*2 # total width of all objects
-$full_size_y = $height*2
-$scroll_list_x = [] # list of all elements scrollable by x
+$future_scrolled_x = 0 # scrolls to be implemented on next refresh
+$future_scrolled_y = 0
+$full_size_x = 0 # total width/height of all objects
+$full_size_y = 0
+$scroll_list_x = [] # list of all elements scrollable by direction
 $scroll_list_y = []
 
 class Scroll_Button
@@ -15,18 +17,17 @@ class Scroll_Button
 		@color = $colors["button_deselected"]
 		@hidden = false # this is just to ignore errors with the mouse_up script
 		@first_draw = true
+		@button_image = Image.new @image, x: @x, y: @y, width: 20, height: 20, color: $colors["background"], z: 8
 		draw
 		$all_buttons.push self
 	end
 	def draw
 		if !@first_draw
 			@button.remove
-			@button_image.remove
 		else
 			@first_draw = false
 		end
-		@button = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: @color, z: 6
-		@button_image = Image.new @image, x: @x, y: @y, width: 20, height: 20, color: $colors["background"], z: 6
+		@button = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: @color, z: 7
 	end
 	def click event
 		if @button.contains? event.x, event.y
@@ -53,14 +54,15 @@ class Scroll_Bar_X
 		@button_left = Scroll_Button.new 0, $height-20, "resources/images/left_scroll.png", Proc.new { $scroll_bar_x.scroll_left 21 }
 		@button_right = Scroll_Button.new $width-40, $height-20, "resources/images/right_scroll.png", Proc.new { $scroll_bar_x.scroll_right 21 }
 		@first_draw = true
-		draw
 		$scroll_bar_x = self
 	end
 	def draw
 		if !@first_draw
+			@bar.remove
 		else
 			@first_draw = false
 		end
+		@bar = Rectangle.new x: 20+$scrolled_x/(($full_size_x+$width)/($width)), y: $height-20, width: ($width-40)/(($full_size_x+$width)/$width), height: 20, color: $colors["button_deselected"], z: 6
 	end
 	def click event
 		if @container.contains? event.x, event.y
@@ -75,36 +77,36 @@ class Scroll_Bar_X
 		end
 	end
 	def scroll_left increment
-		if $scrolled_x != 0
-			if $scrolled_x-increment < 0
-				$scrolled_x = 0
+		if $future_scrolled_x != 0
+			if $future_scrolled_x-increment < 0
+				$future_scrolled_x = 0
 			else
-				$scrolled_x -= increment
+				$future_scrolled_x -= increment
 			end
-			if !$playing
-				$playing_bar.remove
-				$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
+		end
+	end
+	def scroll_right increment
+		if $future_scrolled_x != $full_size_x
+			if $future_scrolled_x+increment > $full_size_x
+				$future_scrolled_x = $full_size_x
+			else
+				$future_scrolled_x += increment
 			end
 			$scroll_list_x.each do |c|
 				c.scroll_x
 			end
 		end
 	end
-	def scroll_right increment
-		if $scrolled_x+$width != $full_size_x
-			if $scrolled_x+$width+increment > $full_size_x
-				$scrolled_x = $full_size_x-$width
-			else
-				$scrolled_x += increment
-			end
-			if !$playing
-				$playing_bar.remove
-				$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
-			end
-			$scroll_list_x.each do |c|
-				c.scroll_x
+	def determine
+		h = 0
+		$containers.select{ |c| c.respond_to? "get_last_sound" }.each do |c|
+			a = c.get_last_sound
+			if a > h
+				h = a
 			end
 		end
+		$full_size_x = h
+		draw
 	end
 end
 class Scroll_Bar_Y
@@ -113,14 +115,15 @@ class Scroll_Bar_Y
 		@button_up = Scroll_Button.new $width-20, 0, "resources/images/up_scroll.png", Proc.new{ $scroll_bar_y.scroll_up 21 }
 		@button_down = Scroll_Button.new $width-20, $height-40, "resources/images/down_scroll.png", Proc.new{ $scroll_bar_y.scroll_down 21 }
 		@first_draw = true
-		draw
 		$scroll_bar_y = self
 	end
 	def draw
 		if !@first_draw
+			@bar.remove
 		else
 			@first_draw = false
 		end
+		@bar = Rectangle.new x: $width-20, y: 20+(1-$scrolled_y)/(($full_size_y+$height)/($height)), width: 20, height: ($height-40)/(($full_size_y+$height)/$height), color: $colors["button_deselected"], z: 6
 	end
 	def click event
 		if @container.contains? event.x, event.y
@@ -135,28 +138,26 @@ class Scroll_Bar_Y
 		end
 	end
 	def scroll_up increment
-		if $scrolled_y != 0
-			if $scrolled_y+$width+increment > $full_size_x
-				$scrolled_y = $full_size_x-$width
+		if $future_scrolled_y != 0
+			if $future_scrolled_y+increment > 0
+				$future_scrolled_y = 0
 			else
-				$scrolled_y += increment
-			end
-			$scroll_list_y.each do |c|
-				c.scroll_y
+				$future_scrolled_y += increment
 			end
 		end
 	end
 	def scroll_down increment
-		if 1-$scrolled_y != $full_size_y
-			if $scrolled_y-increment < 1-$full_size_y
-				$scrolled_y = 1-$full_size_y
+		if 1-$future_scrolled_y != $full_size_y
+			if $future_scrolled_y-increment < 1-$full_size_y
+				$future_scrolled_y = 1-$full_size_y
 			else
-				$scrolled_y -= increment
-			end
-			$scroll_list_y.each do |c|
-				c.scroll_y
+				$future_scrolled_y -= increment
 			end
 		end
+	end
+	def determine
+		$full_size_y = $containers[-1].y+$containers[-1].container.height+30-120
+		draw
 	end
 end
 

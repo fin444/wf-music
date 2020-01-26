@@ -163,12 +163,17 @@ class Popup_Ask
 		if event.key != "return"
 			@writing.remove
 			@writing = Text.new @text, x: ($width/2)-188, y: ($height/2)-12, size: 20, color: $colors["string"], z: 10
+			if $time_counter < 30
+				@blinker.remove
+				@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
+			end
 		end
 	end
-	def blink # blinking cursor
-		@blinker.remove
-		if Time.now.to_i%2 == 0
+	def blink on # blinking cursor
+		if on
 			@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
+		else
+			@blinker.remove	
 		end
 	end
 	def remove

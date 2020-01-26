@@ -19,14 +19,18 @@ class Lure_UI < UI_Element
 		$scroll_list_y.push self
 	end
 	def click event
-		@select_animal.click event
-		@delete_button.click event
+		if !$playing
+			@select_animal.click event
+			@delete_button.click event
+		end
 	end
 	def right_click event
-		@noises.each do |n|
-			if n.drawn.contains? event.x, event.y
-				n.remove
-				@noises.delete_at @noises.find_index n
+		if !$playing
+			@noises.each do |n|
+				if n.drawn.contains? event.x, event.y
+					n.remove
+					@noises.delete_at @noises.find_index n
+				end
 			end
 		end
 	end
@@ -43,14 +47,15 @@ class Lure_UI < UI_Element
 	end
 	def new_noise event
 		if event.y-$scrolled_y > @y+30 && event.y-$scrolled_y < @y+220 && event.x > 50 && event.x < $width-50
-			if @noises.any?{ |n| n.x == (((event.x-50)/21).floor)*15+50+$scrolled_x } # detection here dont work
-				@noises.select{ |n| n.x == (((event.x-50)/21).floor)*15+50+$scrolled_x }.each do |n|
+			if @noises.any?{ |n| n.x == (((event.x-50)/21).floor)*21+50 }
+				@noises.filter{ |n| n.x == (((event.x-50)/21).floor)*21+50 }.each do |n|
 					n.y = (event.y-$scrolled_y-@y).round_to(15)+@y-5
 					n.draw
 				end
 			else
 				@noises.push Lure_Noise.new event.x+$scrolled_x, event.y-$scrolled_y, @y
 			end
+			change
 		end
 	end
 	def play x
@@ -62,8 +67,8 @@ class Lure_UI < UI_Element
 		connect_noises
 		h = 0
 		@noises.each do |n|
-			if n.x+10 > h
-				h = n.x+10
+			if n.x+10-$scrolled_x > h
+				h = n.x+10-$scrolled_x
 			end
 		end
 		h
@@ -167,7 +172,7 @@ class Lure_UI < UI_Element
 		@noises.each do |n|
 			n.remove
 		end
-		if @y+@height > $scrolled_y and @y < $scrolled_y+$height
+		if @y+@height > $scrolled_y and @y < $height-$scrolled_y
 			@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 			@select_animal.y = @y+$scrolled_y
 			@select_animal.draw

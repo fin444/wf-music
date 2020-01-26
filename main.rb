@@ -1,17 +1,15 @@
 # BUGS
-# fix scroll hiding instruments that are farther down
-# fix echo lure deleting
-# echo lure saving is fucked, doesn't save sets of 8 digits (i think)
-# echo lure changing y value in column doesn't work
+# echo lure saving is fucked, remake it from scratch
+# scrolling goes backwards at a weird speed on mandachord
+# playing is misaligned on mandachord
+# y scroll bar goes too far down
 
 # FEATURES
-# actual bar when scrolling
-# dynamic full_size variables
+# click and drag scroll bar
 # loop mandachord playing
 # when importing, hide all things that aren't currently on screen
 # time display on top bar
 # show that shawzin has specifically 8 per second
-# align echo lure to shawzin note speed
 # note/time limits on mandachord/shawzin
 # settings pop up on instruments instead of ugly buttons/dropdowns
 # options
@@ -49,46 +47,35 @@ load "echo_lure.rb"
 load "add.rb"
 load "pop_up.rb"
 
+$scroll_bar_x.determine
+$scroll_bar_y.determine
+
 # blockers to cover up things in scrolling
 Rectangle.new x: 0, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
 Rectangle.new x: $width-50, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
 
-# playing
-$playing = false
-$playing_bar = Line.new x1: 0, y1: 0, x2: 0, y2: 0, width: 0, color: [0, 0, 0, 0]
-$playing_counter = 50
-
-def play_all
-	$playing_highest = 0
-	$containers.filter{ |c| c.respond_to? "get_last_sound" }.each do |c| # go through every container to find out how long the song is
-		h = c.get_last_sound
-		if h > $playing_highest
-			$playing_highest = h+5
-		end
-	end
-	if $playing_highest > 5
-		$playing = true
-		$playing_counter = 50
-		$playing_previous = 47
-		$playing_bar.remove
-		$playing_bar = Line.new x1: 50-$scrolled_x, y1: $containers[0].container.height, x2: 50-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
-	end
-end
-def pause_all
-	$playing = false
-end
-
+# core loop
+$time_counter = 0
 update do
-	$fps.remove
-	$fps = Text.new get(:fps).round(2), x: 0, y: 0, size: 15, color: "white", z: 20
-	if $alert.respond_to? "blink"
-		$alert.blink
+	$time_counter += 1
+	case $time_counter
+	when 30
+		if $alert.respond_to? "blink"
+			$alert.blink false
+		end
+	when 60
+		$fps.remove
+		$fps = Text.new get(:fps).round(2), x: 0, y: 0, size: 15, color: "white", z: 20
+		if $alert.respond_to? "blink"
+			$alert.blink true
+		end
+		$time_counter = 0
 	end
 	if $playing
 		$playing_previous = $playing_counter.floor
 		$playing_counter += (1340.0/480.0).round 3
 		$playing_bar.remove
-		$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
+		$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 7
 		($playing_counter.floor-$playing_previous).times do |t|
 			$containers.filter{ |c| c.respond_to? "play" }.each do |c|
 				c.play $playing_previous+t
@@ -98,6 +85,26 @@ update do
 			$playing = false
 			$containers[0].buttons[0].image_url = "resources/images/play_icon.png"
 			$containers[0].buttons[0].draw
+		end
+	end
+	if $time_counter%6 == 0 # scroll every 1/10 of a second
+		if $scrolled_x != $future_scrolled_x
+			$scrolled_x = $future_scrolled_x
+			if !$playing && $playing_bar.x1 != 0
+				$playing_bar.remove
+				$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
+			end
+			$scroll_list_x.each do |c|
+				c.scroll_x
+			end
+			$scroll_bar_x.draw
+		end
+		if $scrolled_y != $future_scrolled_y
+			$scrolled_y = $future_scrolled_y
+			$scroll_list_y.each do |c|
+				c.scroll_y
+			end
+			$scroll_bar_y.draw
 		end
 	end
 end
@@ -172,6 +179,21 @@ on :mouse_move do |event|
 		end
 	end
 end
+on :mouse_scroll do |event|
+	if event.delta_y.abs > event.delta_x.abs
+		if event.delta_y > 0
+			$scroll_bar_y.scroll_down event.delta_y.ceil_to 21
+		elsif event.delta_y < 0
+			$scroll_bar_y.scroll_up 1-event.delta_y.floor_to(21)
+		end
+	else
+		if event.delta_x > 0
+			$scroll_bar_x.scroll_right event.delta_x.ceil_to 21
+		elsif event.delta_x < 0
+			$scroll_bar_x.scroll_left 1-event.delta_x.floor_to(21)
+		end
+	end
+end
 on :key_down do |event|
 	$keys_down.push event.key
 	if $alert.respond_to? "key_down"
@@ -190,6 +212,31 @@ on :key_down do |event|
 end
 on :key_up do |event|
 	$keys_down.delete_at $keys_down.find_index event.key
+end
+
+# playing
+$playing = false
+$playing_bar = Line.new x1: 0, y1: 0, x2: 0, y2: 0, width: 0, color: [0, 0, 0, 0]
+$playing_counter = 50
+
+def play_all
+	$playing_highest = 0
+	$containers.filter{ |c| c.respond_to? "get_last_sound" }.each do |c| # go through every container to find out how long the song is
+		h = c.get_last_sound
+		if h > $playing_highest
+			$playing_highest = h+5
+		end
+	end
+	if $playing_highest > 5
+		$playing = true
+		$playing_counter = 50
+		$playing_previous = 47
+		$playing_bar.remove
+		$playing_bar = Line.new x1: 50-$scrolled_x, y1: $containers[0].container.height, x2: 50-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
+	end
+end
+def pause_all
+	$playing = false
 end
 
 # save/load
@@ -271,7 +318,7 @@ def open_file a # a defines what phase of the process you are on
 						ui = Lure_UI.new
 						ui.import r
 					else
-						Popup_Info.new "Error in line #{file.read.find_index r} of file: Type of data not known."
+						Popup_Info.new "Error in line #{file.read.split(/\n/).find_index r} of file: Type of data not known."
 						break
 					end
 				end
@@ -283,6 +330,11 @@ def open_file a # a defines what phase of the process you are on
 		end
 		Add_UI.new
 	end
+end
+
+def change # will be used for undo/redo functions in future
+	$saved = false
+	$scroll_bar_x.determine
 end
 
 show # show the window

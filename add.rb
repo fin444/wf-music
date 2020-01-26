@@ -35,7 +35,7 @@ class Add_UI < UI_Element
 		end
 		@buttons = []
 		@container.remove
-		if @y+@height > $scrolled_y and @y < $scrolled_y+$height
+		if @y+@height > $scrolled_y and @y < $height-$scrolled_y
 			@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
 			@buttons.push Text_Button.new "Shawzin", $width/2-192, @y+$scrolled_y, 22, Proc.new{ new_element "Shawzin" }
 			@buttons.push Text_Button.new "Mandachord", $width/2-90, @y+$scrolled_y, 22, Proc.new{ new_element "Mandachord" }
@@ -56,6 +56,7 @@ def new_element type
 	end
 	Add_UI.new
 	$saved = false
+	$scroll_bar_y.determine
 end
 
 Add_UI.new

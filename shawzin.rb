@@ -27,7 +27,7 @@ class Shawzin_UI < UI_Element
 				if $containers[0].editing
 					$containers[0].editing_buttons[4].action.call
 				end
-				$saved = false
+				change
 			else
 				@select_scale.click event
 				@export.click event
@@ -54,8 +54,8 @@ class Shawzin_UI < UI_Element
 	def get_last_sound
 		h = 0
 		@notes.each do |n|
-			if n.x > h
-				h = n.x
+			if n.x-$scrolled_x > h
+				h = n.x-$scrolled_x
 			end
 		end
 		h
@@ -66,7 +66,7 @@ class Shawzin_UI < UI_Element
 		end
 	end
 	def remove
-		$saved = false
+		change
 		@notes.each do |n|
 			n.remove
 		end
@@ -171,7 +171,7 @@ class Shawzin_UI < UI_Element
 		@line_2.remove
 		@line_3.remove
 		@container.remove
-		if @y+@height > $scrolled_y and @y < $scrolled_y+$height
+		if @y+@height > $scrolled_y and @y < $height-$scrolled_y
 			@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
 			@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 			@select_scale.y = @y+$scrolled_y

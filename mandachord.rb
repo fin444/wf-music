@@ -4,29 +4,13 @@ class Mandachord_UI < UI_Element
 	def init
 		@instrument = $all_mandachord_instruments[0]
 		@drawn = Array.new
-		@notes = Array.new
-		@percussion_background = Rectangle.new x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 66, color: $colors["percussion"], z: 4
-		@bass_background = Rectangle.new x: 49, y: @y+95+$scrolled_y, width: $width-94, height: 106, color: $colors["bass"], z: 4
-		@melody_background = Rectangle.new x: 49, y: @y+201+$scrolled_y, width: $width-94, height: 106, color: $colors["melody"], z: 4
-		@line_1 = Line.new x1: 50+(336+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(336+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-		@line_2 = Line.new x1: 50+(672+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(672+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-		@line_3 = Line.new x1: 50+(1008+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1008+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
+		@line_1 = Line.new x1: 50+(336+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(336+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_2 = Line.new x1: 50+(672+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(672+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_3 = Line.new x1: 50+(1008+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1008+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
-			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-		end
-		64.times do |a|
-			arr = Array.new
-			3.times do |n|
-				arr.push Mandachord_Note.new "percussion", 50+a*21, @y, n+1
-			end
-			5.times do |n|
-				arr.push Mandachord_Note.new "bass", 50+a*21, @y, n+1
-			end
-			5.times do |n|
-				arr.push Mandachord_Note.new "melody", 50+a*21, @y, n+1
-			end
-			@drawn.push arr
+			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		end
 		@select_instrument = Dropdown.new (60+get_text_width("Mandachord", 17)), @y+$scrolled_y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
 		@select_instrument.z = 4
@@ -38,20 +22,25 @@ class Mandachord_UI < UI_Element
 		if !$playing
 			@select_instrument.click event
 			@delete_button.click event
-			@drawn.each do |a| # loops through every column
-				a.each do |n| # loops through everything in column
-					if event.x >= n.drawn.x-1 and event.x <= n.drawn.x+20 and event.y >= n.drawn.y-1 and event.y <= n.drawn.y+20
-						n.selected = !n.selected
-						if @notes.include? n
-							@notes = @notes - [n]
-						else
-							@notes.push n
-						end
-						n.draw
-						$saved = false
-						return
-					end
+			@drawn.each do |n|
+				if n.drawn.contains? event.x, event.y
+					n.drawn.remove
+					@drawn.delete_at @drawn.find_index n
+					return
 				end
+			end
+			if event.x >= 49 and event.x <= $width-46 and event.y >= @y+$scrolled_y+30 and event.y <= @y+$scrolled_y+308
+				if event.y-$scrolled_y < @y+94
+					type = "percussion"
+					adjust_y = 0 # because there are 2 pixel thick barriers between types
+				elsif event.y-$scrolled_y < @y+200
+					type = "bass"
+					adjust_y = 1
+				else
+					type = "melody"
+					adjust_y = 2
+				end
+				@drawn.push Mandachord_Note.new type, (((event.x-49-$scrolled_x)/21.0).floor-2)*21+49, ((event.y-@y-$scrolled_y-30)/21.0).floor*21+@y+30+adjust_y
 			end
 		end
 	end
@@ -60,34 +49,30 @@ class Mandachord_UI < UI_Element
 	end
 	def get_last_sound
 		h = 0
-		@notes.each do |n|
-			if n.x > h
-				h = n.x
+		@drawn.each do |n|
+			if n.x-$scrolled_x > h
+				h = n.x-$scrolled_x
 			end
 		end
 		h
 	end
 	def play x
-		if (x-50)%21 == 0
-			@notes.select{|n| n.x == x }.each do |n|
+		if (x-49)%21 == 0
+			@drawn.select{ |n| n.x == x%1344 }.each do |n|
 				n.play @instrument
 			end
 		end
 	end
 	def remove
-		$saved = false
-		@drawn.each do |a| # loops through every column
-			a.each do |n| # loops through everything in column
-				n.drawn.remove
-			end
+		change
+		@drawn.each do |n|
+			n.drawn.remove
 		end
 		@name.remove
 		@select_instrument.remove
 		@delete_button.remove
 		@container.remove
-		@percussion_background.remove
-		@bass_background.remove
-		@melody_background.remove
+		@image.remove
 		@line_1.remove
 		@line_2.remove
 		@line_3.remove
@@ -101,35 +86,29 @@ class Mandachord_UI < UI_Element
 	def reposition_unique
 		@select_instrument.remove
 		@select_instrument = Dropdown.new (60+get_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
-		@percussion_background.remove
-		@bass_background.remove
-		@melody_background.remove
+		@image.remove
 		@line_1.remove
 		@line_2.remove
 		@line_3.remove
 		@line_4.remove
 		@line_5.remove
-		@percussion_background = Rectangle.new x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 66, color: $colors["percussion"], z: 4
-		@bass_background = Rectangle.new x: 49, y: @y+95+$scrolled_y, width: $width-94, height: 106, color: $colors["bass"], z: 4
-		@melody_background = Rectangle.new x: 49, y: @y+201+$scrolled_y, width: $width-94, height: 106, color: $colors["melody"], z: 4
-		@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-		@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-		@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
+		@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
-			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		end
-		@drawn.each do |a|
-			a.each do |n|
-				n.determine_y @y
-				n.draw
-			end
+		@drawn.each do |n|
+			n.determine_y @y
+			n.draw
 		end
 	end
 	def export
 		str = $all_mandachord_instruments.find_index(@instrument).to_s
-		@notes = @notes.sort_by{ |n| n.x }
-		@notes.each do |n|
+		@drawn = @drawn.sort_by{ |n| n.x }
+		@drawn.each do |n|
 			str += "#{n.number}#{n.type[0]}#{add_zeros (n.x-50)/21, 2}"
 		end
 		str
@@ -163,68 +142,58 @@ class Mandachord_UI < UI_Element
 			when 3
 				@drawn[curr_x+d.to_i][curr_num-1].selected = true
 				@drawn[curr_x+d.to_i][curr_num-1].draw
-				@notes.push @drawn[curr_x+d.to_i][curr_num-1]
+				@drawn.push @drawn[curr_x+d.to_i][curr_num-1]
 			end
 		end
 	end
 	def scroll_x
-		@drawn.each do |d|
-			d.each do |n|
-				n.draw
-			end
+		@drawn.each do |n|
+			n.draw
 		end
 		@line_1.remove
 		@line_2.remove
 		@line_3.remove
 		@line_4.remove
 		@line_5.remove
-		@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-		@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-		@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+		@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+		@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
-			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		end
 	end
 	def scroll_y
-		@drawn.each do |a| # loops through every column
-			a.each do |n| # loops through everything in column
-				n.drawn.remove
-			end
+		@drawn.each do |n|
+			n.drawn.remove
 		end
 		@name.remove
 		@select_instrument.remove
 		@delete_button.hide
 		@container.remove
-		@percussion_background.remove
-		@bass_background.remove
-		@melody_background.remove
+		@image.remove
 		@line_1.remove
 		@line_2.remove
 		@line_3.remove
 		@line_4.remove
 		@line_5.remove
-		if @y+@height > $scrolled_y and @y < $scrolled_y+$height
+		if @y+@height > $scrolled_y && @y < $height-$scrolled_y
 			@select_instrument.y = @y+$scrolled_y
 			@select_instrument.draw
 			@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
 			@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 			@delete_button.y = @y+$scrolled_y
 			@delete_button.draw
-			@percussion_background = Rectangle.new x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 66, color: $colors["percussion"], z: 4
-			@bass_background = Rectangle.new x: 49, y: @y+95+$scrolled_y, width: $width-94, height: 106, color: $colors["bass"], z: 4
-			@melody_background = Rectangle.new x: 49, y: @y+201+$scrolled_y, width: $width-94, height: 106, color: $colors["melody"], z: 4
-			@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-			@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-			@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
-			@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+			@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
+			@line_1 = Line.new x1: 50+(335+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+			@line_2 = Line.new x1: 50+(671+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+			@line_3 = Line.new x1: 50+(1007+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
+			@line_4 = Line.new x1: 50+(1343+$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1343+$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 			if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
-				@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 4
+				@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 			end
-			@drawn.each do |a| # loops through every column
-				a.each do |n| # loops through everything in column
-					n.draw
-				end
+			@drawn.each do |n|
+				n.draw
 			end
 		end
 	end
@@ -232,13 +201,11 @@ end
 
 class Mandachord_Note
 	attr_accessor :drawn, :selected, :x, :number, :type
-	def initialize type, x, container_y, number
+	def initialize type, x, y
 		@type = type
 		@x = x
-		@number = number
-		@selected = false
+		@y = y
 		@first_draw = true
-		determine_y container_y
 		draw
 	end
 	def play instrument
@@ -249,7 +216,7 @@ class Mandachord_Note
 			@drawn.remove
 		end
 		@first_draw = false
-		@drawn = Rectangle.new x: 43+(@x+$scrolled_x)%1344, y: @y+1+$scrolled_y, width: 19, height: 19, color: determine_color, z: 4
+		@drawn = Rectangle.new x: 43+(@x+$scrolled_x)%1344, y: @y+1+$scrolled_y, width: 21, height: 21, color: $colors[@type.downcase], z: 4
 	end
 	def determine_y container_y
 		case @type
@@ -260,11 +227,5 @@ class Mandachord_Note
 		when "melody"
 			@y = container_y+@number*21+180
 		end
-	end
-	def determine_color
-		if @selected
-			return $colors[@type.downcase]
-		end
-		$colors["background"]
 	end
 end
