@@ -1,11 +1,15 @@
-class Add_UI < UI_Element
-	def init
+class Add_UI
+	attr_accessor :y, :container
+	def initialize
+		@height = 40
+		@y = $containers[-1].y+$containers[-1].container.height+5
+		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
 		@buttons = []
 		@buttons.push Text_Button.new "Shawzin", $width/2-192, @y+$scrolled_y, 22, Proc.new{ new_element "Shawzin" }
 		@buttons.push Text_Button.new "Mandachord", $width/2-90, @y+$scrolled_y, 22, Proc.new{ new_element "Mandachord" }
 		@buttons.push Text_Button.new "Echo Lure", $width/2+49, @y+$scrolled_y, 22, Proc.new{ new_element "Echo Lure" }
-		@delete_button.remove # don't delete the add section
 		$scroll_list_y.push self
+		$containers.push self
 	end
 	def click event
 		@buttons.each do |b|

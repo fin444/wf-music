@@ -1,8 +1,17 @@
 $all_mandachord_instruments = ["Adau", "Alpha", "Beta", "Delta", "Gamma", "Epsilon", "Horos", "Druk", "Plogg"]
 
-class Mandachord_UI < UI_Element
-	def init
-		@instrument = $all_mandachord_instruments[0]
+class Mandachord_UI
+	attr_accessor :instrument_percussion, :instrument_base, :instrument_melody, :y, :container
+	def initialize
+		@height = 315
+		@y = $containers[-1].y+$containers[-1].container.height+5
+		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
+		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
+		@options = Gear_Button.new $width-100, @y+$scrolled_y, Proc.new{ Popup_Instrument_Options.new self }
+		@instrument_percussion = $all_mandachord_instruments[0]
+		@instrument_base = $all_mandachord_instruments[0]
+		@instrument_melody = $all_mandachord_instruments[0]
 		@drawn = []
 		@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
 		@line_1 = Line.new x1: 50+(336-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(336-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
@@ -17,11 +26,13 @@ class Mandachord_UI < UI_Element
 		@select_instrument.draw
 		$scroll_list_x.push self
 		$scroll_list_y.push self
+		$containers.push self
 	end
 	def click event
 		if !$playing
 			@select_instrument.click event
 			@delete_button.click event
+			@options.click event
 			@drawn.each do |n|
 				if n.drawn.contains? event.x, event.y
 					n.drawn.remove
@@ -32,34 +43,46 @@ class Mandachord_UI < UI_Element
 			if event.x >= 49 and event.x <= $width-46 and event.y >= @y+$scrolled_y+30 and event.y <= @y+$scrolled_y+308
 				if event.y-$scrolled_y < @y+94
 					type = "percussion"
+					num = (event.y-$scrolled_y-30-@y)%21
 					adjust_y = 0 # because there are 2 pixel thick barriers between types
 				elsif event.y-$scrolled_y < @y+200
 					type = "bass"
+					num = (event.y-$scrolled_y-94-@y)%21
 					adjust_y = 1
 				else
 					type = "melody"
+					num = (event.y-$scrolled_y-200-@y)%21
 					adjust_y = 2
 				end
-				@drawn.push Mandachord_Note.new type, (((event.x-49-$scrolled_x)/21.0).floor-2)*21+49, ((event.y-@y-$scrolled_y-30)/21.0).floor*21+@y+30+adjust_y
+				@drawn.push Mandachord_Note.new type, (((event.x-49-$scrolled_x)/21.0).floor-2)*21+49, ((event.y-@y-$scrolled_y-30)/21.0).floor*21+@y+30+adjust_y, num
 			end
 		end
 	end
 	def mouse_down event
 		@delete_button.mouse_down event
+		@options.mouse_down event
 	end
 	def get_last_sound
 		h = 0
 		@drawn.each do |n|
-			if n.x-$scrolled_x > h
-				h = n.x-$scrolled_x
+			if n.x+$scrolled_x > h
+				h = n.x+$scrolled_x
 			end
 		end
 		h
 	end
-	def play x
-		if (x-49)%21 == 0
-			@drawn.select{ |n| n.x == x%1344 }.each do |n|
-				n.play @instrument
+	def play x, change
+		(change-x).times do |n|
+			if (x+n-49)%21 == 0
+				@drawn.select{ |i| i.x == (x+n)%1344 }.each do |i|
+					if i.type == "percussion"
+						i.play @instrument_percussion
+					elsif i.type == "bass"
+						i.play @instrument_bass
+					else
+						i.play @instrument_melody
+					end
+				end
 			end
 		end
 	end
@@ -83,7 +106,14 @@ class Mandachord_UI < UI_Element
 		$containers.delete_at $containers.find_index self
 		reposition_all
 	end
-	def reposition_unique
+	def reposition
+		@y = determine_y $containers.find_index(self)-1
+		@container.remove
+		@name.remove
+		@delete_button.remove
+		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
+		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
 		@select_instrument.remove
 		@select_instrument = Dropdown.new (60+get_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
 		@image.remove
@@ -201,10 +231,11 @@ end
 
 class Mandachord_Note
 	attr_accessor :drawn, :selected, :x, :number, :type
-	def initialize type, x, y
+	def initialize type, x, y, number
 		@type = type
 		@x = x
 		@y = y
+		@number = number
 		@first_draw = true
 		draw
 	end

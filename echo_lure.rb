@@ -1,7 +1,14 @@
 $all_animals = ["Pobbers", "Virmink", "Sawgaw", "Bolarola", "Horrasque", "Stover", "Kubrodon", "Kuaka", "Condroc", "Mergoo", "Vasca"]
 
-class Lure_UI < UI_Element
-	def init
+class Lure_UI
+	attr_accessor :animal, :y, :container
+	def initialize
+		@height = 220
+		@y = $containers[-1].y+$containers[-1].container.height+5
+		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
+		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
+		@options = Gear_Button.new $width-100, @y+$scrolled_y, Proc.new{ Popup_Instrument_Options.new self }
 		@animal = $all_animals[0]
 		@select_animal = Dropdown.new (60+get_text_width("Echo Lure", 17)), @y+$scrolled_y, $all_animals, @animal, Proc.new{ |s| @animal = s }
 		@lines = []
@@ -17,11 +24,13 @@ class Lure_UI < UI_Element
 		end
 		$scroll_list_x.push self
 		$scroll_list_y.push self
+		$containers.push self
 	end
 	def click event
 		if !$playing
 			@select_animal.click event
 			@delete_button.click event
+			@options.click event
 		end
 	end
 	def right_click event
@@ -38,6 +47,7 @@ class Lure_UI < UI_Element
 		if $open_dropdown != @select_animal && !$playing
 			new_noise event
 			@delete_button.mouse_down event
+			@options.mouse_down event
 		end
 	end
 	def mouse_move event
@@ -58,20 +68,20 @@ class Lure_UI < UI_Element
 			change
 		end
 	end
-	def play x
-		@noises.filter{ |n| n.x == x }.each do |n|
-			n.play @animal
-		end
-	end
 	def get_last_sound
 		connect_noises
 		h = 0
 		@noises.each do |n|
-			if n.x+10-$scrolled_x > h
-				h = n.x+10-$scrolled_x
+			if n.x+10+$scrolled_x > h
+				h = n.x+10+$scrolled_x
 			end
 		end
 		h
+	end
+	def play x, change
+		@noises.filter{ |n| n.x.between? x, change }.each do |n|
+			n.play @animal
+		end
 	end
 	def remove
 		@select_animal.remove
@@ -88,7 +98,14 @@ class Lure_UI < UI_Element
 		$containers.delete_at $containers.find_index self
 		reposition_all
 	end
-	def reposition_unique
+	def reposition
+		@y = determine_y $containers.find_index(self)-1
+		@container.remove
+		@name.remove
+		@delete_button.remove
+		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
+		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
 		@lines.each do |l|
 			l.remove
 		end
@@ -114,10 +131,6 @@ class Lure_UI < UI_Element
 		str = add_zeros($all_animals.find_index(@animal), 2).to_s
 		@noises.each do |n|
 			t = "#{add_zeros (n.x-50)/21, 3}#{add_zeros (n.y-@y-25)/15, 2}"
-			if t.include? "-"
-				puts t
-				puts n.y-@y-30
-			end
 			str += t
 		end
 		str

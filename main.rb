@@ -1,14 +1,15 @@
 # BUGS
-# blinker is weird on popup_ask
 # playing doesn't go as far as it should when scrolled to x
 # y scroll bar goes too far down
 # both scroll bars don't get sized right
-# echo lure loading is very wonky
+# echo lure loading doesn't work
+# mandachord numbers on play
+# double playing shawzin notes
 
 # FEATURES
 # click and drag scroll bar
 # loop mandachord playing
-# show that shawzin has specifically 8 per second
+# show that shawzin has specifically 8 notes per second
 # note/time limits on mandachord/shawzin
 # settings pop up on instruments instead of ugly buttons/dropdowns
 # options
@@ -52,39 +53,30 @@ $scroll_bar_y.determine
 
 # blockers to cover up things in scrolling
 Rectangle.new x: 0, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
-Rectangle.new x: 1390, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
+Rectangle.new x: $width-50, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
 
 # core loop
 $time_counter = 0
 update do
 	$time_counter += 1
-	case $time_counter
-	when 30
-		if $alert.respond_to? "blink"
-			$alert.blink false
-		end
-	when 60
+	if $alert.respond_to? "blink" # blink the cursor
+		$alert.blink
+	end
+	if $time_counter == 60 # display fps and reset $time_counter
 		$fps.remove
 		$fps = Text.new get(:fps).round(2), x: 0, y: 0, size: 15, color: "white", z: 20
-		if $alert.respond_to? "blink"
-			$alert.blink true
-		end
 		$time_counter = 0
 	end
-	if $playing
+	if $playing # play the song
 		$playing_previous = $playing_counter.floor
 		$playing_counter += (1340.0/480.0).round 3
 		$playing_bar.remove
 		$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 7
-		($playing_counter.floor-$playing_previous).times do |t|
-			$containers.filter{ |c| c.respond_to? "play" }.each do |c|
-				c.play $playing_previous+t
-			end
+		$containers.filter{ |c| c.respond_to? "play" }.each do |c|
+			c.play $playing_previous, $playing_counter.floor
 		end
 		if $playing_counter > $playing_highest
-			$playing = false
-			$containers[0].buttons[0].image_url = "resources/images/play_icon.png"
-			$containers[0].buttons[0].draw
+			pause_all
 		end
 	end
 	if $time_counter%6 == 0 # scroll every 1/10 of a second
@@ -196,9 +188,7 @@ on :mouse_scroll do |event|
 end
 on :key_down do |event|
 	$keys_down.push event.key
-	if $alert.respond_to? "key_down"
-		$alert.key_down event
-	elsif $keys_down.any?{ |k| k == "left command" } or $keys_down.any?{ |k| k == "right command" }
+	if $keys_down.any?{ |k| k == "left command" } or $keys_down.any?{ |k| k == "right command" }
 		if ($keys_down.any?{ |k| k == "left shift" } or $keys_down.any?{ |k| k == "right shift" }) and $keys_down.any?{ |k| k == "s" } # cmd + shift + s = save as
 			Popup_Ask.new "File Name", Proc.new{ |t| save_as t }
 		elsif $keys_down.any?{ |k| k == "s" } # cmd + s = save
@@ -208,6 +198,8 @@ on :key_down do |event|
 		elsif $keys_down.any?{ |k| k == "o" } # cmd + o = open
 			open_file 1
 		end
+	elsif $alert.respond_to? "key_down"
+		$alert.key_down event
 	end
 end
 on :key_up do |event|
@@ -228,6 +220,8 @@ def play_all
 		end
 	end
 	if $playing_highest > 5
+		$containers[0].buttons[0].image_url = "resources/images/pause_icon.png"
+		$containers[0].buttons[0].draw
 		$playing = true
 		$playing_counter = 50
 		$playing_previous = 47
@@ -237,6 +231,8 @@ def play_all
 end
 def pause_all
 	$playing = false
+	$containers[0].buttons[0].image_url = "resources/images/play_icon.png"
+	$containers[0].buttons[0].draw
 end
 
 # save/load
@@ -294,7 +290,7 @@ def open_file a # a defines what phase of the process you are on
 	elsif a == 3
 		$containers[-1].remove
 		File.open "saves/#{$file_name}", "r" do |file|
-			# begin # ruby equivalent of try
+			begin # ruby equivalent of try
 				file.read.split(/\n/).each do |r|
 					case r[0] # first letter of r signifies type of data
 					when "d"
@@ -322,11 +318,11 @@ def open_file a # a defines what phase of the process you are on
 						break
 					end
 				end
-			# rescue => err # ruby equivalent of catch
-			# 	$saved = true
-			# 	new_file false
-			# 	Popup_Info.new "An error has occured in reading the file:\n#{err}"
-			# end
+			rescue => err # ruby equivalent of catch
+				$saved = true
+				new_file false
+				Popup_Info.new "An error has occured in reading the file:\n#{err}"
+			end
 		end
 		Add_UI.new
 	end

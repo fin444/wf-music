@@ -1,18 +1,15 @@
-class Top_UI < UI_Element
-	attr_accessor :buttons, :editing, :editing_buttons
-	def init
+class Top_UI
+	attr_accessor :buttons, :editing, :editing_buttons, :y, :container
+	def initialize
+		@height = 125
+		@y = 0
 		@container = Rectangle.new x: 0, y: @y+$scrolled_y, width: $width, height: @height, color: $colors["background"], z: 6
-		@delete_button.remove # don't delete the top bar
 		@buttons = []
 		@buttons.push Quad_Button.new "Play", 50, @y+10, "resources/images/play_icon.png", Proc.new{
 			if $playing
 				pause_all
-				$containers[0].buttons[0].image_url = "resources/images/play_icon.png"
-				$containers[0].buttons[0].draw
 			else
 				play_all
-				$containers[0].buttons[0].image_url = "resources/images/pause_icon.png"
-				$containers[0].buttons[0].draw
 			end
 		}
 		@buttons.push Quad_Button.new "Save", 140, @y+10, "resources/images/clear.png", Proc.new{ save }
@@ -21,7 +18,6 @@ class Top_UI < UI_Element
 		@buttons.push Quad_Button.new "Open", 410, @y+10, "resources/images/clear.png", Proc.new{ open_file 1 }
 		@buttons.each do |b|
 			b.z = 6
-			b.draw
 		end
 		# buttons for editing shawzin, will hide until needed
 		@editing = false
@@ -37,16 +33,17 @@ class Top_UI < UI_Element
 			b.hide
 		end
 		# time marker
-		@time_bottom_line = Line.new x1: 50, y1: @y+120, x2: 1394, y2: @y+120, width: 1, color: $colors["string"], z: 6
+		@time_bottom_line = Line.new x1: 50, y1: @y+120, x2: $width-46, y2: @y+120, width: 1, color: $colors["string"], z: 6
 		@time_markers = []
 		@time_numbers = []
 		33.times do |i|
 			@time_markers.push Line.new x1: (i)*42+50, y1: @y+110, x2: (i)*42+50, y2: @y+120, width: 1, color: $colors["string"], z: 6
 		end
 		9.times do |i|
-			@time_numbers.push Text.new "#{(i+($scrolled_x/168))/60}:#{add_zeros (i+($scrolled_x/168))%60, 2}", x: (i)*168+46, y: @y+95, size: 12, color: $colors["string"], z: 6
+			@time_numbers.push Text.new "#{(i+($scrolled_x/168))/60}:#{add_zeros (i+($scrolled_x/168))%60, 2}", x: (i)*168+50-(get_text_width("0:00", 12)/2), y: @y+95, size: 12, color: $colors["string"], z: 6
 		end
 		$scroll_list_x.push self
+		$containers.push self
 	end
 	def click event
 		if @editing # two sets of buttons, has to determine which ones to click
@@ -124,7 +121,7 @@ class Top_UI < UI_Element
 			@note.draw
 		}
 	end
-	def reposition # redefining as empty because it never moves
+	def reposition # empty to avoid errors
 	end
 	def scroll_x
 		@time_markers.each do |t|
@@ -139,7 +136,7 @@ class Top_UI < UI_Element
 			@time_markers.push Line.new x1: (i)*42+50-($scrolled_x%42), y1: @y+110, x2: (i)*42+50-($scrolled_x%42), y2: @y+120, width: 1, color: $colors["string"], z: 6
 		end
 		9.times do |i|
-			@time_numbers.push Text.new "#{(i+($scrolled_x/168))/60}:#{add_zeros (i+($scrolled_x/168))%60, 2}", x: (i)*168-($scrolled_x%168), y: @y+95, size: 12, color: $colors["string"], z: 6
+			@time_numbers.push Text.new "#{(i+($scrolled_x/168))/60}:#{add_zeros (i+($scrolled_x/168))%60, 2}", x: (i)*168+50-(get_text_width("0:00", 12)/2)-($scrolled_x%168), y: @y+95, size: 12, color: $colors["string"], z: 6
 		end
 	end
 end

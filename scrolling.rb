@@ -92,9 +92,6 @@ class Scroll_Bar_X
 			else
 				$future_scrolled_x += increment
 			end
-			$scroll_list_x.each do |c|
-				c.scroll_x
-			end
 		end
 	end
 	def determine
@@ -104,6 +101,10 @@ class Scroll_Bar_X
 			if a > h
 				h = a
 			end
+		end
+		if h >= 43008 && $full_size_x != 43008
+			h = 43008-$scrolled_x
+			Popup_Info.new "Shawzin songs are limited to 4:16 by Warframe."
 		end
 		$full_size_x = h+$scrolled_x
 		draw
@@ -123,7 +124,7 @@ class Scroll_Bar_Y
 		else
 			@first_draw = false
 		end
-		@bar = Rectangle.new x: $width-20, y: 20+(1-$scrolled_y)/(($full_size_y+$height)/($height)), width: 20, height: ($height-40)/(($full_size_y+$height)/$height), color: $colors["button_deselected"], z: 6
+		@bar = Rectangle.new x: $width-20, y: 20+(0-$scrolled_y)/(($full_size_y+$height)/($height)), width: 20, height: ($height-40)/(($full_size_y+$height)/$height), color: $colors["button_deselected"], z: 6
 	end
 	def click event
 		if @container.contains? event.x, event.y
@@ -147,9 +148,9 @@ class Scroll_Bar_Y
 		end
 	end
 	def scroll_down increment
-		if 1-$future_scrolled_y != $full_size_y
-			if $future_scrolled_y-increment < 1-$full_size_y
-				$future_scrolled_y = 1-$full_size_y
+		if 0-$future_scrolled_y != $full_size_y
+			if $future_scrolled_y-increment < 0-$full_size_y
+				$future_scrolled_y = 0-$full_size_y
 			else
 				$future_scrolled_y -= increment
 			end

@@ -35,55 +35,8 @@ def get_text_height text, size
 end
 
 # Base Classes
-class UI_Element # inherited by all main ui elements
-	attr_accessor :y, :container
-	def initialize
-		# determine what type it is, and have some values from that
-		case self.class.name
-		when "Top_UI"
-			@height = 125
-			@text = ""
-		when "Shawzin_UI"
-			@height = 280
-			@text = "Shawzin"
-		when "Mandachord_UI"
-			@height = 315
-			@text = "Mandachord"
-		when "Lure_UI"
-			@height = 220
-			@text = "Echo Lure"
-		when "Add_UI"
-			@height = 40
-			@text = ""
-		end
-		# generate base stuff
-		@y = determine_y -1
-		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
-		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
-		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
-		init # individual for each sub-class
-		$containers.push self
-	end
-	def determine_y index # automatically stack all of the ui elements
-		if $containers.length > 0
-			return $containers[index].y+$containers[index].container.height+5
-		end
-		0
-	end
-	def reposition # fix the y-values after a deletion
-		@y = determine_y $containers.find_index(self)-1
-		@container.remove
-		@name.remove
-		@delete_button.remove
-		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
-		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
-		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
-		reposition_unique
-	end
-end
-
 class Dropdown
-	attr_accessor :x, :y, :z, :width, :selected
+	attr_accessor :x, :y, :width, :selected
 	def initialize x, y, options, selected, update
 		@x = x
 		@y = y
@@ -182,11 +135,15 @@ class Dropdown
 			d.remove
 		end
 	end
+	def z= z
+		@z = z
+		draw
+	end
 end
 
 # buttons
 class Delete_Button
-	attr_accessor :z, :x, :y, :hidden
+	attr_accessor :x, :y, :hidden
 	def initialize x, y, ui_element
 		@x = x
 		@y = y
@@ -234,9 +191,13 @@ class Delete_Button
 		@text.remove
 		@hidden = true
 	end
+	def z= z
+		@z = z
+		draw
+	end
 end
 class Quad_Button
-	attr_accessor :image_url, :z, :x, :y, :action, :hidden, :color
+	attr_accessor :image_url, :x, :y, :action, :hidden, :color
 	def initialize text, x, y, image_url, action
 		@text = text
 		@x = x
@@ -304,6 +265,10 @@ class Quad_Button
 		@image.remove
 		@hidden = true
 	end
+	def z= z
+		@z = z
+		draw
+	end
 end
 class Toggle_Quad_Button < Quad_Button # @action will be Boolean instead of Proc
 	def click event
@@ -325,7 +290,7 @@ class Toggle_Quad_Button < Quad_Button # @action will be Boolean instead of Proc
 	end
 end
 class Text_Button
-	attr_accessor :z, :x, :y, :hidden, :width, :height
+	attr_accessor :x, :y, :hidden, :width, :height
 	def initialize text, x, y, font_size, action
 		@text = text
 		@x = x
@@ -377,5 +342,58 @@ class Text_Button
 		@button.remove
 		@button_text.remove
 		@hidden = true
+	end
+	def z= z
+		@z = z
+		draw
+	end
+end
+class Gear_Button
+	attr_accessor :hidden
+	def initialize x, y, action
+		@x = x
+		@y = y
+		@action = action
+		@z = 0 # can be manipulated by outside scripts if need be
+		@color = $colors["button_deselected"]
+		@hidden = false
+		draw
+		$all_buttons.push self
+	end
+	def draw
+		@hidden = false # using draw function unhides it, not drawing if hidden occurs in other scripts
+		@container = Rectangle.new x: @x, y: @y, width: 15, height: 15, color: [0, 0, 0, 0]
+		@image = Image.new "resources/images/gear.png", x: @x, y: @y, width: 15, height: 15, color: @color, z: @z
+	end
+	def click event
+		if @container.contains? event.x, event.y
+			@color = $colors["button_deselected"]
+			@action.call
+			draw
+		end
+	end
+	def mouse_down event
+		if @container.contains? event.x, event.y
+			@color = $colors["button_selected"]
+			draw
+		end
+	end
+	def mouse_up
+		@color = $colors["button_deselected"]
+		draw
+	end
+	def remove
+		@container.remove
+		@image.remove
+		$all_buttons.delete_at $all_buttons.find_index self
+	end
+	def hide
+		@container.remove
+		@image.remove
+		@hidden = true
+	end
+	def z= z
+		@z = z
+		draw
 	end
 end

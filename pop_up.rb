@@ -1,5 +1,6 @@
 class Popup_Info
 	def initialize text
+		$alert = self
 		# figure out where text goes on lines
 		arr = [""]
 		text.split(" ").each do |t|
@@ -22,8 +23,6 @@ class Popup_Info
 		end
 		@button = Text_Button.new "Okay", ($width/2)-(get_text_width("Okay", 20)/2), ($height/2)+(height/2)-30, 20, Proc.new{ $alert.remove }
 		@button.z = 10
-		@button.draw
-		$alert = self
 	end
 	def click event
 		@button.click event
@@ -44,6 +43,7 @@ class Popup_Info
 end
 class Popup_Confirm
 	def initialize text, action_1, action_2
+		$alert = self
 		@action_1 = action_1
 		@action_2 = action_2
 		# figure out where text goes on lines
@@ -71,14 +71,11 @@ class Popup_Confirm
 			@action_1.call
 		}
 		@yes_button.z = 10
-		@yes_button.draw
 		@no_button = Text_Button.new "No", ($width/2)+10, ($height/2)+(height/2)-30, 20, Proc.new{
 			$alert.remove
 			@action_2.call
 		}
 		@no_button.z = 10
-		@no_button.draw
-		$alert = self
 	end
 	def click event
 		@yes_button.click event
@@ -102,6 +99,7 @@ class Popup_Confirm
 end
 class Popup_Ask
 	def initialize title, action
+		$alert = self
 		@action = action
 		@text = ""
 		@background = Rectangle.new x: 0, y: 0, width: $width, height: $height, color: [0, 0, 0, 0.8], z: 10
@@ -116,12 +114,8 @@ class Popup_Ask
 			@action.call @text
 		}
 		@button.z = 10
-		@button.draw
 		@position = 0
-		# if $time_counter >= 30
-		# 	@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
-		# end
-		$alert = self
+		@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
 	end
 	def click event
 		@button.click event
@@ -165,17 +159,12 @@ class Popup_Ask
 		if event.key != "return"
 			@writing.remove
 			@writing = Text.new @text, x: ($width/2)-188, y: ($height/2)-12, size: 20, color: $colors["string"], z: 10
-			if $time_counter >= 30
-				@blinker.remove
-				@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
-			end
 		end
 	end
-	def blink on # blinking cursor
-		if on
+	def blink # blinking cursor
+		@blinker.remove
+		if $time_counter >= 30
 			@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
-		else
-			@blinker.remove	
 		end
 	end
 	def remove
@@ -193,6 +182,7 @@ class Popup_Ask
 end
 class Popup_File
 	def initialize action
+		$alert = self
 		@action = action
 		@file_list = Dir.children("saves").filter{ |s| s[-4, 4] == ".txt" }
 		if @file_list.length == 0
@@ -222,14 +212,12 @@ class Popup_File
 		end
 		@button = Text_Button.new "Select", ($width/2)-(get_text_width("Select", 20)/2), ($height/2)+(@height/2)-30, 20, Proc.new{ $alert.remove }
 		@button.z = 10
-		@button.draw
 		# set the first file to be currently selected
 		@selected = @file_list[0]
 		@selector_containers[0].remove
 		@selector_names[0].remove
 		@selector_containers[0] = Rectangle.new x: ($width/2)-(@width/2)+10, y: ($height/2)-(@height/2)+60+@file_list.find_index(@selected)*20, width: @width-20, height: 20, color: $colors["string"], z: 10
 		@selector_names[0] = Text.new @selected, x: ($width/2)-(@width/2)+15, y: ($height/2)-(@height/2)+60+@file_list.find_index(@selected)*20, size: 17, color: $colors["background"], z: 10
-		$alert = self
 	end
 	def click event
 		@selector_containers.each do |s|
@@ -268,5 +256,44 @@ class Popup_File
 		end
 		@button.remove
 		$alert = nil
+	end
+end
+class Popup_Instrument_Options
+	def initialize instrument
+		$alert = self
+		@instrument = instrument
+		# draw
+		@background = Rectangle.new x: 0, y: 0, width: $width, height: $height, color: [0, 0, 0, 0.8], z: 10
+		@outline = Rectangle.new x: ($width/2)-201, y: ($height/2)-101, width: 402, height: 202, color: $colors["string"], z: 10
+		@outline = Rectangle.new x: ($width/2)-200, y: ($height/2)-100, width: 400, height: 200, color: $colors["background"], z: 10
+		@delete_button = Delete_Button.new ($width/2)+150, ($height/2)-100, self
+		@delete_button.z = 10
+		# put an export button here
+		case @instrument.class.name
+		when "Shawzin_UI"
+			@dropdown_1 = Dropdown.new ($width/2), ($height/2), $all_scales, @instrument.scale, Proc.new{ |s| @instrument.scale = s }
+		when "Mandachord_UI"
+			@dropdown_1 = Dropdown.new ($width/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_percussion, Proc.new{ |i| @instrument.instrument_percussion = i }
+			@dropdown_2 = Dropdown.new ($width/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_bass, Proc.new{ |i| @instrument.instrument_bass = i }
+			@dropdown_3 = Dropdown.new ($width/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_melody, Proc.new{ |i| @instrument.instrument_melody = i }
+			@dropdown_2.z = 10
+			@dropdown_3.z = 10
+		when "Lure_UI"
+			@dropdown_1 = Dropdown.new ($width/2), ($height/2), $all_animals, @instrument.animal, Proc.new{ |a| @instrument.animal = a }
+		end
+		@dropdown_1.z = 10
+	end
+	def click event
+		@delete_button.click event
+		@dropdown_1.click event
+		if @instrument.class.name == "Mandachord_UI"
+			@dropdown_2.click event
+			@dropdown_3.click event
+		end
+	end
+	def mouse_down event
+		@delete_button.mouse_down event
+	end
+	def remove
 	end
 end
