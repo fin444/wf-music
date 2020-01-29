@@ -141,7 +141,7 @@ class Dropdown
 	end
 end
 
-# buttons
+# Buttons
 class Delete_Button
 	attr_accessor :x, :y, :hidden
 	def initialize x, y, ui_element
