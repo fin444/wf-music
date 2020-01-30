@@ -36,7 +36,7 @@ end
 
 # Base Classes
 class Dropdown
-	attr_accessor :x, :y, :width, :selected
+	attr_accessor :x, :y, :width, :selected, :container
 	def initialize x, y, options, selected, update
 		@x = x
 		@y = y
@@ -351,7 +351,7 @@ class Text_Button
 	end
 end
 class Gear_Button
-	attr_accessor :hidden
+	attr_accessor :hidden, :x, :y
 	def initialize x, y, action
 		@x = x
 		@y = y
@@ -359,11 +359,18 @@ class Gear_Button
 		@z = 0 # can be manipulated by outside scripts if need be
 		@color = $colors["button_deselected"]
 		@hidden = false
+		@first_draw = true
 		draw
 		$all_buttons.push self
 	end
 	def draw
 		@hidden = false # using draw function unhides it, not drawing if hidden occurs in other scripts
+		if !@first_draw
+			@container.remove
+			@image.remove
+		else
+			@first_draw = false
+		end
 		@container = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: [0, 0, 0, 0]
 		@image = Image.new "resources/images/gear.png", x: @x, y: @y, width: 20, height: 20, color: @color, z: @z
 	end

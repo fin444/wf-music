@@ -83,6 +83,7 @@ class Lure_UI
 	end
 	def remove
 		@delete_button.remove
+		@options.remove
 		@name.remove
 		@lines.each do |l|
 			l.remove
@@ -96,31 +97,8 @@ class Lure_UI
 		reposition_all
 	end
 	def reposition
-		@y = determine_y $containers.find_index(self)-1
-		@container.remove
-		@name.remove
-		@delete_button.remove
-		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
-		@name = Text.new "Echo Lure", x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
-		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
-		@lines.each do |l|
-			l.remove
-		end
-		@lines = []
-		13.times do |n|
-			if n == 3 || n == 9
-				@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 2, color: $colors["note"]
-				@lines[n].opacity = 0.4
-			else
-				@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 1, color: $colors["note"]
-				@lines[n].opacity = 0.3
-			end
-		end
-		@noises.each do |n|
-			n.y -= n.container_y-@y
-			n.container_y = @y
-			n.draw
-		end
+		@y = $containers[$containers.find_index(self)-1].y+$containers[$containers.find_index(self)-1].container.height+5
+		scroll_y
 	end
 	def export
 		str = add_zeros($all_animals.find_index(@animal), 2).to_s
@@ -177,7 +155,9 @@ class Lure_UI
 		end
 	end
 	def scroll_y
+		@container.remove
 		@delete_button.hide
+		@options.hide
 		@name.remove
 		@lines.each do |l|
 			l.remove
@@ -186,9 +166,12 @@ class Lure_UI
 			n.remove
 		end
 		if @y+@height > $scrolled_y and @y < $height-$scrolled_y
-			@name = Text.new "Echo Lure", x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+			@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
+			@name = Text.new "Echo Lure", x: 80, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 			@delete_button.y = @y+$scrolled_y
 			@delete_button.draw
+			@options.y = @y+$scrolled_y
+			@options.draw
 			# redraw lines
 			@lines = []
 			13.times do |n|

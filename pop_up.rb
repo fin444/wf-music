@@ -283,6 +283,8 @@ class Popup_Instrument_Options
 			@items.push Dropdown.new ($width/2)-((get_text_width("Gamma", 17)+20)/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_bass, Proc.new{ |i| @instrument.instrument_bass = i }
 			@items.push Dropdown.new ($width/2)+((get_text_width("Gamma", 17)+20)/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_melody, Proc.new{ |i| @instrument.instrument_melody = i }
 		when "Lure_UI"
+			@title.remove
+			@title = Text.new "Options for Echo Lure", x: ($width/2)-(get_text_width("Options for Echo Lure", 30)/2), y: ($height/2)-90, size: 30, color: $colors["string"], z: 10
 			@items.push Dropdown.new ($width/2)-((get_text_width("Horrasque", 17)+20)/2), ($height/2), $all_animals, @instrument.animal, Proc.new{ |a| @instrument.animal = a }
 		end
 		@items.each do |i|

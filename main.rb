@@ -2,6 +2,7 @@
 # playing doesn't go as far as it should when scrolled to x
 # y scroll bar goes too far down
 # both scroll bars don't get sized right
+# echo lure note connection doesnt work
 
 # FEATURES
 # click and drag scroll bar
@@ -109,43 +110,52 @@ on :mouse_up do |event|
 			end
 		end
 	end
-	if $alert.nil?
-		case event.button
-		when :left
-			$scroll_bar_x.click event
-			$scroll_bar_y.click event
-			if !$open_dropdown.nil?
-				if $open_dropdown.click event
-					dont = true # used to signify that click was handled on dropdown
-				end
+	case event.button
+	when :left
+		$scroll_bar_x.click event
+		$scroll_bar_y.click event
+		if !$open_dropdown.nil?
+			if $open_dropdown.click event
+				dont = true # used to signify that click was handled on dropdown
 			end
-			if dont.nil?
-				if !$export_window.nil?
-					$export_window.click event
-				else
-					$containers.each do |c|
-						if c.container.contains? event.x, event.y
-							c.click event
-						end
+		end
+		if dont.nil? and !$alert.nil?
+			$alert.click event
+			dont = true
+		end
+		if dont.nil?
+			if !$export_window.nil?
+				$export_window.click event
+			else
+				$containers.each do |c|
+					if c.container.contains? event.x, event.y
+						c.click event
 					end
 				end
 			end
-		when :right
-			$containers.select{ |c| c.class.name == "Shawzin_UI" || c.class.name == "Lure_UI" }.each do |c|
-				c.right_click event
-			end
-		when :middle
-			# not used right now, but save this for later
 		end
-	else
-		$alert.click event
+	when :right
+		$containers.select{ |c| c.class.name == "Shawzin_UI" || c.class.name == "Lure_UI" }.each do |c|
+			c.right_click event
+		end
+	when :middle
+		# not used right now, but save this for later
 	end
 end
 on :mouse_down do |event|
 	$mouse_down = true
-	if $alert.nil?
-		case event.button
-		when :left
+	case event.button
+	when :left
+		if !$open_dropdown.nil?
+			if $open_dropdown.container.contains? event.x, event.y
+				dont = true
+			end
+		end
+		if dont.nil? and !$alert.nil?
+			$alert.mouse_down event
+			dont = true
+		end
+		if dont.nil?
 			$scroll_bar_x.mouse_down event
 			$scroll_bar_y.mouse_down event
 			$containers.each do |c|
@@ -153,13 +163,11 @@ on :mouse_down do |event|
 					c.mouse_down event
 				end
 			end
-		when :right
-			# not used right now, but save this for later
-		when :middle
-			# not used right now, but save this for later
 		end
-	else
-		$alert.mouse_down event
+	when :right
+		# not used right now, but save this for later
+	when :middle
+		# not used right now, but save this for later
 	end
 end
 on :mouse_move do |event|

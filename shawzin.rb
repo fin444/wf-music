@@ -75,6 +75,7 @@ class Shawzin_UI
 			n.remove
 		end
 		@delete_button.remove
+		@options.remove
 		@name.remove
 		@line_1.remove
 		@line_2.remove
@@ -86,23 +87,8 @@ class Shawzin_UI
 		reposition_all
 	end
 	def reposition
-		@y = determine_y $containers.find_index(self)-1
-		@container.remove
-		@name.remove
-		@delete_button.remove
-		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
-		@name = Text.new "Shawzin", x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
-		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
-		@line_1.remove
-		@line_2.remove
-		@line_3.remove
-		@line_1 = Line.new x1: 50, y1: @y+80+$scrolled_y, x2: $width-50, y2: @y+80+$scrolled_y, width: 4, color: $colors["string"]
-		@line_2 = Line.new x1: 50, y1: @y+160+$scrolled_y, x2: $width-50, y2: @y+160+$scrolled_y, width: 4, color: $colors["string"]
-		@line_3 = Line.new x1: 50, y1: @y+240+$scrolled_y, x2: $width-50, y2: @y+240+$scrolled_y, width: 4, color: $colors["string"]
-		@notes.each do |n|
-			n.container_y = @y
-			n.draw
-		end
+		@y = $containers[$containers.find_index(self)-1].y+$containers[$containers.find_index(self)-1].container.height+5
+		scroll_y
 	end
 	def export # all data information is based off of https://warframe.fandom.com/wiki/Shawzin#Song_Transcription
 		# TODO: limit 4:16 song with 1666 notes
@@ -169,6 +155,7 @@ class Shawzin_UI
 			n.remove
 		end
 		@delete_button.hide
+		@options.hide
 		@name.remove
 		@line_1.remove
 		@line_2.remove
@@ -176,9 +163,11 @@ class Shawzin_UI
 		@container.remove
 		if @y+@height > $scrolled_y and @y < $height-$scrolled_y
 			@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
-			@name = Text.new "Shawzin", x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+			@name = Text.new "Shawzin", x: 80, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 			@delete_button.y = @y+$scrolled_y
 			@delete_button.draw
+			@options.y = @y+$scrolled_y
+			@options.draw
 			@line_1 = Line.new x1: 50, y1: @y+80+$scrolled_y, x2: $width-50, y2: @y+80+$scrolled_y, width: 4, color: $colors["string"]
 			@line_2 = Line.new x1: 50, y1: @y+160+$scrolled_y, x2: $width-50, y2: @y+160+$scrolled_y, width: 4, color: $colors["string"]
 			@line_3 = Line.new x1: 50, y1: @y+240+$scrolled_y, x2: $width-50, y2: @y+240+$scrolled_y, width: 4, color: $colors["string"]
