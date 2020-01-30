@@ -184,6 +184,11 @@ class Popup_File
 	def initialize action
 		$alert = self
 		@action = action
+		if !File.exists? "saves"
+			$alert = nil
+			Popup_Info.new "There are no files in the saves folder."
+			return
+		end
 		@file_list = Dir.children("saves").filter{ |s| s[-4, 4] == ".txt" }
 		if @file_list.length == 0
 			$alert = nil

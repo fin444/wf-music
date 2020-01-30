@@ -136,11 +136,9 @@ class Lure_UI
 		data.slice! 0..1
 		# loop through data in sets of 5
 		data = data.split ""
-		puts data.length
 		data.length.times do |i|
 			if i%5 == 0 and !data[i+4].nil?
-				@noises.push Lure_Noise.new data[i-1, 3].join("").to_i*21+50, data[i+2, 2].join("").to_i*15+@y+30, @y
-				puts "#{@noises[-1].x}, #{@noises[-1].y}"
+				@noises.push Lure_Noise.new data[i, 3].join("").to_i*21+50, data[i+3, 2].join("").to_i*15+@y+30, @y
 			end
 		end
 		@noises.filter{ |n| n.x < $scrolled_x && n.x > $width+$scrolled_x }.each do |n|

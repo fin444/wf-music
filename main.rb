@@ -2,7 +2,6 @@
 # playing doesn't go as far as it should when scrolled to x
 # y scroll bar goes too far down
 # both scroll bars don't get sized right
-# echo lure loading doesn't work
 
 # FEATURES
 # click and drag scroll bar
@@ -252,6 +251,9 @@ def save
 	if $file_name == ""
 		$file_name = Popup_Ask.new "File Name", Proc.new{ |t| save_as t }
 	else
+		if !File.exists? "saves/"
+			Dir.mkdir "saves/"
+		end
 		File.open "saves/#{$file_name}", "w" do |file|
 			file.syswrite "d v:#{$file_version}\n" # save file version is 1
 			$containers.filter{ |c| c.class.name == "Shawzin_UI" or c.class.name == "Mandachord_UI" or c.class.name == "Lure_UI" }.each do |c|
