@@ -51,8 +51,8 @@ end
 class Scroll_Bar_X
 	def initialize
 		@container = Rectangle.new x: 0, y: $height-20, width: $width-20, height: 20, color: [0, 0, 0, 0]
-		@button_left = Scroll_Button.new 0, $height-20, "resources/images/left_scroll.png", Proc.new { $scroll_bar_x.scroll_left 21 }
-		@button_right = Scroll_Button.new $width-40, $height-20, "resources/images/right_scroll.png", Proc.new { $scroll_bar_x.scroll_right 21 }
+		@button_left = Scroll_Button.new 0, $height-20, "resources/images/scroll/left_scroll.png", Proc.new { $scroll_bar_x.scroll_left 21 }
+		@button_right = Scroll_Button.new $width-40, $height-20, "resources/images/scroll/right_scroll.png", Proc.new { $scroll_bar_x.scroll_right 21 }
 		@first_draw = true
 		$scroll_bar_x = self
 	end
@@ -113,8 +113,8 @@ end
 class Scroll_Bar_Y
 	def initialize
 		@container = Rectangle.new x: $width-20, y: 00, width: 20, height: $height-20, color: [0, 0, 0, 0]
-		@button_up = Scroll_Button.new $width-20, 0, "resources/images/up_scroll.png", Proc.new{ $scroll_bar_y.scroll_up 21 }
-		@button_down = Scroll_Button.new $width-20, $height-40, "resources/images/down_scroll.png", Proc.new{ $scroll_bar_y.scroll_down 21 }
+		@button_up = Scroll_Button.new $width-20, 0, "resources/images/scroll/up_scroll.png", Proc.new{ $scroll_bar_y.scroll_up 21 }
+		@button_down = Scroll_Button.new $width-20, $height-40, "resources/images/scroll/down_scroll.png", Proc.new{ $scroll_bar_y.scroll_down 21 }
 		@first_draw = true
 		$scroll_bar_y = self
 	end

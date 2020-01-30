@@ -235,17 +235,17 @@ class Shawzin_Note
 		if !@options[0] # draw either circle to show false
 			@drawn_sky = Circle.new x: @drawn.x-20, y: @drawn.y-35, radius: 4, color: @color
 		else # or mouse button to show true
-			@drawn_sky = Image.new "resources/images/left_arrow_button.png", x: @drawn.x-38, y: @drawn.y-47, width: 24, height: 24, color: @color
+			@drawn_sky = Image.new "resources/images/instruments/left_arrow_button.png", x: @drawn.x-38, y: @drawn.y-47, width: 24, height: 24, color: @color
 		end
 		if !@options[1]
 			@drawn_earth = Circle.new x: @drawn.x, y: @drawn.y-35, radius: 4, color: @color
 		else
-			@drawn_earth = Image.new "resources/images/down_arrow_button.png", x: @drawn.x-12, y: @drawn.y-47, width: 24, height: 24, color: @color
+			@drawn_earth = Image.new "resources/images/instruments/down_arrow_button.png", x: @drawn.x-12, y: @drawn.y-47, width: 24, height: 24, color: @color
 		end
 		if !@options[2]
 			@drawn_water = Circle.new x: @drawn.x+20, y: @drawn.y-35, radius: 4, color: @color
 		else
-			@drawn_water = Image.new "resources/images/right_arrow_button.png", x: @drawn.x+15, y: @drawn.y-47, width: 24, height: 24, color: @color
+			@drawn_water = Image.new "resources/images/instruments/right_arrow_button.png", x: @drawn.x+15, y: @drawn.y-47, width: 24, height: 24, color: @color
 		end
 	end
 	def remove

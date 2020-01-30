@@ -16,6 +16,7 @@
 # allow mandachord to not loop
 # manually increase x scroll size
 # lure live copy
+# only apply click if mouse_down over same container
 
 require "ruby2d"
 require "clipboard"
@@ -220,7 +221,7 @@ def play_all
 		end
 	end
 	if $playing_highest > 5
-		$containers[0].buttons[0].image_url = "resources/images/pause_icon.png"
+		$containers[0].buttons[0].image_url = "resources/images/top_bar/pause_icon.png"
 		$containers[0].buttons[0].draw
 		$playing = true
 		$playing_counter = 50
@@ -231,7 +232,7 @@ def play_all
 end
 def pause_all
 	$playing = false
-	$containers[0].buttons[0].image_url = "resources/images/play_icon.png"
+	$containers[0].buttons[0].image_url = "resources/images/top_bar/play_icon.png"
 	$containers[0].buttons[0].draw
 end
 

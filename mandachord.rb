@@ -13,7 +13,7 @@ class Mandachord_UI
 		@instrument_bass = $all_mandachord_instruments[0]
 		@instrument_melody = $all_mandachord_instruments[0]
 		@drawn = []
-		@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
+		@image = Image.new "resources/images/instruments/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
 		@line_1 = Line.new x1: 50+(336-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(336-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		@line_2 = Line.new x1: 50+(672-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(672-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		@line_3 = Line.new x1: 50+(1008-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1008-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
@@ -115,7 +115,7 @@ class Mandachord_UI
 		@line_3.remove
 		@line_4.remove
 		@line_5.remove
-		@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
+		@image = Image.new "resources/images/instruments/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
 		@line_1 = Line.new x1: 50+(335-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		@line_2 = Line.new x1: 50+(671-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		@line_3 = Line.new x1: 50+(1007-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
@@ -202,7 +202,7 @@ class Mandachord_UI
 			@name = Text.new "Mandachord", x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 			@delete_button.y = @y+$scrolled_y
 			@delete_button.draw
-			@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
+			@image = Image.new "resources/images/instruments/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
 			@line_1 = Line.new x1: 50+(335-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(335-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 			@line_2 = Line.new x1: 50+(671-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(671-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 			@line_3 = Line.new x1: 50+(1007-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1007-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5

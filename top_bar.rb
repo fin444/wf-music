@@ -5,14 +5,14 @@ class Top_UI
 		@y = 0
 		@container = Rectangle.new x: 0, y: @y+$scrolled_y, width: $width, height: @height, color: $colors["background"], z: 6
 		@buttons = []
-		@buttons.push Quad_Button.new "Play", 50, @y+10, "resources/images/play_icon.png", Proc.new{
+		@buttons.push Quad_Button.new "Play", 50, @y+10, "resources/images/top_bar/play_icon.png", Proc.new{
 			if $playing
 				pause_all
 			else
 				play_all
 			end
 		}
-		@buttons.push Quad_Button.new "Save", 140, @y+10, "resources/images/clear.png", Proc.new{ save }
+		@buttons.push Quad_Button.new "Save", 140, @y+10, "resources/images/top_bar/save.png", Proc.new{ save }
 		@buttons.push Quad_Button.new "Save As", 230, @y+10, "resources/images/clear.png", Proc.new{ save_as }
 		@buttons.push Quad_Button.new "New", 320, @y+10, "resources/images/clear.png", Proc.new{ new_file false }
 		@buttons.push Quad_Button.new "Open", 410, @y+10, "resources/images/clear.png", Proc.new{ open_file 1 }
@@ -23,9 +23,9 @@ class Top_UI
 		@editing = false
 		@note = nil
 		@editing_buttons = []
-		@editing_buttons.push Toggle_Quad_Button.new "Sky Fret", 50, @y+10, "resources/images/left_arrow.png", false
-		@editing_buttons.push Toggle_Quad_Button.new "Earth Fret", 140, @y+10, "resources/images/down_arrow.png", false
-		@editing_buttons.push Toggle_Quad_Button.new "Water Fret", 230, @y+10, "resources/images/right_arrow.png", false
+		@editing_buttons.push Toggle_Quad_Button.new "Sky Fret", 50, @y+10, "resources/images/top_bar/left_arrow.png", false
+		@editing_buttons.push Toggle_Quad_Button.new "Earth Fret", 140, @y+10, "resources/images/top_bar/down_arrow.png", false
+		@editing_buttons.push Toggle_Quad_Button.new "Water Fret", 230, @y+10, "resources/images/top_bar/right_arrow.png", false
 		@editing_buttons.push Quad_Button.new "Delete", 320, @y+10, "resources/images/clear.png", Proc.new{ } # Proc filled in later
 		@editing_buttons.push Quad_Button.new "Stop Editing", 410, @y+10, "resources/images/clear.png", Proc.new{ } # Proc filled in later
 		@editing_buttons.each do |b|
