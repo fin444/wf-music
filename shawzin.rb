@@ -65,7 +65,7 @@ class Shawzin_UI
 		h
 	end
 	def play x, change
-		@notes.select{|n| (x...change).contains? n.x }.each do |n|
+		@notes.select{|n| (x...change).include? n.x }.each do |n|
 			n.play @scale
 		end
 	end

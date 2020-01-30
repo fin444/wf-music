@@ -39,15 +39,15 @@ class Mandachord_UI
 			if event.x >= 49 and event.x <= $width-46 and event.y >= @y+$scrolled_y+30 and event.y <= @y+$scrolled_y+308
 				if event.y-$scrolled_y < @y+94
 					type = "percussion"
-					num = (event.y-$scrolled_y-30-@y)%21
+					num = (event.y-$scrolled_y-9-@y)/21
 					adjust_y = 0 # because there are 2 pixel thick barriers between types
 				elsif event.y-$scrolled_y < @y+200
 					type = "bass"
-					num = (event.y-$scrolled_y-94-@y)%21
+					num = (event.y-$scrolled_y-73-@y)/21
 					adjust_y = 1
 				else
 					type = "melody"
-					num = (event.y-$scrolled_y-200-@y)%21
+					num = (event.y-$scrolled_y-179-@y)/21
 					adjust_y = 2
 				end
 				@drawn.push Mandachord_Note.new type, (((event.x-49-$scrolled_x)/21.0).floor-2)*21+49, ((event.y-@y-$scrolled_y-30)/21.0).floor*21+@y+30+adjust_y, num

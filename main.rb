@@ -3,8 +3,6 @@
 # y scroll bar goes too far down
 # both scroll bars don't get sized right
 # echo lure loading doesn't work
-# mandachord numbers on play
-# double playing shawzin notes
 
 # FEATURES
 # click and drag scroll bar
