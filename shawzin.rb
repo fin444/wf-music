@@ -6,16 +6,14 @@ class Shawzin_UI
 		@height = 280
 		@y = $containers[-1].y+$containers[-1].container.height+5
 		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
-		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@name = Text.new "Shawzin", x: 80, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
-		@options = Gear_Button.new $width-100, @y+$scrolled_y, Proc.new{ Popup_Instrument_Options.new self }
+		@options = Gear_Button.new 55, @y+$scrolled_y, Proc.new{ Popup_Instrument_Options.new self }
 		@scale = $all_scales[0]
 		@line_1 = Line.new x1: 50, y1: @y+80+$scrolled_y, x2: $width-50, y2: @y+80+$scrolled_y, width: 4, color: $colors["string"]
 		@line_2 = Line.new x1: 50, y1: @y+160+$scrolled_y, x2: $width-50, y2: @y+160+$scrolled_y, width: 4, color: $colors["string"]
 		@line_3 = Line.new x1: 50, y1: @y+240+$scrolled_y, x2: $width-50, y2: @y+240+$scrolled_y, width: 4, color: $colors["string"]
 		@notes = []
-		@select_scale = Dropdown.new (60+get_text_width("Shawzin", 17)), @y+$scrolled_y, $all_scales, @scale, Proc.new{ |s| @scale = s }
-		@export = Text_Button.new "Copy Song Code", @select_scale.x+@select_scale.width+10, @y+$scrolled_y, 17, Proc.new{ Clipboard.copy export }
 		$scroll_list_x.push self
 		$scroll_list_y.push self
 		$containers.push self
@@ -36,15 +34,12 @@ class Shawzin_UI
 				end
 				change
 			else
-				@select_scale.click event
-				@export.click event
 				@delete_button.click event
 				@options.click event
 			end
 		end
 	end
 	def mouse_down event
-		@export.mouse_down event
 		@delete_button.mouse_down event
 		@options.mouse_down event
 	end
@@ -79,14 +74,12 @@ class Shawzin_UI
 		@notes.each do |n|
 			n.remove
 		end
-		@select_scale.remove
 		@delete_button.remove
 		@name.remove
 		@line_1.remove
 		@line_2.remove
 		@line_3.remove
 		@container.remove
-		@export.remove
 		$scroll_list_x.delete_at $scroll_list_x.find_index self
 		$scroll_list_y.delete_at $scroll_list_y.find_index self
 		$containers.delete_at $containers.find_index self
@@ -98,19 +91,14 @@ class Shawzin_UI
 		@name.remove
 		@delete_button.remove
 		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
-		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@name = Text.new "Shawzin", x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
 		@line_1.remove
 		@line_2.remove
 		@line_3.remove
-		@select_scale.remove
-		@export.remove
 		@line_1 = Line.new x1: 50, y1: @y+80+$scrolled_y, x2: $width-50, y2: @y+80+$scrolled_y, width: 4, color: $colors["string"]
 		@line_2 = Line.new x1: 50, y1: @y+160+$scrolled_y, x2: $width-50, y2: @y+160+$scrolled_y, width: 4, color: $colors["string"]
 		@line_3 = Line.new x1: 50, y1: @y+240+$scrolled_y, x2: $width-50, y2: @y+240+$scrolled_y, width: 4, color: $colors["string"]
-		@select_scale.y = @y+$scrolled_y
-		@select_scale.draw
-		@export = Text_Button.new "Copy Song Code", @select_scale.x+@select_scale.width+10, @y+$scrolled_y, 17, Proc.new{ Clipboard.copy export }
 		@notes.each do |n|
 			n.container_y = @y
 			n.draw
@@ -140,8 +128,6 @@ class Shawzin_UI
 		num_to_fret = {"0"=>[false, false, false], "1"=>[true, false, false], "2"=>[false, true, false], "3"=>[false, false, true], "4"=>[true, true, false], "5"=>[true, false, true], "6"=>[false, true, true], "7"=>[true, true, true]}
 		# set the scale and update the dropdown
 		@scale = $all_scales[data[0].to_i-1]
-		@select_scale.selected = @scale
-		@select_scale.draw
 		data.slice! 0
 		# loop through data in sets of three to create notes
 		curr_string = 1 # stores string for notes currently being created
@@ -182,8 +168,6 @@ class Shawzin_UI
 		@notes.each do |n|
 			n.remove
 		end
-		@select_scale.remove
-		@export.hide
 		@delete_button.hide
 		@name.remove
 		@line_1.remove
@@ -192,10 +176,7 @@ class Shawzin_UI
 		@container.remove
 		if @y+@height > $scrolled_y and @y < $height-$scrolled_y
 			@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
-			@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
-			@select_scale.y = @y+$scrolled_y
-			@select_scale.draw
-			@export = Text_Button.new "Copy Song Code", @select_scale.x+@select_scale.width+10, @y+$scrolled_y, 17, Proc.new{ Clipboard.copy export }
+			@name = Text.new "Shawzin", x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 			@delete_button.y = @y+$scrolled_y
 			@delete_button.draw
 			@line_1 = Line.new x1: 50, y1: @y+80+$scrolled_y, x2: $width-50, y2: @y+80+$scrolled_y, width: 4, color: $colors["string"]

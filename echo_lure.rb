@@ -6,11 +6,10 @@ class Lure_UI
 		@height = 220
 		@y = $containers[-1].y+$containers[-1].container.height+5
 		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
-		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@name = Text.new "Echo Lure", x: 80, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
-		@options = Gear_Button.new $width-100, @y+$scrolled_y, Proc.new{ Popup_Instrument_Options.new self }
+		@options = Gear_Button.new 55, @y+$scrolled_y, Proc.new{ Popup_Instrument_Options.new self }
 		@animal = $all_animals[0]
-		@select_animal = Dropdown.new (60+get_text_width("Echo Lure", 17)), @y+$scrolled_y, $all_animals, @animal, Proc.new{ |s| @animal = s }
 		@lines = []
 		@noises = []
 		13.times do |n|
@@ -28,7 +27,6 @@ class Lure_UI
 	end
 	def click event
 		if !$playing
-			@select_animal.click event
 			@delete_button.click event
 			@options.click event
 		end
@@ -44,14 +42,14 @@ class Lure_UI
 		end
 	end
 	def mouse_down event
-		if $open_dropdown != @select_animal && !$playing
+		if !$playing
 			new_noise event
 			@delete_button.mouse_down event
 			@options.mouse_down event
 		end
 	end
 	def mouse_move event
-		if $open_dropdown != @select_animal && !$playing
+		if !$playing
 			new_noise event
 		end
 	end
@@ -84,7 +82,6 @@ class Lure_UI
 		end
 	end
 	def remove
-		@select_animal.remove
 		@delete_button.remove
 		@name.remove
 		@lines.each do |l|
@@ -104,7 +101,7 @@ class Lure_UI
 		@name.remove
 		@delete_button.remove
 		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
-		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@name = Text.new "Echo Lure", x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
 		@lines.each do |l|
 			l.remove
@@ -124,8 +121,6 @@ class Lure_UI
 			n.container_y = @y
 			n.draw
 		end
-		@select_animal.y = @y+$scrolled_y
-		@select_animal.draw
 	end
 	def export
 		str = add_zeros($all_animals.find_index(@animal), 2).to_s
@@ -138,8 +133,6 @@ class Lure_UI
 	def import data
 		# set the animal and update dropdown
 		@animal = $all_animals[data[0, 2].to_i]
-		@select_animal.selected = @animal
-		@select_animal.draw
 		data.slice! 0..1
 		# loop through data in sets of 5
 		data = data.split ""
@@ -186,7 +179,6 @@ class Lure_UI
 		end
 	end
 	def scroll_y
-		@select_animal.remove
 		@delete_button.hide
 		@name.remove
 		@lines.each do |l|
@@ -196,9 +188,7 @@ class Lure_UI
 			n.remove
 		end
 		if @y+@height > $scrolled_y and @y < $height-$scrolled_y
-			@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
-			@select_animal.y = @y+$scrolled_y
-			@select_animal.draw
+			@name = Text.new "Echo Lure", x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 			@delete_button.y = @y+$scrolled_y
 			@delete_button.draw
 			# redraw lines

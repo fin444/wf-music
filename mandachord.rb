@@ -1,16 +1,16 @@
 $all_mandachord_instruments = ["Adau", "Alpha", "Beta", "Delta", "Gamma", "Epsilon", "Horos", "Druk", "Plogg"]
 
 class Mandachord_UI
-	attr_accessor :instrument_percussion, :instrument_base, :instrument_melody, :y, :container
+	attr_accessor :instrument_percussion, :instrument_bass, :instrument_melody, :y, :container
 	def initialize
 		@height = 315
 		@y = $containers[-1].y+$containers[-1].container.height+5
 		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
-		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@name = Text.new "Mandachord", x: 80, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
-		@options = Gear_Button.new $width-100, @y+$scrolled_y, Proc.new{ Popup_Instrument_Options.new self }
+		@options = Gear_Button.new 55, @y+$scrolled_y, Proc.new{ Popup_Instrument_Options.new self }
 		@instrument_percussion = $all_mandachord_instruments[0]
-		@instrument_base = $all_mandachord_instruments[0]
+		@instrument_bass = $all_mandachord_instruments[0]
 		@instrument_melody = $all_mandachord_instruments[0]
 		@drawn = []
 		@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
@@ -21,16 +21,12 @@ class Mandachord_UI
 		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
 			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		end
-		@select_instrument = Dropdown.new (60+get_text_width("Mandachord", 17)), @y+$scrolled_y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
-		@select_instrument.z = 4
-		@select_instrument.draw
 		$scroll_list_x.push self
 		$scroll_list_y.push self
 		$containers.push self
 	end
 	def click event
 		if !$playing
-			@select_instrument.click event
 			@delete_button.click event
 			@options.click event
 			@drawn.each do |n|
@@ -92,7 +88,6 @@ class Mandachord_UI
 			n.drawn.remove
 		end
 		@name.remove
-		@select_instrument.remove
 		@delete_button.remove
 		@container.remove
 		@image.remove
@@ -112,10 +107,8 @@ class Mandachord_UI
 		@name.remove
 		@delete_button.remove
 		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
-		@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+		@name = Text.new "Mandachord", x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
-		@select_instrument.remove
-		@select_instrument = Dropdown.new (60+get_text_width("Mandachord", 17)), @y, $all_mandachord_instruments, @instrument, Proc.new{ |s| @instrument = s }
 		@image.remove
 		@line_1.remove
 		@line_2.remove
@@ -147,8 +140,6 @@ class Mandachord_UI
 		letter_to_instrument = {"p"=>"percussion", "b"=>"bass", "m"=>"melody"}
 		# set the instrument and update dropdown
 		@instrument = $all_mandachord_instruments[data[0].to_i]
-		@select_instrument.selected = @instrument
-		@select_instrument.draw
 		data.slice! 0
 		# loop through data in sets of 4
 		curr_num = 0 # stores number for note being currently created
@@ -198,7 +189,6 @@ class Mandachord_UI
 			n.drawn.remove
 		end
 		@name.remove
-		@select_instrument.remove
 		@delete_button.hide
 		@container.remove
 		@image.remove
@@ -208,10 +198,8 @@ class Mandachord_UI
 		@line_4.remove
 		@line_5.remove
 		if @y+@height > $scrolled_y && @y < $height-$scrolled_y
-			@select_instrument.y = @y+$scrolled_y
-			@select_instrument.draw
 			@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
-			@name = Text.new @text, x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
+			@name = Text.new "Mandachord", x: 55, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 			@delete_button.y = @y+$scrolled_y
 			@delete_button.draw
 			@image = Image.new "resources/images/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4

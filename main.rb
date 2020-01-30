@@ -11,11 +11,11 @@
 # loop mandachord playing
 # show that shawzin has specifically 8 notes per second
 # note/time limits on mandachord/shawzin
-# settings pop up on instruments instead of ugly buttons/dropdowns
 # options
 # way to signify that can't add notes to instruments while playing
 # allow mandachord to not loop
 # manually increase x scroll size
+# lure live copy
 
 require "ruby2d"
 require "clipboard"

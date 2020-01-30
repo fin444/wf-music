@@ -116,6 +116,8 @@ class Dropdown
 		end
 		false # tell click handler that click wasn't on this element
 	end
+	def mouse_down event # avoid errors by defining
+	end
 	def close
 		@open = false
 		@height = 22
@@ -362,8 +364,8 @@ class Gear_Button
 	end
 	def draw
 		@hidden = false # using draw function unhides it, not drawing if hidden occurs in other scripts
-		@container = Rectangle.new x: @x, y: @y, width: 15, height: 15, color: [0, 0, 0, 0]
-		@image = Image.new "resources/images/gear.png", x: @x, y: @y, width: 15, height: 15, color: @color, z: @z
+		@container = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: [0, 0, 0, 0]
+		@image = Image.new "resources/images/gear.png", x: @x, y: @y, width: 20, height: 20, color: @color, z: @z
 	end
 	def click event
 		if @container.contains? event.x, event.y

@@ -265,35 +265,43 @@ class Popup_Instrument_Options
 		# draw
 		@background = Rectangle.new x: 0, y: 0, width: $width, height: $height, color: [0, 0, 0, 0.8], z: 10
 		@outline = Rectangle.new x: ($width/2)-201, y: ($height/2)-101, width: 402, height: 202, color: $colors["string"], z: 10
-		@outline = Rectangle.new x: ($width/2)-200, y: ($height/2)-100, width: 400, height: 200, color: $colors["background"], z: 10
-		@delete_button = Delete_Button.new ($width/2)+150, ($height/2)-100, self
-		@delete_button.z = 10
-		# put an export button here
+		@container = Rectangle.new x: ($width/2)-200, y: ($height/2)-100, width: 400, height: 200, color: $colors["background"], z: 10
+		@title = Text.new "Options for #{instrument.class.name.split("_")[0]}", x: ($width/2)-(get_text_width("Options for #{instrument.class.name.split("_")[0]}", 30)/2), y: ($height/2)-90, size: 30, color: $colors["string"], z: 10
+		@items = []
+		@items.push Text_Button.new "Okay", ($width/2)-(get_text_width("Okay", 20)/2), ($height/2)+70, 20, Proc.new{ $alert.remove }
 		case @instrument.class.name
 		when "Shawzin_UI"
-			@dropdown_1 = Dropdown.new ($width/2), ($height/2), $all_scales, @instrument.scale, Proc.new{ |s| @instrument.scale = s }
+			@items.push Dropdown.new ($width/2)-((get_text_width("Pentatonic Major", 17)+20)/2), ($height/2), $all_scales, @instrument.scale, Proc.new{ |s| @instrument.scale = s }
+			@items.push Text_Button.new "Copy Song Code", ($width/2)-((get_text_width("Pentatonic Major", 20)+20)/2), ($height/2)-30, 20, Proc.new{ Clipboard.copy @instrument.export }
 		when "Mandachord_UI"
-			@dropdown_1 = Dropdown.new ($width/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_percussion, Proc.new{ |i| @instrument.instrument_percussion = i }
-			@dropdown_2 = Dropdown.new ($width/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_bass, Proc.new{ |i| @instrument.instrument_bass = i }
-			@dropdown_3 = Dropdown.new ($width/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_melody, Proc.new{ |i| @instrument.instrument_melody = i }
-			@dropdown_2.z = 10
-			@dropdown_3.z = 10
+			@items.push Dropdown.new ($width/2)-((get_text_width("Gamma", 17)+20)*1.5), ($height/2), $all_mandachord_instruments, @instrument.instrument_percussion, Proc.new{ |i| @instrument.instrument_percussion = i }
+			@items.push Dropdown.new ($width/2)-((get_text_width("Gamma", 17)+20)/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_bass, Proc.new{ |i| @instrument.instrument_bass = i }
+			@items.push Dropdown.new ($width/2)+((get_text_width("Gamma", 17)+20)/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_melody, Proc.new{ |i| @instrument.instrument_melody = i }
 		when "Lure_UI"
-			@dropdown_1 = Dropdown.new ($width/2), ($height/2), $all_animals, @instrument.animal, Proc.new{ |a| @instrument.animal = a }
+			@items.push Dropdown.new ($width/2)-((get_text_width("Horrasque", 17)+20)/2), ($height/2), $all_animals, @instrument.animal, Proc.new{ |a| @instrument.animal = a }
 		end
-		@dropdown_1.z = 10
+		@items.each do |i|
+			i.z = 10
+		end
 	end
 	def click event
-		@delete_button.click event
-		@dropdown_1.click event
-		if @instrument.class.name == "Mandachord_UI"
-			@dropdown_2.click event
-			@dropdown_3.click event
+		@items.each do |i|
+			i.click event
 		end
 	end
 	def mouse_down event
-		@delete_button.mouse_down event
+		@items.each do |i|
+			i.mouse_down event
+		end
 	end
 	def remove
+		@background.remove
+		@outline.remove
+		@container.remove
+		@title.remove
+		@items.each do |i|
+			i.remove
+		end
+		$alert = nil
 	end
 end
