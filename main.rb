@@ -4,16 +4,16 @@
 # echo lure note connection doesnt work
 
 # FEATURES
+# options
 # click and drag scroll bar
 # loop mandachord playing
 # show that shawzin has specifically 8 notes per second
 # note/time limits on mandachord/shawzin
-# options
-# way to signify that can't add notes to instruments while playing
 # allow mandachord to not loop
 # manually increase x scroll size
 # lure live copy
 # only apply click if mouse_down over same container
+
 require "ruby2d"
 require "clipboard"
 require "os"
@@ -37,6 +37,7 @@ else
 end
 
 load "base_classes.rb"
+load "options.rb"
 load "scrolling.rb"
 load "top_bar.rb"
 load "shawzin.rb"
@@ -120,6 +121,9 @@ on :mouse_up do |event|
 		if dont.nil? and !$alert.nil?
 			$alert.click event
 			dont = true
+		elsif !$options_window.hidden
+			$options_window.click event
+			dont = true
 		end
 		if dont.nil?
 			if !$export_window.nil?
@@ -151,6 +155,9 @@ on :mouse_down do |event|
 		end
 		if dont.nil? and !$alert.nil?
 			$alert.mouse_down event
+			dont = true
+		elsif !$options_window.hidden
+			$options_window.mouse_down event
 			dont = true
 		end
 		if dont.nil?
