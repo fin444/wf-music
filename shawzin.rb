@@ -58,8 +58,8 @@ class Shawzin_UI
 	def get_last_sound
 		h = 0
 		@notes.each do |n|
-			if n.x+$scrolled_x > h
-				h = n.x+$scrolled_x
+			if n.x > h
+				h = n.x
 			end
 		end
 		h

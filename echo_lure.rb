@@ -70,8 +70,8 @@ class Lure_UI
 		connect_noises
 		h = 0
 		@noises.each do |n|
-			if n.x+10+$scrolled_x > h
-				h = n.x+10+$scrolled_x
+			if n.x+10 > h
+				h = n.x+10
 			end
 		end
 		h

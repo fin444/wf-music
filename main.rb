@@ -1,5 +1,4 @@
 # BUGS
-# playing doesn't go as far as it should when scrolled to x
 # y scroll bar goes too far down
 # both scroll bars don't get sized right
 # echo lure note connection doesnt work
@@ -15,7 +14,6 @@
 # manually increase x scroll size
 # lure live copy
 # only apply click if mouse_down over same container
-
 require "ruby2d"
 require "clipboard"
 require "os"
@@ -215,7 +213,7 @@ end
 # playing
 $playing = false
 $playing_bar = Line.new x1: 0, y1: 0, x2: 0, y2: 0, width: 0, color: [0, 0, 0, 0]
-$playing_counter = 50
+$playing_counter = 49
 
 def play_all
 	$playing_highest = 0
@@ -229,10 +227,10 @@ def play_all
 		$containers[0].buttons[0].image_url = "resources/images/top_bar/pause_icon.png"
 		$containers[0].buttons[0].draw
 		$playing = true
-		$playing_counter = 50
+		$playing_counter = 49
 		$playing_previous = 47
 		$playing_bar.remove
-		$playing_bar = Line.new x1: 50-$scrolled_x, y1: $containers[0].container.height, x2: 50-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
+		$playing_bar = Line.new x1: 49-$scrolled_x, y1: $containers[0].container.height, x2: 49-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
 	end
 end
 def pause_all

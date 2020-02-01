@@ -37,20 +37,24 @@ class Mandachord_UI
 				end
 			end
 			if event.x >= 49 and event.x <= $width-46 and event.y >= @y+$scrolled_y+30 and event.y <= @y+$scrolled_y+308
-				if event.y-$scrolled_y < @y+94
+				y = event.y-2
+				if y < @y+30
+					y = 30 # prevents putting notes too far down
+				end
+				if y-$scrolled_y < @y+93
 					type = "percussion"
-					num = (event.y-$scrolled_y-9-@y)/21
-					adjust_y = 0 # because there are 2 pixel thick barriers between types
-				elsif event.y-$scrolled_y < @y+200
+					num = (event.y-$scrolled_y-9-@y)/21 # identifier for which sound to play
+					adjust_y = 0 # because there are thicker barriers between types
+				elsif y-$scrolled_y < @y+198
 					type = "bass"
-					num = (event.y-$scrolled_y-73-@y)/21
-					adjust_y = 1
+					num = (y-$scrolled_y-73-@y)/21
+					adjust_y = 2
 				else
 					type = "melody"
-					num = (event.y-$scrolled_y-179-@y)/21
-					adjust_y = 2
+					num = (y-$scrolled_y-179-@y)/21
+					adjust_y = 3
 				end
-				@drawn.push Mandachord_Note.new type, (((event.x-49-$scrolled_x)/21.0).floor-2)*21+49+$scrolled_x, ((event.y-@y-$scrolled_y-30)/21.0).floor*21+@y+30+adjust_y, num
+				@drawn.push Mandachord_Note.new type, (((event.x-49-$scrolled_x)/21.0).floor-2)*21+49+$scrolled_x, ((y-@y-$scrolled_y-30)/21.0).floor*21+@y+30+adjust_y, num
 			end
 		end
 	end
@@ -61,8 +65,8 @@ class Mandachord_UI
 	def get_last_sound
 		h = 0
 		@drawn.each do |n|
-			if n.x+$scrolled_x > h
-				h = n.x+$scrolled_x
+			if n.x+42 > h
+				h = n.x+42
 			end
 		end
 		h
@@ -70,12 +74,13 @@ class Mandachord_UI
 	def play x, change
 		(change-x).times do |n|
 			if (x+n-49)%21 == 0
-				@drawn.select{ |i| i.x == (x+n)%1344 }.each do |i|
-					if i.type == "percussion"
+				@drawn.select{ |i| i.x-7 == x+n-49 }.each do |i|
+					case i.type
+					when "percussion"
 						i.play @instrument_percussion
-					elsif i.type == "bass"
+					when "bass"
 						i.play @instrument_bass
-					else
+					when "melody"
 						i.play @instrument_melody
 					end
 				end
