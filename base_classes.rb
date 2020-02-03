@@ -120,7 +120,7 @@ class Dropdown
 	end
 	def close
 		@open = false
-		@height = 22
+		@height = 19
 		draw
 		$open_dropdown = nil
 	end

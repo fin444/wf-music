@@ -39,7 +39,10 @@ class Mandachord_UI
 			if event.x >= 49 and event.x <= $width-46 and event.y >= @y+$scrolled_y+30 and event.y <= @y+$scrolled_y+308
 				y = event.y-2
 				if y < @y+30
-					y = 30 # prevents putting notes too far down
+					y = @y+30 # prevents putting notes too far down
+				end
+				if y > @y+302
+					y = @y+302 # prevents putting notes too far up
 				end
 				if y-$scrolled_y < @y+93
 					type = "percussion"
