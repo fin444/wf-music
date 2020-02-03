@@ -112,41 +112,41 @@ class Mandachord_UI
 		scroll_y
 	end
 	def export
-		str = $all_mandachord_instruments.find_index(@instrument).to_s
+		str = "#{$all_mandachord_instruments.find_index(@instrument_percussion).to_s}#{$all_mandachord_instruments.find_index(@instrument_bass).to_s}#{$all_mandachord_instruments.find_index(@instrument_melody).to_s}"
 		@drawn = @drawn.sort_by{ |n| n.x }
 		@drawn.each do |n|
-			str += "#{n.number}#{n.type[0]}#{add_zeros (n.x-50)/21, 2}"
+			str += "#{n.number}#{n.type[0]}#{add_zeros (n.x+14)/21, 2}"
 		end
 		str
 	end
 	def import data
 		letter_to_instrument = {"p"=>"percussion", "b"=>"bass", "m"=>"melody"}
 		# set the instrument and update dropdown
-		@instrument = $all_mandachord_instruments[data[0].to_i]
-		data.slice! 0
+		@instrument_percussion = $all_mandachord_instruments[data[0].to_i]
+		@instrument_bass = $all_mandachord_instruments[data[1].to_i]
+		@instrument_melody = $all_mandachord_instruments[data[2].to_i]
+		data.slice! 0..2
 		# loop through data in sets of 4
 		curr_num = 0 # stores number for note being currently created
 		curr_type = "percussion" # stores type for note being currently created
 		curr_x = 0  # stores x for note being currently created
 		data = data.split ""
 		data.length.times do |i|
-			d = data[i]
-			case i%4
-			when 0
-				curr_num = d.to_i
-			when 1
-				curr_type = letter_to_instrument[d]
+			if i%4 == 0
+				curr_y = data[i].to_i
+				curr_type = letter_to_instrument[data[i+1]]
 				if curr_type == "bass"
-					curr_num += 3
+					curr_y += 3
 				elsif curr_type == "melody"
-					curr_num += 8
+					curr_y += 8
 				end
-			when 2
-				curr_x = d.to_i*10
-			when 3
-				@drawn[curr_x+d.to_i][curr_num-1].selected = true
-				@drawn[curr_x+d.to_i][curr_num-1].draw
-				@drawn.push @drawn[curr_x+d.to_i][curr_num-1]
+				adjust_y = 0
+				if curr_type == "bass"
+					adjust_y = 1
+				elsif curr_type == "melody"
+					adjust_y = 2
+				end
+				@drawn.push Mandachord_Note.new curr_type, data[i+2, 2].join("").to_i*21-14, curr_y*21+10+adjust_y+@y, data[i]
 			end
 		end
 	end
