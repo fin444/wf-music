@@ -215,30 +215,25 @@ class Quad_Button
 		@hidden = false # using draw function unhides it, not drawing if hidden occurs in other scripts
 		# remove first
 		if !@first_draw
-			@button_1.remove
-			@button_2.remove
-			@inner_1.remove
-			@inner_2.remove
+			@outline.remove
+			@inner.remove
 			@button_text.remove
 			@image.remove
 		else
 			@first_draw = false
 		end
-		# need two to make a button because of bug in ruby2d where Quad doesn't display fully
-		@button_1 = Quad.new x1: @x, y1: @y+30, x2: @x+30, y2: @y, x3: @x+30, y3: @y+60, x4: @x+60, y4: @y+30, color: @color, z: @z
-		@button_2 = Triangle.new x1: @x+30, y1: @y, x2: @x+60, y2: @y+30, x3: @x+30, y3: @y+30, color: @color, z: @z
-		@inner_1 = Quad.new x1: @x+2, y1: @y+30, x2: @x+30, y2: @y+2, x3: @x+30, y3: @y+58, x4: @x+58, y4: @y+30, color: $colors["background"], z: @z
-		@inner_2 = Triangle.new x1: @x+30, y1: @y+2, x2: @x+58, y2: @y+30, x3: @x+20, y3: @y+40, color: $colors["background"], z: @z
+		@outline = Quad.new x1: @x, y1: @y+30, x2: @x+30, y2: @y, x3: @x+60, y3: @y+30, x4: @x+30, y4: @y+60, color: @color, z: @z
+		@inner = Quad.new x1: @x+2, y1: @y+30, x2: @x+30, y2: @y+2, x3: @x+58, y3: @y+30, x4: @x+30, y4: @y+58, color: $colors["background"], z: @z
 		@button_text = Text.new @text, x: @x+30-get_text_width(@text, 15)/2, y: @y+65, size: 15, color: $colors["note"], z: @z
 		@image = Image.new @image_url, x: @x+15, y: @y+15, width: 30, height: 30, color: @color, z: @z
 	end
 	def click event
-		if @button_1.contains? event.x, event.y or @button_2.contains? event.x, event.y
+		if @outline.contains? event.x, event.y
 			@action.call
 		end
 	end
 	def mouse_down event
-		if @button_1.contains? event.x, event.y or @button_2.contains? event.x, event.y
+		if @outline.contains? event.x, event.y
 			@color = $colors["button_selected"]
 			draw
 		end
@@ -248,19 +243,15 @@ class Quad_Button
 		draw
 	end
 	def remove
-		@button_1.remove
-		@button_2.remove
-		@inner_1.remove
-		@inner_2.remove
+		@outline.remove
+		@inner.remove
 		@button_text.remove
 		@image.remove
 		$all_buttons.delete_at $all_buttons.find_index self
 	end
 	def hide # hides the button without removing it
-		@button_1.remove
-		@button_2.remove
-		@inner_1.remove
-		@inner_2.remove
+		@outline.remove
+		@inner.remove
 		@button_text.remove
 		@image.remove
 		@hidden = true
