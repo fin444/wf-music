@@ -8,15 +8,14 @@ $scroll_list_x = [] # list of all elements scrollable by direction
 $scroll_list_y = []
 
 class Scroll_Button
-	attr_accessor :hidden
 	def initialize x, y, image, action
 		@x = x
 		@y = y
 		@image = image
 		@action = action
 		@color = $colors["button_deselected"]
-		@hidden = false # this is just to ignore errors with the mouse_up script
 		@first_draw = true
+		@mouse_downed = false # saves if the mouse went down over this object
 		@button_image = Image.new @image, x: @x, y: @y, width: 20, height: 20, color: $colors["background"], z: 8
 		draw
 		$all_buttons.push self
@@ -30,7 +29,7 @@ class Scroll_Button
 		@button = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: @color, z: 7
 	end
 	def click event
-		if @button.contains? event.x, event.y
+		if @button.contains? event.x, event.y and @mouse_downed
 			@color = $colors["button_deselected"]
 			draw
 			@action.call
@@ -38,11 +37,13 @@ class Scroll_Button
 	end
 	def mouse_down event
 		if @button.contains? event.x, event.y
+			@mouse_downed = true
 			@color = $colors["button_selected"]
 			draw
 		end
 	end
 	def mouse_up
+		@mouse_downed = false
 		@color = $colors["button_deselected"]
 		draw
 	end

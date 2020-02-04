@@ -3,12 +3,11 @@
 # echo lure note connection doesnt work
 
 # FEATURES
-# only apply click if mouse_down over same container
 # click and drag scroll bar
 # loop mandachord playing
+# allow mandachord to not loop
 # show that shawzin has specifically 8 notes per second
 # note/time limits on mandachord/shawzin
-# allow mandachord to not loop
 # manually increase x scroll size
 # lure live copy
 
@@ -104,13 +103,6 @@ end
 # inputs
 on :mouse_up do |event|
 	$mouse_down = false
-	if event.button == :left # remove mouse_down color state from all buttons
-		$all_buttons.each do |b|
-			if !b.hidden
-				b.mouse_up
-			end
-		end
-	end
 	case event.button
 	when :left
 		$scroll_bar_x.click event
@@ -137,6 +129,11 @@ on :mouse_up do |event|
 					end
 				end
 			end
+		end
+		$all_buttons.each do |b|
+			# if !b.hidden
+				b.mouse_up
+			# end
 		end
 	when :right
 		$containers.select{ |c| c.class.name == "Shawzin_UI" || c.class.name == "Lure_UI" }.each do |c|

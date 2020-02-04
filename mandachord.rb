@@ -21,6 +21,8 @@ class Mandachord_UI
 		if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
 			@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		end
+		@mouse_downed = false # saves if the mouse went down over this object
+		$all_buttons.push self # to handle @mouse_downed
 		$scroll_list_x.push self
 		$scroll_list_y.push self
 		$containers.push self
@@ -36,7 +38,7 @@ class Mandachord_UI
 					return
 				end
 			end
-			if event.x >= 49 and event.x <= $width-46 and event.y >= @y+$scrolled_y+30 and event.y <= @y+$scrolled_y+308
+			if event.x >= 49 and event.x <= $width-46 and event.y >= @y+$scrolled_y+30 and event.y <= @y+$scrolled_y+308 and @mouse_downed
 				y = event.y-2
 				if y < @y+30
 					y = @y+30 # prevents putting notes too far down
@@ -62,8 +64,14 @@ class Mandachord_UI
 		end
 	end
 	def mouse_down event
+		if event.x >= 49 and event.x <= $width-46 and event.y >= @y+$scrolled_y+30 and event.y <= @y+$scrolled_y+308
+			@mouse_downed = true
+		end
 		@delete_button.mouse_down event
 		@options.mouse_down event
+	end
+	def mouse_up
+		@mouse_downed = false
 	end
 	def get_last_sound
 		h = 0

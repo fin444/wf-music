@@ -14,13 +14,15 @@ class Shawzin_UI
 		@line_2 = Line.new x1: 50, y1: @y+160+$scrolled_y, x2: $width-50, y2: @y+160+$scrolled_y, width: 4, color: $colors["string"]
 		@line_3 = Line.new x1: 50, y1: @y+240+$scrolled_y, x2: $width-50, y2: @y+240+$scrolled_y, width: 4, color: $colors["string"]
 		@notes = []
+		@mouse_downed = false # saves if the mouse went down over this object
+		$all_buttons.push self # to handle @mouse_downed
 		$scroll_list_x.push self
 		$scroll_list_y.push self
 		$containers.push self
 	end
 	def click event
 		if !$playing
-			if event.y-$scrolled_y > @y+20
+			if event.y-$scrolled_y > @y+20 and @mouse_downed
 				if event.x < 50 || event.x > $width-50 # don't put outside the strings on left or right
 				elsif event.y-$scrolled_y <= @y+120 # if below halfway between string 1 and string 2
 					@notes.push Shawzin_Note.new 1, @y, event.x+$scrolled_x
@@ -40,8 +42,14 @@ class Shawzin_UI
 		end
 	end
 	def mouse_down event
+		if event.y-$scrolled_y > @y+20
+			@mouse_downed = true
+		end
 		@delete_button.mouse_down event
 		@options.mouse_down event
+	end
+	def mouse_up
+		@mouse_downed = false
 	end
 	def right_click event
 		@notes.each do |n|

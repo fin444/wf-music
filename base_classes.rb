@@ -49,6 +49,7 @@ class Dropdown
 		@height = 19 # to be changed when open/closed
 		@open = false
 		@first_draw = true
+		@mouse_downed = false # saves if the mouse went down over this object
 		h = ""
 		options.each do |o|
 			if o.length > h.length
@@ -91,7 +92,7 @@ class Dropdown
 		end
 	end
 	def click event
-		if @container.contains? event.x, event.y
+		if @container.contains? event.x, event.y and @mouse_downed
 			if @open
 				@options_containers.each do |c|
 					if c.contains? event.x, event.y
@@ -116,7 +117,13 @@ class Dropdown
 		end
 		false # tell click handler that click wasn't on this element
 	end
-	def mouse_down event # avoid errors by defining
+	def mouse_down event
+		if @container.contains? event.x, event.y
+			@mouse_downed = true
+		end
+	end
+	def mouse_up
+		@mouse_downed = false
 	end
 	def close
 		@open = false
@@ -143,15 +150,15 @@ class Dropdown
 	end
 end
 class Delete_Button
-	attr_accessor :x, :y, :hidden
+	attr_accessor :x, :y 
 	def initialize x, y, ui_element
 		@x = x
 		@y = y
 		@ui_element = ui_element
 		@z = 0 # can be manipulated by outside scripts if need be
-		@hidden = false
 		@color = $colors["button_deselected"]
 		@first_draw = true
+		@mouse_downed = false # saves if the mouse went down over this object
 		draw
 		$all_buttons.push self
 	end
@@ -164,20 +171,21 @@ class Delete_Button
 		end
 		@container = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: [0, 0, 0, 0]
 		@text = Text.new "x", x: @x, y: @y-15, size: 35, color: @color, z: @z
-		@hidden = false
 	end
 	def click event
-		if @container.contains? event.x, event.y
+		if @container.contains? event.x, event.y and @mouse_downed
 			@ui_element.remove
 		end
 	end
 	def mouse_down event
 		if @container.contains? event.x, event.y
+			@mouse_downed = true
 			@color = $colors["button_selected"]
 			draw
 		end
 	end
 	def mouse_up
+		@mouse_downed = false
 		@color = $colors["button_deselected"]
 		draw
 	end
@@ -189,7 +197,6 @@ class Delete_Button
 	def hide
 		@container.remove
 		@text.remove
-		@hidden = true
 	end
 	def z= z
 		@z = z
@@ -197,22 +204,23 @@ class Delete_Button
 	end
 end
 class Quad_Button
-	attr_accessor :image_url, :x, :y, :action, :hidden, :color
+	attr_accessor :image_url, :x, :y, :action, :color
 	def initialize text, x, y, image_url, action
 		@text = text
 		@x = x
 		@y = y
 		@image_url = image_url
 		@action = action
-		@hidden = false
 		@z = 0 # can be manipulated by outside scripts if need be
 		@color = $colors["button_deselected"]
 		@first_draw = true
+		@hidden = false # to define whether it's currently hidden so it doesn't draw on mouse_up
+		@mouse_downed = false # saves if the mouse went down over this object
 		draw
 		$all_buttons.push self
 	end
 	def draw
-		@hidden = false # using draw function unhides it, not drawing if hidden occurs in other scripts
+		@hidden = false
 		# remove first
 		if !@first_draw
 			@outline.remove
@@ -228,19 +236,23 @@ class Quad_Button
 		@image = Image.new @image_url, x: @x+15, y: @y+15, width: 30, height: 30, color: @color, z: @z
 	end
 	def click event
-		if @outline.contains? event.x, event.y
+		if @outline.contains? event.x, event.y and @mouse_downed
 			@action.call
 		end
 	end
 	def mouse_down event
 		if @outline.contains? event.x, event.y
+			@mouse_downed = true
 			@color = $colors["button_selected"]
 			draw
 		end
 	end
 	def mouse_up
+		@mouse_downed = false
 		@color = $colors["button_deselected"]
-		draw
+		if !@hidden
+			draw
+		end
 	end
 	def remove
 		@outline.remove
@@ -250,11 +262,11 @@ class Quad_Button
 		$all_buttons.delete_at $all_buttons.find_index self
 	end
 	def hide # hides the button without removing it
+		@hidden = true
 		@outline.remove
 		@inner.remove
 		@button_text.remove
 		@image.remove
-		@hidden = true
 	end
 	def z= z
 		@z = z
@@ -263,7 +275,7 @@ class Quad_Button
 end
 class Toggle_Quad_Button < Quad_Button # @action will be Boolean instead of Proc
 	def click event
-		if @button_1.contains? event.x, event.y or @button_2.contains? event.x, event.y
+		if (@outline.contains? event.x, event.y or @outline.contains? event.x, event.y) and @mouse_downed
 			@action = !@action
 			if @action
 				@color = $colors["button_selected"]
@@ -274,14 +286,17 @@ class Toggle_Quad_Button < Quad_Button # @action will be Boolean instead of Proc
 			@action # returns value of @action to be used
 		end
 	end
-	# not needed because color changes differently
 	def mouse_down event
+		if @outline.contains? event.x, event.y
+			@mouse_downed = true
+		end
 	end
 	def mouse_up
+		@mouse_downed = false
 	end
 end
 class Text_Button
-	attr_accessor :x, :y, :hidden, :width, :height
+	attr_accessor :x, :y, :width, :height
 	def initialize text, x, y, font_size, action
 		@text = text
 		@x = x
@@ -289,8 +304,8 @@ class Text_Button
 		@font_size = font_size
 		@action = action
 		@z = 0 # can be manipulated by outside scripts if need be
-		@hidden = false
 		@first_draw = true
+		@mouse_downed = false # saves if the mouse went down over this object
 		@color = $colors["button_deselected"]
 		@width = get_text_width(@text, @font_size)+10
 		@height = @font_size+3
@@ -298,7 +313,6 @@ class Text_Button
 		$all_buttons.push self
 	end
 	def draw
-		@hidden = false # using draw function unhides it, not drawing if hidden occurs in other scripts
 		# remove first
 		if !@first_draw
 			@button.remove
@@ -310,17 +324,19 @@ class Text_Button
 		@button_text = Text.new @text, x: @x+5, y: @y, size: @font_size, color: $colors["background"], z: @z
 	end
 	def click event
-		if @button.contains? event.x, event.y
+		if @button.contains? event.x, event.y and @mouse_downed
 			@action.call
 		end
 	end
 	def mouse_down event
 		if @button.contains? event.x, event.y
+			@mouse_downed = true
 			@color = $colors["button_selected"]
 			draw
 		end
 	end
 	def mouse_up
+		@mouse_downed = false
 		@color = $colors["button_deselected"]
 		draw
 	end
@@ -332,7 +348,6 @@ class Text_Button
 	def hide # hides the button without removing it
 		@button.remove
 		@button_text.remove
-		@hidden = true
 	end
 	def z= z
 		@z = z
@@ -340,20 +355,19 @@ class Text_Button
 	end
 end
 class Gear_Button
-	attr_accessor :hidden, :x, :y
+	attr_accessor :x, :y
 	def initialize x, y, action
 		@x = x
 		@y = y
 		@action = action
 		@z = 0 # can be manipulated by outside scripts if need be
 		@color = $colors["button_deselected"]
-		@hidden = false
 		@first_draw = true
+		@mouse_downed = false # saves if the mouse went down over this object
 		draw
 		$all_buttons.push self
 	end
 	def draw
-		@hidden = false # using draw function unhides it, not drawing if hidden occurs in other scripts
 		if !@first_draw
 			@container.remove
 			@image.remove
@@ -364,7 +378,7 @@ class Gear_Button
 		@image = Image.new "resources/images/gear.png", x: @x, y: @y, width: 20, height: 20, color: @color, z: @z
 	end
 	def click event
-		if @container.contains? event.x, event.y
+		if @container.contains? event.x, event.y and @mouse_downed
 			@color = $colors["button_deselected"]
 			@action.call
 			draw
@@ -372,11 +386,13 @@ class Gear_Button
 	end
 	def mouse_down event
 		if @container.contains? event.x, event.y
+			@mouse_downed = true
 			@color = $colors["button_selected"]
 			draw
 		end
 	end
 	def mouse_up
+		@mouse_downed = false
 		@color = $colors["button_deselected"]
 		draw
 	end
@@ -388,7 +404,6 @@ class Gear_Button
 	def hide
 		@container.remove
 		@image.remove
-		@hidden = true
 	end
 	def z= z
 		@z = z
@@ -404,8 +419,10 @@ class Key_Button
 		@action = action
 		@z = 0 # can be manipulated by outside scripts if need be
 		@first_draw = true
+		@mouse_downed = false # saves if the mouse went down over this object
 		@color = $colors["button_deselected"]
 		draw
+		$all_buttons.push self
 	end
 	def draw
 		if !@first_draw
@@ -420,7 +437,7 @@ class Key_Button
 		@text = Text.new @key.upcase, x: @x+9-(get_text_width(@key.upcase, 20)/2), y: @y-1, size: 20, color: @color, z: @z
 	end
 	def click event
-		if @outline.contains? event.x, event.y
+		if @outline.contains? event.x, event.y and @mouse_downed
 			if $active_key_button == self
 				$active_key_button = nil
 				@color = $colors["button_deselected"]
@@ -434,7 +451,13 @@ class Key_Button
 			end
 		end
 	end
-	def mouse_down event # just to avoid errors
+	def mouse_down event
+		if @outline.contains? event.x, event.y
+			@mouse_downed = true
+		end
+	end
+	def mouse_up
+		@mouse_downed = false
 	end
 	def key_down event
 		@key = event.key
