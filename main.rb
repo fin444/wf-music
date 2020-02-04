@@ -1,7 +1,5 @@
 # BUGS
 # Ruby2D::Error image cannot be created
-# y scroll bar goes too far down
-# both scroll bars don't get sized right
 # echo lure note connection doesnt work
 
 # FEATURES

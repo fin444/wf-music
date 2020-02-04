@@ -14,7 +14,7 @@ $ui_themes = {
 class Options_Window
 	attr_accessor :hidden
 	def initialize
-		@hidden = false
+		@hidden = true
 		if File.exist? "options.txt"
 			File.open "options.txt", "r" do |file|
 				file.read.split(/\n/).each do |r|
@@ -27,7 +27,6 @@ class Options_Window
 		$colors = $ui_themes[$options["ui_theme"]]
 		save_options # applies options
 		@first_draw = true
-		draw
 	end
 	def draw
 		@hidden = false

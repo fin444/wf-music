@@ -16,6 +16,7 @@ class Top_UI
 		@buttons.push Quad_Button.new "Save As", 230, @y+10, "resources/images/clear.png", Proc.new{ save_as }
 		@buttons.push Quad_Button.new "New", 320, @y+10, "resources/images/clear.png", Proc.new{ new_file false }
 		@buttons.push Quad_Button.new "Open", 410, @y+10, "resources/images/clear.png", Proc.new{ open_file 1 }
+		@buttons.push Quad_Button.new "Options", 500, @y+10, "resources/images/gear.png", Proc.new { $options_window.draw }
 		@buttons.each do |b|
 			b.z = 6
 		end
@@ -133,10 +134,14 @@ class Top_UI
 		@time_markers = []
 		@time_numbers = []
 		33.times do |i|
-			@time_markers.push Line.new x1: (i)*42+50-($scrolled_x%42), y1: @y+110, x2: (i)*42+50-($scrolled_x%42), y2: @y+120, width: 1, color: $colors["string"], z: 6
+			if !(i*42+50-($scrolled_x%42) < 50) # prevents from rendering too far to left
+				@time_markers.push Line.new x1: i*42+50-($scrolled_x%42), y1: @y+110, x2: i*42+50-($scrolled_x%42), y2: @y+120, width: 1, color: $colors["string"], z: 6
+			end
 		end
 		9.times do |i|
-			@time_numbers.push Text.new "#{(i+($scrolled_x/168))/60}:#{add_zeros (i+($scrolled_x/168))%60, 2}", x: (i)*168+50-(get_text_width("0:00", 12)/2)-($scrolled_x%168), y: @y+95, size: 12, color: $colors["string"], z: 6
+			if !(i*168+50-($scrolled_x%168) < 50) # prevents from rendering too far to left
+				@time_numbers.push Text.new "#{(i+($scrolled_x/168))/60}:#{add_zeros (i+($scrolled_x/168))%60, 2}", x: i*168+50-(get_text_width("0:00", 12)/2)-($scrolled_x%168), y: @y+95, size: 12, color: $colors["string"], z: 6
+			end
 		end
 	end
 end

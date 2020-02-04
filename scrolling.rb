@@ -62,7 +62,8 @@ class Scroll_Bar_X
 		else
 			@first_draw = false
 		end
-		@bar = Rectangle.new x: 20+$scrolled_x/(($full_size_x+$width)/($width)), y: $height-20, width: ($width-40)/(($full_size_x+$width)/$width), height: 20, color: $colors["button_deselected"], z: 6
+		w = ($width-40)*(($width*1.0)/($full_size_x+$width))
+		@bar = Rectangle.new x: ($width-40-($width/w))/(($width+$full_size_x+1.0)/($scrolled_x)), y: $height-20, width: w, height: 20, color: $colors["button_deselected"], z: 6
 	end
 	def click event
 		if @container.contains? event.x, event.y
@@ -124,7 +125,8 @@ class Scroll_Bar_Y
 		else
 			@first_draw = false
 		end
-		@bar = Rectangle.new x: $width-20, y: 20+(0-$scrolled_y)/(($full_size_y+$height)/($height)), width: 20, height: ($height-40)/(($full_size_y+$height)/$height), color: $colors["button_deselected"], z: 6
+		h = ($height-40)*(($height*1.0)/($full_size_y+$height))
+		@bar = Rectangle.new x: $width-20, y: ($height-40-($height/h))/(($height+$full_size_y+1.0)/(0-$scrolled_y)), width: 20, height: h, color: $colors["button_deselected"], z: 6
 	end
 	def click event
 		if @container.contains? event.x, event.y
@@ -157,7 +159,11 @@ class Scroll_Bar_Y
 		end
 	end
 	def determine
-		$full_size_y = $containers[-1].y+$containers[-1].container.height+30-120
+		if $containers[-1].y+$containers[-1].container.height < $height
+			$full_size_y = 0
+		else
+			$full_size_y = $containers[-1].y+$containers[-1].container.height-$height+20
+		end
 		draw
 	end
 end
