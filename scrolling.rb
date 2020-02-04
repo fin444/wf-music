@@ -40,7 +40,9 @@ class Scroll_Button
 			@mouse_downed = true
 			@color = $colors["button_selected"]
 			draw
+			return true # if the button was clicked
 		end
+		false
 	end
 	def mouse_up
 		@mouse_downed = false
@@ -55,6 +57,7 @@ class Scroll_Bar_X
 		@button_left = Scroll_Button.new 0, $height-20, "resources/images/scroll/left_scroll.png", Proc.new { $scroll_bar_x.scroll_left 21 }
 		@button_right = Scroll_Button.new $width-40, $height-20, "resources/images/scroll/right_scroll.png", Proc.new { $scroll_bar_x.scroll_right 21 }
 		@first_draw = true
+		@bar_selected = false
 		$scroll_bar_x = self
 	end
 	def draw
@@ -74,8 +77,22 @@ class Scroll_Bar_X
 	end
 	def mouse_down event
 		if @container.contains? event.x, event.y
-			@button_left.mouse_down event
-			@button_right.mouse_down event
+			if !@button_left.mouse_down event and !@button_right.mouse_down event
+				$future_scrolled_x = ((event.x/(($width*1.0)/($full_size_x+$width)))-($width/2)).round_to 21
+				if $future_scrolled_x > $full_size_x
+					$future_scrolled_x = $full_size_x
+				elsif $future_scrolled_x < 0
+					$future_scrolled_x = 0
+				end
+			end
+		end
+	end
+	def mouse_move event
+		$future_scrolled_x = ((event.x/(($width*1.0)/($full_size_x+$width)))-($width/2)).round_to 21
+		if $future_scrolled_x > $full_size_x
+			$future_scrolled_x = $full_size_x
+		elsif $future_scrolled_x < 0
+			$future_scrolled_x = 0
 		end
 	end
 	def scroll_left increment
@@ -104,10 +121,6 @@ class Scroll_Bar_X
 				h = a
 			end
 		end
-		if h >= 43008 && $full_size_x != 43008
-			h = 43008-$scrolled_x
-			Popup_Info.new "Shawzin songs are limited to 4:16 by Warframe."
-		end
 		$full_size_x = h+$scrolled_x
 		draw
 	end
@@ -118,6 +131,7 @@ class Scroll_Bar_Y
 		@button_up = Scroll_Button.new $width-20, 0, "resources/images/scroll/up_scroll.png", Proc.new{ $scroll_bar_y.scroll_up 21 }
 		@button_down = Scroll_Button.new $width-20, $height-40, "resources/images/scroll/down_scroll.png", Proc.new{ $scroll_bar_y.scroll_down 21 }
 		@first_draw = true
+		@bar_selected = false
 		$scroll_bar_y = self
 	end
 	def draw
@@ -131,8 +145,22 @@ class Scroll_Bar_Y
 	end
 	def click event
 		if @container.contains? event.x, event.y
-			@button_up.click event
-			@button_down.click event
+			if !@button_down.mouse_down event and !@button_up.mouse_down event
+				$future_scrolled_y = (0-((event.y/(($height*1.0)/($full_size_y+$height)))-($height/2))).round_to 21
+				if $future_scrolled_y > 0
+					$future_scrolled_y = 0
+				elsif $future_scrolled_y < 0-$full_size_y
+					$future_scrolled_y = 0-$full_size_y
+				end
+			end
+		end
+	end
+	def mouse_move event
+		$future_scrolled_y = (0-((event.y/(($height*1.0)/($full_size_y+$height)))-($height/2))).round_to 21
+		if $future_scrolled_y > 0
+			$future_scrolled_y = 0
+		elsif $future_scrolled_y < 0-$full_size_y
+			$future_scrolled_y = 0-$full_size_y
 		end
 	end
 	def mouse_down event

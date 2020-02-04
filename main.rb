@@ -3,7 +3,6 @@
 # echo lure note connection doesnt work
 
 # FEATURES
-# click and drag scroll bar
 # loop mandachord playing
 # allow mandachord to not loop
 # show that shawzin has specifically 8 notes per second
@@ -179,6 +178,8 @@ on :mouse_move do |event|
 		$containers.filter{ |c| c.class.name == "Lure_UI" }.each do |c|
 			c.mouse_move event
 		end
+		$scroll_bar_x.mouse_move event
+		$scroll_bar_y.mouse_move event
 	end
 end
 on :mouse_scroll do |event|
