@@ -1,14 +1,15 @@
 $options = {
-	"ui_theme"=>"vitruvian",
+	"ui_theme"=>"Vitruvian",
 	"sky_fret_key"=>"a",
 	"sky_fret_toggle"=>"false",
 	"earth_fret_key"=>"d",
 	"earth_fret_toggle"=>"false",
 	"water_fret_key"=>"s",
-	"water_fret_toggle"=>"false"
+	"water_fret_toggle"=>"false",
+	"developer_mode"=>"false"
 }
 $ui_themes = {
-	"vitruvian"=>{"background"=>"#14121D", "string"=>"#BBA664", "button_selected"=>"#F2E1AD", "button_deselected"=>"#BDA76C", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"}
+	"Vitruvian"=>{"background"=>"#14121D", "string"=>"#BBA664", "button_selected"=>"#F2E1AD", "button_deselected"=>"#BDA76C", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"}
 }
 
 class Options_Window
@@ -26,23 +27,9 @@ class Options_Window
 		end
 		$colors = $ui_themes[$options["ui_theme"]]
 		save_options # applies options
-		@first_draw = true
 	end
 	def draw
 		@hidden = false
-		if !@first_draw
-			@background.remove
-			@outline.remove
-			@container.remove
-			@text.each do |t|
-				e.remove
-			end
-			@elements.each do |e|
-				e.remove
-			end
-		else
-			@first_draw = false
-		end
 		@background = Rectangle.new x: 0, y: 0, width: $width, height: $height, color: [0, 0, 0, 0.8], z: 10
 		@outline = Rectangle.new x: 149, y: 49, width: $width-298, height: $height-98, color: $colors["string"], z: 10
 		@container = Rectangle.new x: 150, y: 50, width: $width-300, height: $height-100, color: $colors["background"], z: 10
@@ -58,9 +45,38 @@ class Options_Window
 			Popup_Info.new "Display settings will be applied after a program restart."
 		}
 		@text.push Text.new "Shawzin", x: 160, y: 180, size: 30, color: $colors["string"], z: 10
-		@text.push Text.new "Sky Fret", x: 160, y: 220, size: 20, color: $colors["string"], z: 10
-		@text.push Text.new "Earth Fret", x: 160, y: 245, size: 20, color: $colors["string"], z: 10
-		@text.push Text.new "Water Fret", x: 160, y: 270, size: 20, color: $colors["string"], z: 10
+		@text.push Text.new "Sky Fret", x: 160, y: 220, size: 25, color: $colors["string"], z: 10
+		@text.push Text.new "Key:", x: 160+get_text_width("Sky Fret  ", 25), y: 222, size: 20, color: $colors["string"], z: 10
+		@elements.push Key_Button.new 160+get_text_width("Sky Fret  ", 25)+get_text_width("Key:  ", 20), 223, $options["sky_fret_key"], Proc.new{ |k|
+			$options["sky_fret_key"] = k
+			save_options
+		}
+		@text.push Text.new "Earth Fret", x: 160, y: 250, size: 25, color: $colors["string"], z: 10
+		@text.push Text.new "Key:", x: 160+get_text_width("Earth Fret  ", 25), y: 252, size: 20, color: $colors["string"], z: 10
+		@elements.push Key_Button.new 160+get_text_width("Earth Fret  ", 25)+get_text_width("Key:  ", 20), 253, $options["earth_fret_key"], Proc.new{ |k|
+			$options["earth_fret_key"] = k
+			save_options
+		}
+		@text.push Text.new "Water Fret", x: 160, y: 280, size: 25, color: $colors["string"], z: 10
+		@text.push Text.new "Key:", x: 160+get_text_width("Water Fret  ", 25), y: 282, size: 20, color: $colors["string"], z: 10
+		@elements.push Key_Button.new 160+get_text_width("Water Fret  ", 25)+get_text_width("Key:  ", 20), 283, $options["water_fret_key"], Proc.new{ |k|
+			$options["water_fret_key"] = k
+			save_options
+		}
+		@text.push Text.new "Developer Mode:", x: 160, y: 400, size: 20, color: $colors["string"], z: 10
+		@elements.push Dropdown.new 160+get_text_width("Developer Mode: ", 20), 403, ["Enabled", "Disabled"], {"true"=>"Enabled", "false"=>"Disabled"}[$options["developer_mode"]], Proc.new{ |m|
+			$options["developer_mode"] = {"Enabled"=>"true", "Disabled"=>"false"}[m]
+			save_options
+			if $options["developer_mode"] == "false"
+				$stdout = File.new("log.txt", "w")
+				$stdout.sync = true
+				$stderr.reopen($stdout)
+			else
+				$stdout = $stdout_old
+				$stdout.sync = true
+				$stderr.reopen($stdout)
+			end
+		}
 		@elements.each do |e|
 			e.z = 10
 		end
@@ -95,5 +111,4 @@ class Options_Window
 		end
 	end
 end
-
 $options_window = Options_Window.new

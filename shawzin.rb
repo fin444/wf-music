@@ -182,13 +182,13 @@ class Shawzin_Note
 	attr_accessor :x, :container_y, :string, :options, :drawn, :color
 	def initialize string, container_y, x
 		@options = [false, false, false]
-		if $keys_down.include? "a"
+		if $keys_down.include? $options["sky_fret_key"]
 			@options[0] = true
 		end
-		if $keys_down.include? "s"
+		if $keys_down.include? $options["earth_fret_key"]
 			@options[1] = true
 		end
-		if $keys_down.include? "d"
+		if $keys_down.include? $options["water_fret_key"]
 			@options[2] = true
 		end
 		@string = string

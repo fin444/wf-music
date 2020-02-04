@@ -3,7 +3,7 @@
 # echo lure note connection doesnt work
 
 # FEATURES
-# options
+# only apply click if mouse_down over same container
 # click and drag scroll bar
 # loop mandachord playing
 # show that shawzin has specifically 8 notes per second
@@ -11,7 +11,6 @@
 # allow mandachord to not loop
 # manually increase x scroll size
 # lure live copy
-# only apply click if mouse_down over same container
 
 require "ruby2d"
 require "clipboard"
@@ -24,7 +23,7 @@ $keys_down = []
 $colors = {"background"=>"#14121D", "string"=>"#BBA664", "button_selected"=>"#F2E1AD", "button_deselected"=>"#BDA76C", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"}
 $all_buttons = []
 $file_name = ""
-$fps = Text.new get(:fps).round(2), x: 0, y: 0, size: 15, color: "white", z: 20
+$fps = Text.new "#{get(:fps).round(2)} FPS", x: 0, y: 0, size: 15, color: "white", z: 20
 
 $width = 1440
 $height = 900
@@ -59,9 +58,13 @@ update do
 	if $alert.respond_to? "blink" # blink the cursor
 		$alert.blink
 	end
-	if $time_counter == 60 # display fps and reset $time_counter
+	if $time_counter == 1 and $options["developer_mode"] == "false"
 		$fps.remove
-		$fps = Text.new get(:fps).round(2), x: 0, y: 0, size: 15, color: "white", z: 20
+	elsif $time_counter == 60
+		if $options["developer_mode"] == "true"
+			$fps.remove
+			$fps = Text.new "#{get(:fps).round(2)} FPS", x: 0, y: 0, size: 15, color: "white", z: 20
+		end
 		$time_counter = 0
 	end
 	if $playing # play the song
@@ -208,6 +211,8 @@ on :key_down do |event|
 		elsif $keys_down.any?{ |k| k == "o" } # cmd + o = open
 			open_file 1
 		end
+	elsif !$active_key_button.nil?
+		$active_key_button.key_down event
 	elsif $alert.respond_to? "key_down"
 		$alert.key_down event
 	end
@@ -348,6 +353,14 @@ def open_file a # a defines what phase of the process you are on
 		end
 		Add_UI.new
 	end
+end
+
+# save all console output to a log
+$stdout_old = $stdout
+if $options["developer_mode"] == "false"
+	$stdout = File.new("log.txt", "w")
+	$stdout.sync = true
+	$stderr.reopen($stdout)
 end
 
 show # show the window

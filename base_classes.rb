@@ -395,3 +395,64 @@ class Gear_Button
 		draw
 	end
 end
+class Key_Button
+	attr_accessor :z
+	def initialize x, y, key, action
+		@x = x
+		@y = y
+		@key = key
+		@action = action
+		@z = 0 # can be manipulated by outside scripts if need be
+		@first_draw = true
+		@color = $colors["button_deselected"]
+		draw
+	end
+	def draw
+		if !@first_draw
+			@outline.remove
+			@button.remove
+			@text.remove
+		else
+			@first_draw = false
+		end
+		@outline = Rectangle.new x: @x-1, y: @y-1, width: 22, height: 22, color: @color, z: @z
+		@button = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: $colors["background"], z: @z
+		@text = Text.new @key.upcase, x: @x+9-(get_text_width(@key.upcase, 20)/2), y: @y-1, size: 20, color: @color, z: @z
+	end
+	def click event
+		if @outline.contains? event.x, event.y
+			if $active_key_button == self
+				$active_key_button = nil
+				@color = $colors["button_deselected"]
+				draw
+			else
+				if $active_key_button.nil?
+					$active_key_button = self
+					@color = $colors["button_selected"]
+					draw
+				end
+			end
+		end
+	end
+	def mouse_down event # just to avoid errors
+	end
+	def key_down event
+		@key = event.key
+		$active_key_button = nil
+		@color = @color = $colors["button_deselected"]
+		@action.call @key
+		draw
+	end
+	def remove
+		if $active_key_button == self
+			$active_key_button = nil
+		end
+		@outline.remove
+		@button.remove
+		@text.remove
+	end
+	def z= z
+		@z = z
+		draw
+	end
+end
