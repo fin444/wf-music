@@ -23,6 +23,11 @@ class Shawzin_UI
 	def click event
 		if !$playing
 			if event.y-$scrolled_y > @y+20 and @mouse_downed
+				@notes.each do |n|
+					if n.drawn.contains? event.x, event.y
+						return
+					end
+				end
 				if event.x < 50 || event.x > $width-50 # don't put outside the strings on left or right
 				elsif event.y-$scrolled_y <= @y+120 # if below halfway between string 1 and string 2
 					@notes.push Shawzin_Note.new 1, @y, event.x+$scrolled_x
@@ -201,7 +206,7 @@ class Shawzin_Note
 		end
 		@string = string
 		@container_y = container_y
-		@x = (x/21.0).ceil*21
+		@x = (x-50).round_to(21)+50
 		@first_draw = true
 		@color = $colors["note"]
 		draw
@@ -220,7 +225,7 @@ class Shawzin_Note
 		puts "[#{Time.now.strftime("%I:%M:%S")}] #{url}"
 	end
 	def draw
-		if !@first_draw # removes all current, but if they don't exist yet then it doesn't
+		if !@first_draw
 			@drawn.remove
 			@drawn_sky.remove
 			@drawn_earth.remove

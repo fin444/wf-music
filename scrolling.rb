@@ -70,6 +70,7 @@ class Scroll_Bar_X
 		@bar = Rectangle.new x: ($width-40-($width/w))/(($width+$full_size_x+1.0)/($scrolled_x)), y: $height-20, width: w, height: 20, color: $colors["button_deselected"], z: 6
 	end
 	def click event
+		@bar_selected = false
 		if @container.contains? event.x, event.y
 			@button_left.click event
 			@button_right.click event
@@ -78,6 +79,7 @@ class Scroll_Bar_X
 	def mouse_down event
 		if @container.contains? event.x, event.y
 			if !@button_left.mouse_down event and !@button_right.mouse_down event
+				@bar_selected = true
 				$future_scrolled_x = ((event.x/(($width*1.0)/($full_size_x+$width)))-($width/2)).round_to 21
 				if $future_scrolled_x > $full_size_x
 					$future_scrolled_x = $full_size_x
@@ -88,11 +90,13 @@ class Scroll_Bar_X
 		end
 	end
 	def mouse_move event
-		$future_scrolled_x = ((event.x/(($width*1.0)/($full_size_x+$width)))-($width/2)).round_to 21
-		if $future_scrolled_x > $full_size_x
-			$future_scrolled_x = $full_size_x
-		elsif $future_scrolled_x < 0
-			$future_scrolled_x = 0
+		if @bar_selected
+			$future_scrolled_x = ((event.x/(($width*1.0)/($full_size_x+$width)))-($width/2)).round_to 21
+			if $future_scrolled_x > $full_size_x
+				$future_scrolled_x = $full_size_x
+			elsif $future_scrolled_x < 0
+				$future_scrolled_x = 0
+			end
 		end
 	end
 	def scroll_left increment
@@ -144,8 +148,16 @@ class Scroll_Bar_Y
 		@bar = Rectangle.new x: $width-20, y: ($height-40-($height/h))/(($height+$full_size_y+1.0)/(0-$scrolled_y)), width: 20, height: h, color: $colors["button_deselected"], z: 6
 	end
 	def click event
+		@bar_selected = false
+		if @container.contains? event.x, event.y
+			@button_up.click event
+			@button_down.click event
+		end
+	end
+	def mouse_down event
 		if @container.contains? event.x, event.y
 			if !@button_down.mouse_down event and !@button_up.mouse_down event
+				@bar_selected = true
 				$future_scrolled_y = (0-((event.y/(($height*1.0)/($full_size_y+$height)))-($height/2))).round_to 21
 				if $future_scrolled_y > 0
 					$future_scrolled_y = 0
@@ -156,17 +168,13 @@ class Scroll_Bar_Y
 		end
 	end
 	def mouse_move event
-		$future_scrolled_y = (0-((event.y/(($height*1.0)/($full_size_y+$height)))-($height/2))).round_to 21
-		if $future_scrolled_y > 0
-			$future_scrolled_y = 0
-		elsif $future_scrolled_y < 0-$full_size_y
-			$future_scrolled_y = 0-$full_size_y
-		end
-	end
-	def mouse_down event
-		if @container.contains? event.x, event.y
-			@button_up.mouse_down event
-			@button_down.mouse_down event
+		if @bar_selected
+			$future_scrolled_y = (0-((event.y/(($height*1.0)/($full_size_y+$height)))-($height/2))).round_to 21
+			if $future_scrolled_y > 0
+				$future_scrolled_y = 0
+			elsif $future_scrolled_y < 0-$full_size_y
+				$future_scrolled_y = 0-$full_size_y
+			end
 		end
 	end
 	def scroll_up increment

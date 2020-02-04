@@ -193,7 +193,9 @@ class Mandachord_UI
 		@line_2.remove
 		@line_3.remove
 		@line_4.remove
-		@line_5.remove
+		if !@line_5.nil?
+			@line_5.remove
+		end
 		if @y+@height > $scrolled_y && @y < $height-$scrolled_y
 			@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: $colors["background"]
 			@name = Text.new "Mandachord", x: 80, y: @y+$scrolled_y, size: 17, color: $colors["string"]

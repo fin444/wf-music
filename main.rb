@@ -6,6 +6,7 @@
 # loop mandachord playing
 # allow mandachord to not loop
 # show that shawzin has specifically 8 notes per second
+# nelumbo/corbu shawzin
 # note/time limits on mandachord/shawzin
 # manually increase x scroll size
 # lure live copy
