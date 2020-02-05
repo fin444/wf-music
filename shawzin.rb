@@ -1,7 +1,8 @@
 $all_scales = ["Pentatonic Minor", "Pentatonic Major", "Chromatic", "Hexatonic", "Major", "Minor", "Hirajoshi", "Phrygian", "Yo"]
+$all_shawzin_types = ["Normal", "Nelumbo", "Corba"]
 
 class Shawzin_UI
-	attr_accessor :notes, :scale, :y, :container
+	attr_accessor :notes, :scale, :type, :y, :container
 	def initialize
 		@height = 280
 		@y = $containers[-1].y+$containers[-1].container.height+5
@@ -10,6 +11,7 @@ class Shawzin_UI
 		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
 		@options = Gear_Button.new 55, @y+$scrolled_y, Proc.new{ Popup_Instrument_Options.new self }
 		@scale = $all_scales[0]
+		@type = $all_shawzin_types[0]
 		@line_1 = Line.new x1: 50, y1: @y+80+$scrolled_y, x2: $width-50, y2: @y+80+$scrolled_y, width: 4, color: $colors["string"]
 		@line_2 = Line.new x1: 50, y1: @y+160+$scrolled_y, x2: $width-50, y2: @y+160+$scrolled_y, width: 4, color: $colors["string"]
 		@line_3 = Line.new x1: 50, y1: @y+240+$scrolled_y, x2: $width-50, y2: @y+240+$scrolled_y, width: 4, color: $colors["string"]
@@ -79,7 +81,7 @@ class Shawzin_UI
 	end
 	def play x, change
 		@notes.select{|n| (x...change).include? n.x }.each do |n|
-			n.play @scale
+			n.play @scale, @type
 		end
 	end
 	def remove
@@ -211,8 +213,8 @@ class Shawzin_Note
 		@color = $colors["note"]
 		draw
 	end
-	def play scale # get url for the sound to play
-		url = "resources/sounds/shawzin/#{scale.downcase}/#{@string}"
+	def play scale, type # get url for the sound to play
+		url = "resources/sounds/shawzin/#{type.downcase}/#{scale.downcase}/#{@string}"
 		if @options[0]
 			url += "sky"
 		end

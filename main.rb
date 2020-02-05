@@ -6,12 +6,14 @@
 # loop mandachord playing
 # allow mandachord to not loop
 # show that shawzin has specifically 8 notes per second
-# nelumbo/corbu shawzin
 # note/time limits on mandachord/shawzin
 # manually increase x scroll size
 # lure live copy
+# the actual sounds
+# more color schemes
 
 require "ruby2d"
+require "ffi" # required by clipboard
 require "clipboard"
 require "os"
 require "rounding"
@@ -209,6 +211,9 @@ on :key_down do |event|
 			new_file false
 		elsif $keys_down.any?{ |k| k == "o" } # cmd + o = open
 			open_file 1
+		elsif $keys_down.any?{ |k| k == "v" } and $alert.respond_to? "paste" # cmd + v = paste
+			puts $keys_down
+			$alert.paste
 		end
 	elsif !$active_key_button.nil?
 		$active_key_button.key_down event

@@ -186,8 +186,10 @@ class Delete_Button
 	end
 	def mouse_up
 		@mouse_downed = false
-		@color = $colors["button_deselected"]
-		draw
+		if @color != $colors["button_deselected"]
+			@color = $colors["button_deselected"]
+			draw
+		end
 	end
 	def remove
 		@container.remove
@@ -249,7 +251,6 @@ class Quad_Button
 	end
 	def mouse_up
 		@mouse_downed = false
-		@color = $colors["button_deselected"]
 		if !@hidden
 			draw
 		end
@@ -337,8 +338,10 @@ class Text_Button
 	end
 	def mouse_up
 		@mouse_downed = false
-		@color = $colors["button_deselected"]
-		draw
+		if @color != $colors["button_deselected"]
+			@color = $colors["button_deselected"]
+			draw
+		end
 	end
 	def remove
 		@button.remove
@@ -393,8 +396,10 @@ class Gear_Button
 	end
 	def mouse_up
 		@mouse_downed = false
-		@color = $colors["button_deselected"]
-		draw
+		if @color != $colors["button_deselected"]
+			@color = $colors["button_deselected"]
+			draw
+		end
 	end
 	def remove
 		@container.remove

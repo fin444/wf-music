@@ -142,7 +142,7 @@ class Popup_Ask
 			@text = "#{@text[0, @position]} #{@text[@position..-1]}"
 			@position += 1
 		elsif event.key == "backspace" and @text.length > 0
-			@text = @text[0, @position-1] + @text[@position, @text.length-(@text.length-@position)]
+			@text ="#{@text[0, @position-1]}#{@text[@position, @text.length-(@text.length-@position)]}"
 			@position -= 1
 		elsif event.key == "return" # submit when enter pressed
 			$alert.remove
@@ -160,6 +160,13 @@ class Popup_Ask
 			@writing.remove
 			@writing = Text.new @text, x: ($width/2)-188, y: ($height/2)-12, size: 20, color: $colors["string"], z: 10
 		end
+	end
+	def paste
+		t = Clipboard.paste
+		@text += t
+		@position += t.length
+		@writing.remove
+		@writing = Text.new @text, x: ($width/2)-188, y: ($height/2)-12, size: 20, color: $colors["string"], z: 10
 	end
 	def blink # blinking cursor
 		@blinker.remove
@@ -276,8 +283,14 @@ class Popup_Instrument_Options
 		@items.push Text_Button.new "Okay", ($width/2)-(get_text_width("Okay", 20)/2), ($height/2)+70, 20, Proc.new{ $alert.remove }
 		case @instrument.class.name
 		when "Shawzin_UI"
-			@items.push Dropdown.new ($width/2)-((get_text_width("Pentatonic Major", 17)+20)/2), ($height/2), $all_scales, @instrument.scale, Proc.new{ |s| @instrument.scale = s }
-			@items.push Text_Button.new "Copy Song Code", ($width/2)-((get_text_width("Pentatonic Major", 20)+20)/2), ($height/2)-30, 20, Proc.new{ Clipboard.copy @instrument.export }
+			@items.push Text_Button.new "Copy Song Code", ($width/2)-((get_text_width("Pentatonic Major", 20)+20)), ($height/2)-30, 20, Proc.new{ Clipboard.copy @instrument.export }
+			@items.push Text_Button.new "Import Song Code", ($width/2), ($height/2)-30, 20, Proc.new{
+				$alert.remove
+				$alert = nil
+				Popup_Ask.new "Paste song code here:", Proc.new{ |c| @instrument.import c }
+			}
+			@items.push Dropdown.new ($width/2)-((get_text_width("Normal", 17)+get_text_width("Pentatonic Major", 17)+60)/2), ($height/2), $all_scales, @instrument.scale, Proc.new{ |s| @instrument.scale = s }
+			@items.push Dropdown.new ($width/2)+((get_text_width("Pentatonic Major", 17)-get_text_width("Normal", 17))/2), ($height/2), $all_shawzin_types, @instrument.type, Proc.new{ |t| @instrument.type = t }
 		when "Mandachord_UI"
 			@items.push Dropdown.new ($width/2)-((get_text_width("Gamma", 17)+20)*1.5), ($height/2), $all_mandachord_instruments, @instrument.instrument_percussion, Proc.new{ |i| @instrument.instrument_percussion = i }
 			@items.push Dropdown.new ($width/2)-((get_text_width("Gamma", 17)+20)/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_bass, Proc.new{ |i| @instrument.instrument_bass = i }
