@@ -11,7 +11,6 @@
 # lure live copy
 # the actual sounds
 # more color schemes
-# Popup_Ask text scrolling
 
 require "ruby2d"
 require "ffi" # required by clipboard
@@ -212,9 +211,8 @@ on :key_down do |event|
 			new_file false
 		elsif $keys_down.any?{ |k| k == "o" } # cmd + o = open
 			open_file 1
-		elsif $keys_down.any?{ |k| k == "v" } and $alert.respond_to? "paste" # cmd + v = paste
-			puts $keys_down
-			$alert.paste
+		elsif $keys_down.any?{ |k| k == "v" } and $alert.respond_to? "key_down" # cmd + v = paste
+			$alert.key_down Paste_Monkeypatch.new
 		end
 	elsif !$active_key_button.nil?
 		$active_key_button.key_down event

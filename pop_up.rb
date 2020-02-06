@@ -97,6 +97,12 @@ class Popup_Confirm
 		$alert = nil
 	end
 end
+class Paste_Monkeypatch # to get around the issue where you can't fake an event
+	attr_accessor :key
+	def initialize
+		@key = "paste"
+	end
+end
 class Popup_Ask
 	def initialize title, action
 		$alert = self
@@ -115,6 +121,8 @@ class Popup_Ask
 		}
 		@button.z = 10
 		@position = 0
+		@display_from = 0
+		@display_to = 0
 		@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
 	end
 	def click event
@@ -155,23 +163,37 @@ class Popup_Ask
 			@position = 0
 		elsif event.key == "down"
 			@position = @text.length
+		elsif event.key == "paste"
+			t = Clipboard.paste
+			@text += t
+			@position += t.length
 		end
-		if event.key != "return"
+		if event.key != "return" # preventes re-rendering after being removed
+			while get_text_width(@text[@display_from..@position], 20) > 380 do
+				@display_from += 1				
+			end
+			if @display_from != 0 and @position != @text.length and get_text_width(@text[@display_from..@position], 20) < 380
+				while get_text_width(@text[@display_from..@position], 20) < 380 and @display_from != 0
+					@display_from -= 1
+				end
+				if get_text_width(@text[@display_from..@position], 20) > 380
+					@display_from += 1
+				end
+			end
+			while get_text_width(@text[@display_from..@display_to], 20) < 380 and @display_to < @text.length-1
+				@display_to += 1
+			end
+			while get_text_width(@text[@display_from..@display_to], 20) > 380 and @display_to != 0
+				@display_to -= 1
+			end
 			@writing.remove
-			@writing = Text.new @text, x: ($width/2)-188, y: ($height/2)-12, size: 20, color: $colors["string"], z: 10
+			@writing = Text.new @text[@display_from..@display_to], x: ($width/2)-188, y: ($height/2)-12, size: 20, color: $colors["string"], z: 10
 		end
-	end
-	def paste
-		t = Clipboard.paste
-		@text += t
-		@position += t.length
-		@writing.remove
-		@writing = Text.new @text, x: ($width/2)-188, y: ($height/2)-12, size: 20, color: $colors["string"], z: 10
 	end
 	def blink # blinking cursor
 		@blinker.remove
 		if $time_counter >= 30
-			@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[0, @position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[0, @position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
+			@blinker = Line.new x1: ($width/2)-187+get_text_width(@text[@display_from...@position], 20), y1: ($height/2)-10, x2: ($width/2)-187+get_text_width(@text[@display_from...@position], 20), y2: ($height/2)+10, width: 2, color: $colors["string"], z: 10
 		end
 	end
 	def remove
