@@ -125,7 +125,11 @@ class Scroll_Bar_X
 				h = a
 			end
 		end
-		$full_size_x = h+$scrolled_x
+		$full_size_x = h
+		if $full_size_x > 41664
+			$full_size_x = 41664
+			Popup_Info.new "Warframe limits songs to 4:16."
+		end
 		draw
 	end
 end

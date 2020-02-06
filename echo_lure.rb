@@ -78,7 +78,7 @@ class Lure_UI
 	end
 	def play x, change
 		@noises.filter{ |n| n.x.between? x, change }.each do |n|
-			n.play @animal
+			n.play @animal # when actual noises are added, make it so that they flow based on @connected_noises
 		end
 	end
 	def remove
@@ -125,25 +125,15 @@ class Lure_UI
 	end
 	def connect_noises
 		@noises.sort_by! { |n| n.x }
-		@connected_noises = []
-		curr_start = 0 # have to define in higher scope
-		curr_length = 1 # have to define in higher scope
+		@connected_noises = [[]]
 		@noises.each do |n|
 			if @noises[0] == n
-				curr_start = ((n.x-50)/21)
-			elsif curr_start*21+curr_length*21 == n.x-50
-				curr_length += 1
+				@connected_noises[0].push n
+			elsif @connected_noises[-1][-1].x+21 == n.x
+				@connected_noises[-1].push n
 			else
-				@connected_noises.push [curr_start, curr_length]
-				curr_start = ((n.x-50)/21) # also sets up for next connection
-				curr_length = 1
+				@connected_noises.push [n]
 			end
-		end
-		if curr_start != -1
-			@connected_noises.push [curr_start, curr_length]
-		end
-		@connected_noises.each do |n|
-			# puts "#{n[0]}, #{n[1]}"
 		end
 	end
 	def scroll_x

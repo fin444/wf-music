@@ -1,16 +1,17 @@
 # BUGS
 # Ruby2D::Error image cannot be created
-# echo lure note connection doesnt work
+# scroll bar math is off when large $full_size_x
+# area to right where you can add notes on shawzin decreases as $full_size_x increases
 
 # FEATURES
 # loop mandachord playing
 # allow mandachord to not loop
 # show that shawzin has specifically 8 notes per second
-# note/time limits on mandachord/shawzin
 # manually increase x scroll size
 # lure live copy
 # the actual sounds
 # more color schemes
+# Popup_Ask text scrolling
 
 require "ruby2d"
 require "ffi" # required by clipboard

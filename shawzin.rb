@@ -25,13 +25,16 @@ class Shawzin_UI
 	def click event
 		if !$playing
 			if event.y-$scrolled_y > @y+20 and @mouse_downed
+				if @notes.length == 1666
+					Popup_Info.new "Due to Warframe's restrictions on shawzin songs, you can't put more than 1666 notes."
+					return
+				end
 				@notes.each do |n|
 					if n.drawn.contains? event.x, event.y
 						return
 					end
 				end
-				if event.x < 50 || event.x > $width-50 # don't put outside the strings on left or right
-				elsif event.y-$scrolled_y <= @y+120 # if below halfway between string 1 and string 2
+				if event.y-$scrolled_y <= @y+120 # if below halfway between string 1 and string 2
 					@notes.push Shawzin_Note.new 1, @y, event.x+$scrolled_x
 				elsif event.y-$scrolled_y <= @y+200 # if below halfway between string 2 and string 3
 					@notes.push Shawzin_Note.new 2, @y, event.x+$scrolled_x
@@ -106,7 +109,6 @@ class Shawzin_UI
 		scroll_y
 	end
 	def export # all data information is based off of https://warframe.fandom.com/wiki/Shawzin#Song_Transcription
-		# TODO: limit 4:16 song with 1666 notes
 		str = (($all_scales.find_index @scale)+1).to_s
 		note_chars = "BCDEFGHJKLMNOPRSTUVWXhijklmnZabcdefpqrstuvxyz012356789+/"
 		time_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"

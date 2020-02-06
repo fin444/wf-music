@@ -59,7 +59,11 @@ class Mandachord_UI
 					num = (y-$scrolled_y-179-@y)/21
 					adjust_y = 3
 				end
-				@drawn.push Mandachord_Note.new type, (((event.x-49-$scrolled_x)/21.0).floor-2)*21+49+$scrolled_x, ((y-@y-$scrolled_y-30)/21.0).floor*21+@y+30+adjust_y, num
+				if @drawn.filter{ |n| n.type == type and (n.x)/336 == (((event.x-49).floor_to(21)+7+$scrolled_x)/336)%4 }.length == 16
+					Popup_Info.new "Warframe limits mandachord songs to 16 notes per type per quadrant."
+					return
+				end
+				@drawn.push Mandachord_Note.new type, (event.x-49).floor_to(21)+7+$scrolled_x, (y-@y-$scrolled_y-30).floor_to(21)+@y+30+adjust_y, num
 			end
 		end
 	end
