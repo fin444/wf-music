@@ -251,6 +251,7 @@ class Quad_Button
 	end
 	def mouse_up
 		@mouse_downed = false
+		@color = $colors["button_deselected"]
 		if !@hidden
 			draw
 		end

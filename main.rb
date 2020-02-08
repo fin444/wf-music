@@ -4,13 +4,12 @@
 # area to right where you can add notes on shawzin decreases as $full_size_x increases
 
 # FEATURES
+# make quad icons be the key binds? (like in game)
 # loop mandachord playing
 # allow mandachord to not loop
 # show that shawzin has specifically 8 notes per second
-# manually increase x scroll size
 # lure live copy
 # the actual sounds
-# more color schemes
 
 require "ruby2d"
 require "ffi" # required by clipboard
@@ -21,14 +20,13 @@ require "rounding"
 $containers = []
 $saved = true
 $keys_down = []
-$colors = {"background"=>"#14121D", "string"=>"#BBA664", "button_selected"=>"#F2E1AD", "button_deselected"=>"#BDA76C", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"}
 $all_buttons = []
 $file_name = ""
 $fps = Text.new "#{get(:fps).round(2)} FPS", x: 0, y: 0, size: 15, color: "white", z: 20
 
 $width = 1440
 $height = 900
-set background: $colors["background"], width: $width, height: $height
+set width: $width, height: $height
 if OS.windows?
 	set borderless: true
 else
@@ -47,6 +45,8 @@ load "pop_up.rb"
 
 $scroll_bar_x.determine
 $scroll_bar_y.determine
+
+set background: $colors["background"]
 
 # blockers to cover up things in scrolling
 Rectangle.new x: 0, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
@@ -133,9 +133,7 @@ on :mouse_up do |event|
 			end
 		end
 		$all_buttons.each do |b|
-			# if !b.hidden
-				b.mouse_up
-			# end
+			b.mouse_up
 		end
 	when :right
 		$containers.select{ |c| c.class.name == "Shawzin_UI" || c.class.name == "Lure_UI" }.each do |c|

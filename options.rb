@@ -9,7 +9,17 @@ $options = {
 	"developer_mode"=>"false"
 }
 $ui_themes = {
-	"Vitruvian"=>{"background"=>"#14121D", "string"=>"#BBA664", "button_selected"=>"#F2E1AD", "button_deselected"=>"#BDA76C", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"}
+	"Vitruvian"=>{"background"=>"#14121D", "string"=>"#BBA664", "button_selected"=>"#F2E1AD", "button_deselected"=>"#BDA76C", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"},
+	"Baruuk"=>{"background"=>"#24231E", "string"=>"#EEC367", "button_selected"=>"#E5D9B1", "button_deselected"=>"#CFA35C", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"},
+	"Corpus"=>{"background"=>"#040C17", "string"=>"#20C9F4", "button_selected"=>"#81E0F6", "button_deselected"=>"#2C709D", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"},
+	"Dark Lotus"=>{"background"=>"#4F157C", "string"=>"#8D778E", "button_selected"=>"#CDA8F5", "button_deselected"=>"#765B7A", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"},
+	"Fortuna"=>{"background"=>"#1B0D24", "string"=>"#3E67BF", "button_selected"=>"#E684DB", "button_deselected"=>"#2957A5", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"},
+	"Grineer"=>{"background"=>"#0A2711", "string"=>"#FFBE64", "button_selected"=>"#ECE5AE", "button_deselected"=>"#CA9851", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"},
+	"Lotus"=>{"background"=>"#3A3259", "string"=>"#25B7F0", "button_selected"=>"#FAEEE0", "button_deselected"=>"#32A4DA", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"},
+	"Nidus"=>{"background"=>"#D5D3BE", "string"=>"#8F265F", "button_selected"=>"#E54E5F", "button_deselected"=>"#9A4B78", "note"=>"#AE6C70", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"},
+	"Orokin"=>{"background"=>"#C2C7CB", "string"=>"#13291D", "button_selected"=>"#AF8112", "button_deselected"=>"#3D4E44", "note"=>"#A08C43", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"},
+	"Stalker"=>{"background"=>"#360E0E", "string"=>"#9A1E20", "button_selected"=>"#FA423A", "button_deselected"=>"#841C19", "note"=>"#EEEEEE", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"},
+	"Tenno"=>{"background"=>"#CDDDDD", "string"=>"#09506E", "button_selected"=>"#1A664C", "button_deselected"=>"#2D6D89", "note"=>"#78AF9C", "percussion"=>"#5A5A5A", "bass"=>"#2B5B72", "melody"=>"#6A306F"},
 }
 
 class Options_Window
