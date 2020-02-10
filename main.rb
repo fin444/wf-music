@@ -9,7 +9,13 @@
 # allow mandachord to not loop
 # show that shawzin has specifically 8 notes per second
 # lure live copy
-# the actual sounds
+# revamp options menu
+
+# SOUNDS NEEDED
+# nelumbo shawzin
+# corbu shawzin
+# mandachord instruments
+# echo lure
 
 require "ruby2d"
 require "ffi" # required by clipboard

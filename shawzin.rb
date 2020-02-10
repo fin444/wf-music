@@ -226,7 +226,9 @@ class Shawzin_Note
 		if @options[2]
 			url += "water"
 		end
+		url += ".mp3"
 		puts "[#{Time.now.strftime("%I:%M:%S")}] #{url}"
+		Sound.new(url).play
 	end
 	def draw
 		if !@first_draw

@@ -200,7 +200,9 @@ class Lure_Noise
 		@drawn = Rectangle.new x: @x-$scrolled_x, y: @y+$scrolled_y, width: 21, height: 10, color: $lure_noise_colors[(@y-@container_y).to_s]
 	end
 	def play animal
-		puts "[#{Time.now.strftime("%I:%M:%S")}] resources/sounds/echo_lure/#{(@y-@container_y)/15}#{animal.downcase}"
+		url = "resources/sounds/echo_lure/#{(@y-@container_y)/15}#{animal.downcase}"
+		puts "[#{Time.now.strftime("%I:%M:%S")}] #{url}"
+		# Sound.new(url).play
 	end
 	def remove
 		@drawn.remove
