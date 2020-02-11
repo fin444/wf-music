@@ -2,13 +2,14 @@
 # Ruby2D::Error image cannot be created
 # scroll bar math is off when large $full_size_x
 # area to right where you can add notes on shawzin decreases as $full_size_x increases
+# minor/1.mp3 sounds a bit off
 
 # FEATURES
 # make quad icons be the key binds? (like in game)
 # loop mandachord playing
 # allow mandachord to not loop
+# mandachord export
 # show that shawzin has specifically 8 notes per second
-# lure live copy
 # revamp options menu
 
 # SOUNDS NEEDED
@@ -38,6 +39,7 @@ if OS.windows?
 else
 	set fullscreen: true
 end
+
 
 load "base_classes.rb"
 load "options.rb"
@@ -85,6 +87,9 @@ update do
 		if $playing_counter > $playing_highest
 			pause_all
 		end
+	end
+	if $alert.respond_to? "refresh"
+		$alert.refresh
 	end
 	if $time_counter%6 == 0 # scroll every 1/10 of a second
 		if $scrolled_x != $future_scrolled_x

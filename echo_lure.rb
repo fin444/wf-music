@@ -1,7 +1,7 @@
 $all_animals = ["Pobbers", "Virmink", "Sawgaw", "Bolarola", "Horrasque", "Stover", "Kubrodon", "Kuaka", "Condroc", "Mergoo", "Vasca"]
 
 class Lure_UI
-	attr_accessor :animal, :y, :container
+	attr_accessor :animal, :y, :container, :noises
 	def initialize
 		@height = 220
 		@y = $containers[-1].y+$containers[-1].container.height+5
@@ -14,10 +14,10 @@ class Lure_UI
 		@noises = []
 		13.times do |n|
 			if n == 3 || n == 9
-				@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 2, color: $colors["note"]
+				@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 2, color: "white"
 				@lines[n].opacity = 0.4
 			else
-				@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 1, color: $colors["note"]
+				@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 1, color: "white"
 				@lines[n].opacity = 0.3
 			end
 		end
@@ -37,6 +37,7 @@ class Lure_UI
 				if n.drawn.contains? event.x, event.y
 					n.remove
 					@noises.delete_at @noises.find_index n
+					connect_noises
 				end
 			end
 		end
@@ -166,10 +167,10 @@ class Lure_UI
 			@lines = []
 			13.times do |n|
 				if n == 3 || n == 9
-					@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 2, color: $colors["note"]
+					@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 2, color: "white"
 					@lines[n].opacity = 0.4
 				else
-					@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 1, color: $colors["note"]
+					@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 1, color: "white"
 					@lines[n].opacity = 0.3
 				end
 			end
@@ -202,9 +203,82 @@ class Lure_Noise
 	def play animal
 		url = "resources/sounds/echo_lure/#{(@y-@container_y)/15}#{animal.downcase}"
 		puts "[#{Time.now.strftime("%I:%M:%S")}] #{url}"
-		# Sound.new(url).play
+		# @sound = Sound.new(url)
+		# @sound.play
 	end
 	def remove
 		@drawn.remove
+	end
+end
+
+class Lure_Copy
+	def initialize noises
+		$alert = self
+		@noises = noises
+		@drawn = []
+		@lines = []
+		@playing = false
+		@scrolled = -1344 # how far the noises are scrolled
+		@background = Rectangle.new x: 0, y: 0, width: $width, height: $height, color: [0, 0, 0, 0.8], z: 10
+		@outline = Rectangle.new x: 49, y: ($height/2)-111, width: $width-98, height: 222, color: $colors["string"], z: 10
+		@container = Rectangle.new x: 50, y: ($height/2)-110, width: $width-100, height: 220, color: $colors["background"], z: 10
+		@delete_button = Delete_Button.new $width-70, ($height/2)-100, self
+		@delete_button.z = 10
+		@start_button = Text_Button.new "Start", ($width/2)-(get_text_width("Start", 25)/2), ($height/2)-10, 25, Proc.new{ start }
+		@start_button.z = 10
+	end
+	def click event
+		@delete_button.click event
+		if !@playing
+			@start_button.click event
+		end
+	end
+	def mouse_down event
+		@delete_button.mouse_down event
+		if !@playing
+			@start_button.mouse_down event
+		end
+	end
+	def start
+		@playing = true
+		@start_button.remove
+		13.times do |n|
+			if n == 3 || n == 9
+				@lines.push Line.new x1: 50, y1: ($height/2)-110+30+n*15, x2: $width-50, y2: ($height/2)-110+30+n*15, width: 2, color: "white", z: 10
+				@lines[n].opacity = 0.4
+			else
+				@lines.push Line.new x1: 50, y1: ($height/2)-110+30+n*15, x2: $width-50, y2: ($height/2)-110+30+n*15, width: 1, color: "white", z: 10
+				@lines[n].opacity = 0.3
+			end
+		end
+		@lines.push Line.new x1: 60, y1: ($height/2)-110, x2: 60, y2: ($height/2)+110, color: "white", z: 10
+		@lines.push Line.new x1: 81, y1: ($height/2)-110, x2: 81, y2: ($height/2)+110, color: "white", z: 10
+	end
+	def refresh
+		if @playing
+			@scrolled += (1340.0/480.0).round 3
+			@drawn.each do |d|
+				d.remove
+			end
+			@drawn = []
+			@noises.filter{ |n| n.x+21-@scrolled > 50 and n.x-@scrolled < $width-50 }.each do |n|
+				@drawn.push Rectangle.new x: n.x-@scrolled, y: n.y+($height/2)-110-n.container_y, width: 21, height: 10, color: n.drawn.color, z: 10
+			end
+		end
+	end
+	def remove
+		@background.remove
+		@outline.remove
+		@container.remove
+		@delete_button.remove
+		if !@playing
+			@start_button.remove
+		end
+		@lines.each do |l|
+			l.remove
+		end
+		@drawn.each do |d|
+			d.remove
+		end
 	end
 end

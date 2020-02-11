@@ -235,7 +235,8 @@ class Mandachord_Note
 	def play instrument
 		url = "resources/sounds/mandachord/#{instrument.downcase}/#{@number}#{@type}.mp3"
 		puts "[#{Time.now.strftime("%I:%M:%S")}] #{url}"
-		# Sound.new(url).play
+		# @sound = Sound.new(url)
+		# @sound.play
 	end
 	def draw
 		if !@first_draw # removes all current, but if they don't exist yet then it doesn't

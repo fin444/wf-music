@@ -83,7 +83,7 @@ class Shawzin_UI
 		h
 	end
 	def play x, change
-		@notes.select{|n| (x...change).include? n.x }.each do |n|
+		@notes.select{ |n| (x...change).include? n.x }.each do |n|
 			n.play @scale, @type
 		end
 	end
@@ -126,6 +126,10 @@ class Shawzin_UI
 		str
 	end
 	def import data
+		@notes.each do |n|
+			n.remove
+		end
+		@notes = []
 		note_chars = "BCDEFGHJKLMNOPRSTUVWXhijklmnZabcdefpqrstuvxyz012356789+/"
 		time_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 		num_to_fret = {"0"=>[false, false, false], "1"=>[true, false, false], "2"=>[false, true, false], "3"=>[false, false, true], "4"=>[true, true, false], "5"=>[true, false, true], "6"=>[false, true, true], "7"=>[true, true, true]}
@@ -228,7 +232,8 @@ class Shawzin_Note
 		end
 		url += ".mp3"
 		puts "[#{Time.now.strftime("%I:%M:%S")}] #{url}"
-		Sound.new(url).play
+		@sound = Sound.new(url)
+		@sound.play
 	end
 	def draw
 		if !@first_draw

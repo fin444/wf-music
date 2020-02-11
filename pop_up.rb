@@ -309,7 +309,10 @@ class Popup_Instrument_Options
 			@items.push Text_Button.new "Import Song Code", ($width/2), ($height/2)-30, 20, Proc.new{
 				$alert.remove
 				$alert = nil
-				Popup_Ask.new "Paste song code here:", Proc.new{ |c| @instrument.import c }
+				Popup_Ask.new "Paste song code here:", Proc.new{ |c|
+					@instrument.import c
+					$scroll_bar_x.determine
+				}
 			}
 			@items.push Dropdown.new ($width/2)-((get_text_width("Normal", 17)+get_text_width("Pentatonic Major", 17)+60)/2), ($height/2), $all_scales, @instrument.scale, Proc.new{ |s| @instrument.scale = s }
 			@items.push Dropdown.new ($width/2)+((get_text_width("Pentatonic Major", 17)-get_text_width("Normal", 17))/2), ($height/2), $all_shawzin_types, @instrument.type, Proc.new{ |t| @instrument.type = t }
@@ -320,6 +323,14 @@ class Popup_Instrument_Options
 		when "Lure_UI"
 			@title.remove
 			@title = Text.new "Options for Echo Lure", x: ($width/2)-(get_text_width("Options for Echo Lure", 30)/2), y: ($height/2)-90, size: 30, color: $colors["string"], z: 10
+			@items.push Text_Button.new "Live Copy", ($width/2)-(get_text_width("Live Copy", 20)/2)-10, ($height/2)-30, 20, Proc.new{
+				$alert.remove
+				if @instrument.noises.length > 0
+					Lure_Copy.new @instrument.noises
+				else
+					Popup_Info.new "Live Copy only works if there are noises in the echo lure."
+				end
+			}
 			@items.push Dropdown.new ($width/2)-((get_text_width("Horrasque", 17)+20)/2), ($height/2), $all_animals, @instrument.animal, Proc.new{ |a| @instrument.animal = a }
 		end
 		@items.each do |i|
