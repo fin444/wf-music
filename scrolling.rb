@@ -15,7 +15,7 @@ class Scroll_Button
 		@action = action
 		@color = $colors["button_deselected"]
 		@mouse_downed = false # saves if the mouse went down over this object
-		@button_image = Image.new @image, x: @x, y: @y, width: 20, height: 20, color: $colors["background"], z: 8
+		@button_image = Image.new @image, x: @x, y: @y, width: 10, height: 10, color: $colors["background"], z: 8
 		draw
 		$all_buttons.push self
 	end
@@ -23,7 +23,7 @@ class Scroll_Button
 		# remove
 		@button.remove
 		# draw
-		@button = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: @color, z: 7
+		@button = Rectangle.new x: @x, y: @y, width: 10, height: 10, color: @color, z: 7
 	end
 	def click event
 		if @button.contains? event.x, event.y and @mouse_downed
@@ -50,9 +50,9 @@ end
 
 class Scroll_Bar_X
 	def initialize
-		@container = Rectangle.new x: 0, y: $height-20, width: $width-20, height: 20, color: [0, 0, 0, 0]
-		@button_left = Scroll_Button.new 0, $height-20, "resources/images/scroll/left_scroll.png", Proc.new { $scroll_bar_x.scroll_left 21 }
-		@button_right = Scroll_Button.new $width-40, $height-20, "resources/images/scroll/right_scroll.png", Proc.new { $scroll_bar_x.scroll_right 21 }
+		@container = Rectangle.new x: 0, y: $height-10, width: $width-10, height: 10, color: [0, 0, 0, 0]
+		@button_left = Scroll_Button.new 0, $height-10, "resources/images/scroll/left_scroll.png", Proc.new { $scroll_bar_x.scroll_left 21 }
+		@button_right = Scroll_Button.new $width-20, $height-10, "resources/images/scroll/right_scroll.png", Proc.new { $scroll_bar_x.scroll_right 21 }
 		@bar_selected = false
 		$scroll_bar_x = self
 	end
@@ -60,8 +60,8 @@ class Scroll_Bar_X
 		# remove
 		@bar.remove
 		# draw
-		w = ($width-40)*(($width*1.0)/($full_size_x+$width))
-		@bar = Rectangle.new x: ($width-40-($width/w))/(($width+$full_size_x+1.0)/($scrolled_x)), y: $height-20, width: w, height: 20, color: $colors["button_deselected"], z: 6
+		w = ($width-20)*(($width*1.0)/($full_size_x+$width))
+		@bar = Rectangle.new x: ($width-20-($width/w))/(($width+$full_size_x+1.0)/($scrolled_x)), y: $height-10, width: w, height: 10, color: $colors["button_deselected"], z: 6
 	end
 	def click event
 		@bar_selected = false
@@ -129,9 +129,9 @@ class Scroll_Bar_X
 end
 class Scroll_Bar_Y
 	def initialize
-		@container = Rectangle.new x: $width-20, y: 00, width: 20, height: $height-20, color: [0, 0, 0, 0]
-		@button_up = Scroll_Button.new $width-20, 0, "resources/images/scroll/up_scroll.png", Proc.new{ $scroll_bar_y.scroll_up 21 }
-		@button_down = Scroll_Button.new $width-20, $height-40, "resources/images/scroll/down_scroll.png", Proc.new{ $scroll_bar_y.scroll_down 21 }
+		@container = Rectangle.new x: $width-10, y: 0, width: 10, height: $height-10, color: [0, 0, 0, 0]
+		@button_up = Scroll_Button.new $width-10, 0, "resources/images/scroll/up_scroll.png", Proc.new{ $scroll_bar_y.scroll_up 21 }
+		@button_down = Scroll_Button.new $width-10, $height-20, "resources/images/scroll/down_scroll.png", Proc.new{ $scroll_bar_y.scroll_down 21 }
 		@bar_selected = false
 		$scroll_bar_y = self
 	end
@@ -139,8 +139,8 @@ class Scroll_Bar_Y
 		# remove
 		@bar.remove
 		# draw
-		h = ($height-40)*(($height*1.0)/($full_size_y+$height))
-		@bar = Rectangle.new x: $width-20, y: ($height-40-($height/h))/(($height+$full_size_y+1.0)/(0-$scrolled_y)), width: 20, height: h, color: $colors["button_deselected"], z: 6
+		h = ($height-20)*(($height*1.0)/($full_size_y+$height))
+		@bar = Rectangle.new x: $width-10, y: ($height-20-($height/h))/(($height+$full_size_y+1.0)/(0-$scrolled_y)), width: 10, height: h, color: $colors["button_deselected"], z: 6
 	end
 	def click event
 		@bar_selected = false
