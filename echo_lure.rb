@@ -189,21 +189,18 @@ class Lure_Noise
 		@x = (((x-50)/21).floor)*21+50 # floors to 21, adjusting for the 50 pixel margin on left
 		@y = (y-container_y).round_to(15)+container_y-5 # rounds to nearest 15, adjusting for container_y
 		@container_y = container_y
-		@first_draw = true
 		draw
 	end
 	def draw
-		if !@first_draw
-			@drawn.remove
-		else
-			@first_draw = false
-		end
+		# remove
+		@drawn.remove
+		# draw
 		@drawn = Rectangle.new x: @x-$scrolled_x, y: @y+$scrolled_y, width: 21, height: 10, color: $lure_noise_colors[(@y-@container_y).to_s]
 	end
 	def play animal
 		url = "resources/sounds/echo_lure/#{(@y-@container_y)/15}#{animal.downcase}"
 		puts "[#{Time.now.strftime("%I:%M:%S")}] #{url}"
-		# @sound = Sound.new(url)
+		# @sound = Sound.new(url) # causes bugs if not stored as variable
 		# @sound.play
 	end
 	def remove

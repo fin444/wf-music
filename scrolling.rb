@@ -14,18 +14,15 @@ class Scroll_Button
 		@image = image
 		@action = action
 		@color = $colors["button_deselected"]
-		@first_draw = true
 		@mouse_downed = false # saves if the mouse went down over this object
 		@button_image = Image.new @image, x: @x, y: @y, width: 20, height: 20, color: $colors["background"], z: 8
 		draw
 		$all_buttons.push self
 	end
 	def draw
-		if !@first_draw
-			@button.remove
-		else
-			@first_draw = false
-		end
+		# remove
+		@button.remove
+		# draw
 		@button = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: @color, z: 7
 	end
 	def click event
@@ -56,16 +53,13 @@ class Scroll_Bar_X
 		@container = Rectangle.new x: 0, y: $height-20, width: $width-20, height: 20, color: [0, 0, 0, 0]
 		@button_left = Scroll_Button.new 0, $height-20, "resources/images/scroll/left_scroll.png", Proc.new { $scroll_bar_x.scroll_left 21 }
 		@button_right = Scroll_Button.new $width-40, $height-20, "resources/images/scroll/right_scroll.png", Proc.new { $scroll_bar_x.scroll_right 21 }
-		@first_draw = true
 		@bar_selected = false
 		$scroll_bar_x = self
 	end
 	def draw
-		if !@first_draw
-			@bar.remove
-		else
-			@first_draw = false
-		end
+		# remove
+		@bar.remove
+		# draw
 		w = ($width-40)*(($width*1.0)/($full_size_x+$width))
 		@bar = Rectangle.new x: ($width-40-($width/w))/(($width+$full_size_x+1.0)/($scrolled_x)), y: $height-20, width: w, height: 20, color: $colors["button_deselected"], z: 6
 	end
@@ -138,16 +132,13 @@ class Scroll_Bar_Y
 		@container = Rectangle.new x: $width-20, y: 00, width: 20, height: $height-20, color: [0, 0, 0, 0]
 		@button_up = Scroll_Button.new $width-20, 0, "resources/images/scroll/up_scroll.png", Proc.new{ $scroll_bar_y.scroll_up 21 }
 		@button_down = Scroll_Button.new $width-20, $height-40, "resources/images/scroll/down_scroll.png", Proc.new{ $scroll_bar_y.scroll_down 21 }
-		@first_draw = true
 		@bar_selected = false
 		$scroll_bar_y = self
 	end
 	def draw
-		if !@first_draw
-			@bar.remove
-		else
-			@first_draw = false
-		end
+		# remove
+		@bar.remove
+		# draw
 		h = ($height-40)*(($height*1.0)/($full_size_y+$height))
 		@bar = Rectangle.new x: $width-20, y: ($height-40-($height/h))/(($height+$full_size_y+1.0)/(0-$scrolled_y)), width: 20, height: h, color: $colors["button_deselected"], z: 6
 	end

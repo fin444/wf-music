@@ -317,6 +317,7 @@ class Popup_Instrument_Options
 			@items.push Dropdown.new ($width/2)-((get_text_width("Normal", 17)+get_text_width("Pentatonic Major", 17)+60)/2), ($height/2), $all_scales, @instrument.scale, Proc.new{ |s| @instrument.scale = s }
 			@items.push Dropdown.new ($width/2)+((get_text_width("Pentatonic Major", 17)-get_text_width("Normal", 17))/2), ($height/2), $all_shawzin_types, @instrument.type, Proc.new{ |t| @instrument.type = t }
 		when "Mandachord_UI"
+			@items.push Check_Box.new ($width/2)-(get_text_width("Loop", 20)/2)-13, ($height/2)-40, @instrument.looped, "Loop", Proc.new{ |l| @instrument.looped = l }
 			@items.push Dropdown.new ($width/2)-((get_text_width("Gamma", 17)+20)*1.5), ($height/2), $all_mandachord_instruments, @instrument.instrument_percussion, Proc.new{ |i| @instrument.instrument_percussion = i }
 			@items.push Dropdown.new ($width/2)-((get_text_width("Gamma", 17)+20)/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_bass, Proc.new{ |i| @instrument.instrument_bass = i }
 			@items.push Dropdown.new ($width/2)+((get_text_width("Gamma", 17)+20)/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_melody, Proc.new{ |i| @instrument.instrument_melody = i }

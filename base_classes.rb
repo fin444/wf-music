@@ -34,6 +34,12 @@ def get_text_height text, size
 	h
 end
 
+# Monkeypatch to remove need for @first_draw
+class NilClass
+	def remove
+	end
+end
+
 # Base Classes
 class Dropdown
 	attr_accessor :x, :y, :width, :selected, :container
@@ -48,7 +54,6 @@ class Dropdown
 		@z = 0 # can be manipulated by outside scripts if need be
 		@height = 19 # to be changed when open/closed
 		@open = false
-		@first_draw = true
 		@mouse_downed = false # saves if the mouse went down over this object
 		h = ""
 		options.each do |o|
@@ -62,22 +67,20 @@ class Dropdown
 		draw
 	end
 	def draw
-		if !@first_draw
-			@outline.remove
-			@container.remove
-			@arrow.remove
-			@drawn_selected.remove
-			@drawn_options.each do |d|
-				d.remove
-			end
-			@drawn_options = []
-			@options_containers.each do |d|
-				d.remove
-			end
-			@options_containers = []
-		else
-			@first_draw = false
+		# remove
+		@outline.remove
+		@container.remove
+		@arrow.remove
+		@drawn_selected.remove
+		@drawn_options.each do |d|
+			d.remove
 		end
+		@drawn_options = []
+		@options_containers.each do |d|
+			d.remove
+		end
+		@options_containers = []
+		# draw
 		@outline = Rectangle.new x: @x-1, y: @y-1, width: @text_width+22, height: @height+2, color: $colors["string"], z: @z
 		@container = Rectangle.new x: @x, y: @y, width: @text_width+20, height: @height, color: $colors["background"], z: @z
 		@drawn_selected = Text.new @selected, x: @x+1, y: @y, size: 17, color: $colors["string"], z: @z
@@ -157,18 +160,15 @@ class Delete_Button
 		@ui_element = ui_element
 		@z = 0 # can be manipulated by outside scripts if need be
 		@color = $colors["button_deselected"]
-		@first_draw = true
 		@mouse_downed = false # saves if the mouse went down over this object
 		draw
 		$all_buttons.push self
 	end
 	def draw
-		if !@first_draw
-			@text.remove
-			@container.remove
-		else
-			@first_draw = false
-		end
+		# remove
+		@text.remove
+		@container.remove
+		# draw
 		@container = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: [0, 0, 0, 0]
 		@text = Text.new "x", x: @x, y: @y-15, size: 35, color: @color, z: @z
 	end
@@ -206,7 +206,7 @@ class Delete_Button
 	end
 end
 class Quad_Button
-	attr_accessor :image_url, :x, :y, :action, :color
+	attr_accessor :image_url, :x, :y, :action, :color, :text
 	def initialize text, x, y, image_url, action
 		@text = text
 		@x = x
@@ -215,7 +215,6 @@ class Quad_Button
 		@action = action
 		@z = 0 # can be manipulated by outside scripts if need be
 		@color = $colors["button_deselected"]
-		@first_draw = true
 		@hidden = false # to define whether it's currently hidden so it doesn't draw on mouse_up
 		@mouse_downed = false # saves if the mouse went down over this object
 		draw
@@ -223,15 +222,12 @@ class Quad_Button
 	end
 	def draw
 		@hidden = false
-		# remove first
-		if !@first_draw
-			@outline.remove
-			@inner.remove
-			@button_text.remove
-			@image.remove
-		else
-			@first_draw = false
-		end
+		# remove
+		@outline.remove
+		@inner.remove
+		@button_text.remove
+		@image.remove
+		# draw
 		@outline = Quad.new x1: @x, y1: @y+30, x2: @x+30, y2: @y, x3: @x+60, y3: @y+30, x4: @x+30, y4: @y+60, color: @color, z: @z
 		@inner = Quad.new x1: @x+2, y1: @y+30, x2: @x+30, y2: @y+2, x3: @x+58, y3: @y+30, x4: @x+30, y4: @y+58, color: $colors["background"], z: @z
 		@button_text = Text.new @text, x: @x+30-get_text_width(@text, 15)/2, y: @y+65, size: 15, color: $colors["note"], z: @z
@@ -306,7 +302,6 @@ class Text_Button
 		@font_size = font_size
 		@action = action
 		@z = 0 # can be manipulated by outside scripts if need be
-		@first_draw = true
 		@mouse_downed = false # saves if the mouse went down over this object
 		@color = $colors["button_deselected"]
 		@width = get_text_width(@text, @font_size)+10
@@ -315,14 +310,11 @@ class Text_Button
 		$all_buttons.push self
 	end
 	def draw
-		# remove first
-		if !@first_draw
-			@button.remove
-			@underline.remove
-			@button_text.remove
-		else
-			@first_draw = false
-		end
+		# remove
+		@button.remove
+		@underline.remove
+		@button_text.remove
+		# draw
 		@button = Rectangle.new x: @x, y: @y, width: @width, height: @height, color: [0, 0, 0, 0]
 		@underline = Line.new x1: @x, y1: @y+@font_size+4, x2: @x+@width, y2: @y+@font_size+4, width: 2, color: @color, z: @z
 		@button_text = Text.new @text, x: @x+5, y: @y, size: @font_size, color: @color, z: @z
@@ -370,18 +362,15 @@ class Gear_Button
 		@action = action
 		@z = 0 # can be manipulated by outside scripts if need be
 		@color = $colors["button_deselected"]
-		@first_draw = true
 		@mouse_downed = false # saves if the mouse went down over this object
 		draw
 		$all_buttons.push self
 	end
 	def draw
-		if !@first_draw
-			@container.remove
-			@image.remove
-		else
-			@first_draw = false
-		end
+		# remove
+		@container.remove
+		@image.remove
+		# draw
 		@container = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: [0, 0, 0, 0]
 		@image = Image.new "resources/images/gear.png", x: @x, y: @y, width: 20, height: 20, color: @color, z: @z
 	end
@@ -428,20 +417,17 @@ class Key_Button
 		@key = key
 		@action = action
 		@z = 0 # can be manipulated by outside scripts if need be
-		@first_draw = true
 		@mouse_downed = false # saves if the mouse went down over this object
 		@color = $colors["button_deselected"]
 		draw
 		$all_buttons.push self
 	end
 	def draw
-		if !@first_draw
-			@outline.remove
-			@button.remove
-			@text.remove
-		else
-			@first_draw = false
-		end
+		# remove
+		@outline.remove
+		@button.remove
+		@text.remove
+		# draw
 		@outline = Rectangle.new x: @x-1, y: @y-1, width: 22, height: 22, color: @color, z: @z
 		@button = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: $colors["background"], z: @z
 		@text = Text.new @key.upcase, x: @x+9-(get_text_width(@key.upcase, 20)/2), y: @y-1, size: 20, color: @color, z: @z
@@ -483,6 +469,62 @@ class Key_Button
 		@outline.remove
 		@button.remove
 		@text.remove
+	end
+	def z= z
+		@z = z
+		draw
+	end
+end
+class Check_Box
+	attr_accessor :z
+	def initialize x, y, checked, text, action
+		@x = x
+		@y = y
+		@checked = checked
+		@text = text
+		@action = action
+		@z = 0 # can be manipulated by outside scripts if need be
+		@mouse_downed = false # saves if the mouse went down over this object
+		draw
+		$all_buttons.push self
+	end
+	def draw
+		# remove
+		@container.remove
+		@outline.remove
+		@cover.remove
+		@writing.remove
+		@inner.remove
+		# draw
+		@container = Rectangle.new x: @x, y: @y, width: 20+get_text_width(@text, 20), height: 20, color: [0, 0, 0, 0]
+		@outline = Rectangle.new x: @x, y: @y, width: 20, height: 20, color: $colors["string"], z: @z
+		@cover = Rectangle.new x: @x+1, y: @y+1, width: 18, height: 18, color: $colors["background"], z: @z
+		@writing = Text.new @text, x: @x+25, y: @y, size: 20, color: $colors["string"], z: @z
+		if @checked
+			@inner = Rectangle.new x: @x+3, y: @y+3, width: 14, height: 14, color: $colors["string"], z: @z
+		end
+	end
+	def click event
+		if @container.contains? event.x, event.y and @mouse_downed
+			@checked = !@checked
+			draw
+			@action.call @checked
+		end
+	end
+	def mouse_down event
+		if @container.contains? event.x, event.y
+			@mouse_downed = true
+		end
+	end
+	def mouse_up
+		@mouse_downed = false
+	end
+	def remove
+		@container.remove
+		@outline.remove
+		@cover.remove
+		@writing.remove
+		@inner.remove
 	end
 	def z= z
 		@z = z

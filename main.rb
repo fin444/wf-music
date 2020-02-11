@@ -248,6 +248,7 @@ def play_all
 	end
 	if $playing_highest > 5
 		$containers[0].buttons[0].image_url = "resources/images/top_bar/pause_icon.png"
+		$containers[0].buttons[0].text = "Pause"
 		$containers[0].buttons[0].draw
 		$playing = true
 		$playing_counter = 49
@@ -259,6 +260,7 @@ end
 def pause_all
 	$playing = false
 	$containers[0].buttons[0].image_url = "resources/images/top_bar/play_icon.png"
+	$containers[0].buttons[0].text = "Play"
 	$containers[0].buttons[0].draw
 end
 

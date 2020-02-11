@@ -215,7 +215,6 @@ class Shawzin_Note
 		@string = string
 		@container_y = container_y
 		@x = (x-50).round_to(21)+50
-		@first_draw = true
 		@color = $colors["note"]
 		draw
 	end
@@ -232,18 +231,16 @@ class Shawzin_Note
 		end
 		url += ".mp3"
 		puts "[#{Time.now.strftime("%I:%M:%S")}] #{url}"
-		@sound = Sound.new(url)
+		@sound = Sound.new(url) # causes bugs if not stored as variable
 		@sound.play
 	end
 	def draw
-		if !@first_draw
-			@drawn.remove
-			@drawn_sky.remove
-			@drawn_earth.remove
-			@drawn_water.remove
-		else
-			@first_draw = false
-		end
+		# remove
+		@drawn.remove
+		@drawn_sky.remove
+		@drawn_earth.remove
+		@drawn_water.remove
+		# draw
 		@drawn = Circle.new x: @x-$scrolled_x, y: @string*80+@container_y+$scrolled_y, radius: 20, color: @color
 		if !@options[0] # draw either circle to show false
 			@drawn_sky = Circle.new x: @drawn.x-20, y: @drawn.y-35, radius: 4, color: @color
