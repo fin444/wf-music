@@ -323,7 +323,7 @@ class Popup_Instrument_Options
 		when "Lure_UI"
 			@title.remove
 			@title = Text.new "Options for Echo Lure", x: ($width/2)-(get_text_width("Options for Echo Lure", 30)/2), y: ($height/2)-90, size: 30, color: $colors["string"], z: 10
-			@items.push Text_Button.new "Live Copy", ($width/2)-(get_text_width("Live Copy", 20)/2)-10, ($height/2)-30, 20, Proc.new{
+			@items.push Text_Button.new "Live Copy", ($width/2)-(get_text_width("Live Copy", 20)/2)-5, ($height/2)-30, 20, Proc.new{
 				$alert.remove
 				if @instrument.noises.length > 0
 					Lure_Copy.new @instrument.noises

@@ -318,12 +318,14 @@ class Text_Button
 		# remove first
 		if !@first_draw
 			@button.remove
+			@underline.remove
 			@button_text.remove
 		else
 			@first_draw = false
 		end
-		@button = Rectangle.new x: @x, y: @y, width: @width, height: @height, color: @color, z: @z
-		@button_text = Text.new @text, x: @x+5, y: @y, size: @font_size, color: $colors["background"], z: @z
+		@button = Rectangle.new x: @x, y: @y, width: @width, height: @height, color: [0, 0, 0, 0]
+		@underline = Line.new x1: @x, y1: @y+@font_size+4, x2: @x+@width, y2: @y+@font_size+4, width: 2, color: @color, z: @z
+		@button_text = Text.new @text, x: @x+5, y: @y, size: @font_size, color: @color, z: @z
 	end
 	def click event
 		if @button.contains? event.x, event.y and @mouse_downed
@@ -346,11 +348,13 @@ class Text_Button
 	end
 	def remove
 		@button.remove
+		@underline.remove
 		@button_text.remove
 		$all_buttons.delete_at $all_buttons.find_index self
 	end
 	def hide # hides the button without removing it
 		@button.remove
+		@underline.remove
 		@button_text.remove
 	end
 	def z= z
