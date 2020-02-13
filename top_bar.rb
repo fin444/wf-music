@@ -40,6 +40,9 @@ class Top_UI
 		33.times do |i|
 			@time_markers.push Line.new x1: (i)*42+50, y1: @y+110, x2: (i)*42+50, y2: @y+120, width: 1, color: $colors["string"], z: 6
 		end
+		32.times do |i|
+			@time_markers.push Line.new x1: (i)*42+71, y1: @y+114, x2: (i)*42+71, y2: @y+120, width: 1, color: $colors["string"], z: 6
+		end
 		9.times do |i|
 			@time_numbers.push Text.new "#{(i+($scrolled_x/168))/60}:#{add_zeros (i+($scrolled_x/168))%60, 2}", x: (i)*168+50-(get_text_width("0:00", 12)/2), y: @y+95, size: 12, color: $colors["string"], z: 6
 		end
@@ -136,6 +139,11 @@ class Top_UI
 		33.times do |i|
 			if !(i*42+50-($scrolled_x%42) < 50) # prevents from rendering too far to left
 				@time_markers.push Line.new x1: i*42+50-($scrolled_x%42), y1: @y+110, x2: i*42+50-($scrolled_x%42), y2: @y+120, width: 1, color: $colors["string"], z: 6
+			end
+		end
+		32.times do |i|
+			if !(i*42+71-($scrolled_x%42) < 50) # prevents from rendering too far to left
+				@time_markers.push Line.new x1: (i)*42+71-($scrolled_x%42), y1: @y+114, x2: (i)*42+71-($scrolled_x%42), y2: @y+120, width: 1, color: $colors["string"], z: 6
 			end
 		end
 		9.times do |i|

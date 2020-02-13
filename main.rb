@@ -6,7 +6,6 @@
 # FEATURES
 # more icons for quads
 # mandachord copy
-# show that shawzin has specifically 8 notes per second
 # revamp options menu
 
 # SOUNDS NEEDED
