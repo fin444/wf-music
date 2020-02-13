@@ -26,13 +26,13 @@ class Lure_UI
 		$containers.push self
 	end
 	def click event
-		if !$playing
+		if !$playing and @container.contains? event.x, event.y
 			@delete_button.click event
 			@options.click event
 		end
 	end
 	def right_click event
-		if !$playing
+		if !$playing and @container.contains? event.x, event.y
 			@noises.each do |n|
 				if n.drawn.contains? event.x, event.y
 					n.remove
@@ -43,19 +43,20 @@ class Lure_UI
 		end
 	end
 	def mouse_down event
-		if !$playing
+		if !$playing and @container.contains? event.x, event.y
 			new_noise event
 			@delete_button.mouse_down event
 			@options.mouse_down event
 		end
 	end
 	def mouse_move event
-		if !$playing
+		if !$playing and @container.contains? event.x, event.y
 			new_noise event
 		end
 	end
 	def new_noise event
-		if event.y-$scrolled_y > @y+30 && event.y-$scrolled_y < @y+220 && event.x > 50 && event.x < $width-50
+		if event.y-$scrolled_y > @y+30 && event.y-$scrolled_y < @y+218 && event.x > 50 && event.x < $width-50
+			puts event.y
 			if @noises.any?{ |n| n.x == (((event.x-50)/21).floor)*21+50 }
 				@noises.filter{ |n| n.x == (((event.x-50)/21).floor)*21+50 }.each do |n|
 					n.y = (event.y-$scrolled_y-@y).round_to(15)+@y-5

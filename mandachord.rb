@@ -29,7 +29,7 @@ class Mandachord_UI
 		$containers.push self
 	end
 	def click event
-		if !$playing
+		if !$playing and @container.contains? event.x, event.y
 			@delete_button.click event
 			@options.click event
 			@drawn.each do |n|

@@ -23,7 +23,7 @@ class Shawzin_UI
 		$containers.push self
 	end
 	def click event
-		if !$playing
+		if !$playing and @container.contains? event.x, event.y
 			if event.y-$scrolled_y > @y+20 and @mouse_downed
 				if @notes.length == 1666
 					Popup_Info.new "Due to Warframe's restrictions on shawzin songs, you can't put more than 1666 notes."
@@ -62,14 +62,16 @@ class Shawzin_UI
 		@mouse_downed = false
 	end
 	def right_click event
-		@notes.each do |n|
-			if n.drawn.contains? event.x, event.y
-				if $containers[0].editing
-					$containers[0].editing_buttons[4].action.call
+		if !$playing and @container.contains? event.x, event.y
+			@notes.each do |n|
+				if n.drawn.contains? event.x, event.y
+					if $containers[0].editing
+						$containers[0].editing_buttons[4].action.call
+					end
+					n.color = $colors["button_selected"]
+					n.draw
+					$containers[0].edit n
 				end
-				n.color = $colors["button_selected"]
-				n.draw
-				$containers[0].edit n
 			end
 		end
 	end

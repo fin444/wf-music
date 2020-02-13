@@ -1,10 +1,7 @@
 # BUGS
 # Ruby2D::Error image cannot be created
 # scroll bar math is off when large $full_size_x
-# area to right where you can add notes on shawzin decreases as $full_size_x increases
 # minor/1.mp3 sounds a bit off
-# mandachord lines become offset when you scroll left
-# echo lure can place 1 too far down
 
 # FEATURES
 # make quad icons be the key binds? (like in game)
@@ -200,13 +197,13 @@ on :mouse_scroll do |event|
 		if event.delta_y > 0
 			$scroll_bar_y.scroll_down event.delta_y.ceil_to 21
 		elsif event.delta_y < 0
-			$scroll_bar_y.scroll_up 1-event.delta_y.floor_to(21)
+			$scroll_bar_y.scroll_up -event.delta_y.floor_to(21)
 		end
 	else
 		if event.delta_x > 0
 			$scroll_bar_x.scroll_right event.delta_x.ceil_to 21
 		elsif event.delta_x < 0
-			$scroll_bar_x.scroll_left 1-event.delta_x.floor_to(21)
+			$scroll_bar_x.scroll_left -event.delta_x.floor_to(21)
 		end
 	end
 end

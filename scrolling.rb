@@ -54,7 +54,6 @@ class Scroll_Bar_X
 		@button_left = Scroll_Button.new 0, $height-10, "resources/images/scroll/left_scroll.png", Proc.new { $scroll_bar_x.scroll_left 21 }
 		@button_right = Scroll_Button.new $width-20, $height-10, "resources/images/scroll/right_scroll.png", Proc.new { $scroll_bar_x.scroll_right 21 }
 		@bar_selected = false
-		$scroll_bar_x = self
 	end
 	def draw
 		# remove
@@ -133,7 +132,6 @@ class Scroll_Bar_Y
 		@button_up = Scroll_Button.new $width-10, 0, "resources/images/scroll/up_scroll.png", Proc.new{ $scroll_bar_y.scroll_up 21 }
 		@button_down = Scroll_Button.new $width-10, $height-20, "resources/images/scroll/down_scroll.png", Proc.new{ $scroll_bar_y.scroll_down 21 }
 		@bar_selected = false
-		$scroll_bar_y = self
 	end
 	def draw
 		# remove
@@ -200,5 +198,5 @@ class Scroll_Bar_Y
 	end
 end
 
-Scroll_Bar_X.new
-Scroll_Bar_Y.new
+$scroll_bar_x = Scroll_Bar_X.new
+$scroll_bar_y = Scroll_Bar_Y.new
