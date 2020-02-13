@@ -248,8 +248,8 @@ class Lure_Copy
 				@lines[n].opacity = 0.3
 			end
 		end
-		@lines.push Line.new x1: 60, y1: ($height/2)-110, x2: 60, y2: ($height/2)+110, color: "white", z: 10
-		@lines.push Line.new x1: 81, y1: ($height/2)-110, x2: 81, y2: ($height/2)+110, color: "white", z: 10
+		@lines.push Line.new x1: ($width/2)-10, y1: ($height/2)-110, x2: ($width/2)-10, y2: ($height/2)+110, color: "white", z: 11
+		@lines.push Line.new x1: ($width/2)+10, y1: ($height/2)-110, x2: ($width/2)+10, y2: ($height/2)+110, color: "white", z: 11
 	end
 	def refresh
 		if @playing
@@ -258,8 +258,24 @@ class Lure_Copy
 				d.remove
 			end
 			@drawn = []
-			@noises.filter{ |n| n.x+21-@scrolled > 50 and n.x-@scrolled < $width-50 }.each do |n|
-				@drawn.push Rectangle.new x: n.x-@scrolled, y: n.y+($height/2)-110-n.container_y, width: 21, height: 10, color: n.drawn.color, z: 10
+			if @noises.filter{ |n| n.x+21-@scrolled > 50 }.length != 0
+				@noises.filter{ |n| n.x+21-@scrolled > 50 and n.x-@scrolled < $width-50 }.each do |n|
+					if n.x-@scrolled < 50
+						@drawn.push Rectangle.new x: 50, y: n.y+($height/2)-110-n.container_y, width: n.x-@scrolled-29, height: 10, color: n.drawn.color, z: 10
+					elsif n.x+21-@scrolled > $width-50
+						@drawn.push Rectangle.new x: n.x-@scrolled, y: n.y+($height/2)-110-n.container_y, width: $width-50-n.x+@scrolled, height: 10, color: n.drawn.color, z: 10
+					else
+						@drawn.push Rectangle.new x: n.x-@scrolled, y: n.y+($height/2)-110-n.container_y, width: 21, height: 10, color: n.drawn.color, z: 10
+					end
+				end
+			else
+				@lines.each do |l|
+					l.remove
+				end
+				@lines = []
+				@playing = false
+				@start_button.draw
+				@scrolled = -1344
 			end
 		end
 	end
@@ -277,5 +293,6 @@ class Lure_Copy
 		@drawn.each do |d|
 			d.remove
 		end
+		$alert = nil
 	end
 end
