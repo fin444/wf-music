@@ -476,7 +476,7 @@ class Key_Button
 	end
 end
 class Check_Box
-	attr_accessor :z
+	attr_accessor :z, :checked
 	def initialize x, y, checked, text, action
 		@x = x
 		@y = y

@@ -3,14 +3,15 @@
 # scroll bar math is off when large $full_size_x
 # area to right where you can add notes on shawzin decreases as $full_size_x increases
 # minor/1.mp3 sounds a bit off
+# mandachord lines become offset when you scroll left
+# echo lure can place 1 too far down
 
 # FEATURES
 # make quad icons be the key binds? (like in game)
-# loop mandachord playing
-# allow mandachord to not loop
-# mandachord export
+# mandachord copy
 # show that shawzin has specifically 8 notes per second
 # revamp options menu
+# auto scroll to view $playing_bar as it moves
 
 # SOUNDS NEEDED
 # nelumbo shawzin
@@ -363,6 +364,9 @@ def open_file a # a defines what phase of the process you are on
 				$saved = true
 				new_file false
 				Popup_Info.new "An error has occured while reading the file:\n#{err}"
+			else
+				$scroll_bar_x.determine
+				$scroll_bar_y.determine
 			end
 		end
 		Add_UI.new

@@ -1,10 +1,11 @@
 $all_mandachord_instruments = ["Adau", "Alpha", "Beta", "Delta", "Gamma", "Epsilon", "Horos", "Druk", "Plogg"]
 
 class Mandachord_UI
-	attr_accessor :instrument_percussion, :instrument_bass, :instrument_melody, :y, :container
+	attr_accessor :instrument_percussion, :instrument_bass, :instrument_melody, :y, :container, :looped, :drawn
 	def initialize
 		@height = 315
 		@y = $containers[-1].y+$containers[-1].container.height+5
+		@looped = true
 		@container = Rectangle.new x: 50, y: @y+$scrolled_y, width: $width-100, height: @height, color: [0, 0, 0, 0]
 		@name = Text.new "Mandachord", x: 80, y: @y+$scrolled_y, size: 17, color: $colors["string"]
 		@delete_button = Delete_Button.new $width-70, @y+$scrolled_y, self
@@ -63,7 +64,8 @@ class Mandachord_UI
 					Popup_Info.new "Warframe limits mandachord songs to 16 notes per type per quadrant."
 					return
 				end
-				@drawn.push Mandachord_Note.new type, (event.x-49).floor_to(21)+7+$scrolled_x, (y-@y-$scrolled_y-30).floor_to(21)+@y+30+adjust_y, num
+				@drawn.push Mandachord_Note.new type, (event.x-49).floor_to(21)+7+$scrolled_x, (y-@y-$scrolled_y-30).floor_to(21)+@y+30+adjust_y, num, self
+				change
 			end
 		end
 	end
@@ -89,7 +91,12 @@ class Mandachord_UI
 	def play x, change
 		(change-x).times do |n|
 			if (x+n-49)%21 == 0
-				@drawn.select{ |i| i.x-7 == x+n-49 }.each do |i|
+				if @looped
+					arr = @drawn.select{ |i| i.x-7 == (x+n-49)%1344 }
+				else
+					arr = @drawn.select{ |i| i.x-7 == x+n-49 }
+				end
+				arr.each do |i|
 					case i.type
 					when "percussion"
 						i.play @instrument_percussion
@@ -127,27 +134,28 @@ class Mandachord_UI
 		scroll_y
 	end
 	def export
-		str = "#{$all_mandachord_instruments.find_index(@instrument_percussion).to_s}#{$all_mandachord_instruments.find_index(@instrument_bass).to_s}#{$all_mandachord_instruments.find_index(@instrument_melody).to_s}"
+		str = "#{{"true"=>0, "false"=>1}[@looped.to_s]}#{$all_mandachord_instruments.find_index(@instrument_percussion).to_s}#{$all_mandachord_instruments.find_index(@instrument_bass).to_s}#{$all_mandachord_instruments.find_index(@instrument_melody).to_s}"
 		@drawn = @drawn.sort_by{ |n| n.x }
 		@drawn.each do |n|
-			str += "#{n.number}#{n.type[0]}#{add_zeros (n.x+14)/21, 2}"
+			str += "#{n.number}#{n.type[0]}#{add_zeros (n.x+14)/21, 4}"
 		end
 		str
 	end
 	def import data
 		letter_to_instrument = {"p"=>"percussion", "b"=>"bass", "m"=>"melody"}
 		# set the instrument and update dropdown
-		@instrument_percussion = $all_mandachord_instruments[data[0].to_i]
-		@instrument_bass = $all_mandachord_instruments[data[1].to_i]
-		@instrument_melody = $all_mandachord_instruments[data[2].to_i]
-		data.slice! 0..2
+		self.looped = [true, false][data[0].to_i]
+		@instrument_percussion = $all_mandachord_instruments[data[1].to_i]
+		@instrument_bass = $all_mandachord_instruments[data[2].to_i]
+		@instrument_melody = $all_mandachord_instruments[data[3].to_i]
+		data.slice! 0..3
 		# loop through data in sets of 4
 		curr_num = 0 # stores number for note being currently created
 		curr_type = "percussion" # stores type for note being currently created
 		curr_x = 0  # stores x for note being currently created
 		data = data.split ""
 		data.length.times do |i|
-			if i%4 == 0
+			if i%6 == 0
 				curr_y = data[i].to_i
 				curr_type = letter_to_instrument[data[i+1]]
 				if curr_type == "bass"
@@ -161,7 +169,7 @@ class Mandachord_UI
 				elsif curr_type == "melody"
 					adjust_y = 2
 				end
-				@drawn.push Mandachord_Note.new curr_type, data[i+2, 2].join("").to_i*21-14, curr_y*21+10+adjust_y+@y, data[i]
+				@drawn.push Mandachord_Note.new curr_type, data[i+2, 4].join("").to_i*21-14, curr_y*21+10+adjust_y+@y, data[i], self
 			end
 		end
 	end
@@ -220,30 +228,47 @@ class Mandachord_UI
 			end
 		end
 	end
+	def looped= l
+		@looped = l
+		if l
+			@drawn.filter{ |d| d.x > 1330 }.each do |d|
+				d.drawn.remove
+			end
+			@drawn = @drawn.filter{ |d| d.x <= 1330 }
+		else
+			@drawn.each do |d|
+				d.x = d.x%1344
+			end
+		end
+		scroll_x
+	end
 end
 
 class Mandachord_Note
 	attr_accessor :drawn, :selected, :x, :number, :type
-	def initialize type, x, y, number
+	def initialize type, x, y, number, container
 		@type = type
 		@x = x
 		@y = y
 		@number = number
-		@first_draw = true
+		@container = container
 		draw
 	end
 	def play instrument
 		url = "resources/sounds/mandachord/#{instrument.downcase}/#{@number}#{@type}.mp3"
 		puts "[#{Time.now.strftime("%I:%M:%S")}] #{url}"
-		# @sound = Sound.new(url)
+		# @sound = Sound.new(url) # causes bugs if not stored as variable
 		# @sound.play
 	end
 	def draw
-		if !@first_draw # removes all current, but if they don't exist yet then it doesn't
-			@drawn.remove
+		# remove
+		@drawn.remove
+		# draw
+		if @container.looped
+			@drawn = Rectangle.new x: 43+(@x-$scrolled_x)%1344, y: @y+1+$scrolled_y, width: 21, height: 21, color: $colors[@type.downcase], z: 4
+		elsif 64+@x-$scrolled_x >= 49 and @x-$scrolled_x <= 1344
+			@drawn = Rectangle.new x: 43+@x-$scrolled_x, y: @y+1+$scrolled_y, width: 21, height: 21, color: $colors[@type.downcase], z: 4
 		end
-		@first_draw = false
-		@drawn = Rectangle.new x: 43+(@x-$scrolled_x)%1344, y: @y+1+$scrolled_y, width: 21, height: 21, color: $colors[@type.downcase], z: 4
 	end
 	def determine_y container_y
 		case @type

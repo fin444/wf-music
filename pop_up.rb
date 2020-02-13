@@ -317,7 +317,23 @@ class Popup_Instrument_Options
 			@items.push Dropdown.new ($width/2)-((get_text_width("Normal", 17)+get_text_width("Pentatonic Major", 17)+60)/2), ($height/2), $all_scales, @instrument.scale, Proc.new{ |s| @instrument.scale = s }
 			@items.push Dropdown.new ($width/2)+((get_text_width("Pentatonic Major", 17)-get_text_width("Normal", 17))/2), ($height/2), $all_shawzin_types, @instrument.type, Proc.new{ |t| @instrument.type = t }
 		when "Mandachord_UI"
-			@items.push Check_Box.new ($width/2)-(get_text_width("Loop", 20)/2)-13, ($height/2)-40, @instrument.looped, "Loop", Proc.new{ |l| @instrument.looped = l }
+			@items.push Check_Box.new ($width/2)-(get_text_width("Loop", 20)/2)-13, ($height/2)-40, @instrument.looped, "Loop", Proc.new{ |l|
+				if l and @instrument.drawn.any?{ |d| d.x > 1344 }
+					$alert.remove
+					Popup_Confirm.new "Doing this will delete #{@instrument.drawn.filter{ |d| d.x > 1344 }.length} notes saved in your mandachord after the first 8 seconds. Are you sure?", Proc.new{
+						@instrument.looped = true
+						Popup_Instrument_Options.new @instrument
+					}, Proc.new{
+						$alert.items.filter{ |i| i.class.name == "Check_Box" }[0].checked = false
+						$alert.items.filter{ |i| i.class.name == "Check_Box" }[0].draw
+						Popup_Instrument_Options.new @instrument
+					}
+				elsif l
+					@instrument.looped = true
+				else
+					@instrument.looped = false
+				end
+			}
 			@items.push Dropdown.new ($width/2)-((get_text_width("Gamma", 17)+20)*1.5), ($height/2), $all_mandachord_instruments, @instrument.instrument_percussion, Proc.new{ |i| @instrument.instrument_percussion = i }
 			@items.push Dropdown.new ($width/2)-((get_text_width("Gamma", 17)+20)/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_bass, Proc.new{ |i| @instrument.instrument_bass = i }
 			@items.push Dropdown.new ($width/2)+((get_text_width("Gamma", 17)+20)/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_melody, Proc.new{ |i| @instrument.instrument_melody = i }
