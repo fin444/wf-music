@@ -4,11 +4,10 @@
 # minor/1.mp3 sounds a bit off
 
 # FEATURES
-# make quad icons be the key binds? (like in game)
+# more icons for quads
 # mandachord copy
 # show that shawzin has specifically 8 notes per second
 # revamp options menu
-# auto scroll to view $playing_bar as it moves
 
 # SOUNDS NEEDED
 # nelumbo shawzin
@@ -81,6 +80,9 @@ update do
 		$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 7
 		$containers.filter{ |c| c.respond_to? "play" }.each do |c|
 			c.play $playing_previous, $playing_counter.floor
+		end
+		if $playing_counter > $scrolled_x+$width-50 or $playing_counter < $scrolled_x-50
+			$future_scrolled_x = ($playing_counter-50).round_to 21
 		end
 		if $playing_counter > $playing_highest
 			pause_all
