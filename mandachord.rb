@@ -1,7 +1,7 @@
 $all_mandachord_instruments = ["Adau", "Alpha", "Beta", "Delta", "Gamma", "Epsilon", "Horos", "Druk", "Plogg"]
 
 class Mandachord_UI
-	attr_accessor :instrument_percussion, :instrument_bass, :instrument_melody, :y, :container, :looped, :drawn
+	attr_accessor :instrument_percussion, :instrument_bass, :instrument_melody, :y, :container, :looped, :notes
 	def initialize
 		@height = 315
 		@y = $containers[-1].y+$containers[-1].container.height+5
@@ -13,7 +13,7 @@ class Mandachord_UI
 		@instrument_percussion = $all_mandachord_instruments[0]
 		@instrument_bass = $all_mandachord_instruments[0]
 		@instrument_melody = $all_mandachord_instruments[0]
-		@drawn = []
+		@notes = []
 		@image = Image.new "resources/images/instruments/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
 		@line_1 = Line.new x1: 50+(336-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(336-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		@line_2 = Line.new x1: 50+(672-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(672-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
@@ -32,10 +32,10 @@ class Mandachord_UI
 		if !$playing and @container.contains? event.x, event.y
 			@delete_button.click event
 			@options.click event
-			@drawn.each do |n|
-				if n.drawn.contains? event.x, event.y
-					n.drawn.remove
-					@drawn.delete_at @drawn.find_index n
+			@notes.each do |n|
+				if n.notes.contains? event.x, event.y
+					n.notes.remove
+					@notes.delete_at @notes.find_index n
 					return
 				end
 			end
@@ -60,11 +60,11 @@ class Mandachord_UI
 					num = (y-$scrolled_y-179-@y)/21
 					adjust_y = 3
 				end
-				if @drawn.filter{ |n| n.type == type and (n.x)/336 == (((event.x-49).floor_to(21)+7+$scrolled_x)/336)%4 }.length == 16
+				if @notes.filter{ |n| n.type == type and (n.x)/336 == (((event.x-49).floor_to(21)+7+$scrolled_x)/336)%4 }.length == 16
 					Popup_Info.new "Warframe limits mandachord songs to 16 notes per type per quadrant."
 					return
 				end
-				@drawn.push Mandachord_Note.new type, (event.x-49).floor_to(21)+7+$scrolled_x, (y-@y-$scrolled_y-30).floor_to(21)+@y+30+adjust_y, num, self
+				@notes.push Mandachord_Note.new type, (event.x-49).floor_to(21)+7+$scrolled_x, (y-@y-$scrolled_y-30).floor_to(21)+@y+30+adjust_y, num, self
 				change
 			end
 		end
@@ -81,7 +81,7 @@ class Mandachord_UI
 	end
 	def get_last_sound
 		h = 0
-		@drawn.each do |n|
+		@notes.each do |n|
 			if n.x+42 > h
 				h = n.x+42
 			end
@@ -92,9 +92,9 @@ class Mandachord_UI
 		(change-x).times do |n|
 			if (x+n-49)%21 == 0
 				if @looped
-					arr = @drawn.select{ |i| i.x-7 == (x+n-49)%1344 }
+					arr = @notes.select{ |i| i.x-7 == (x+n-49)%1344 }
 				else
-					arr = @drawn.select{ |i| i.x-7 == x+n-49 }
+					arr = @notes.select{ |i| i.x-7 == x+n-49 }
 				end
 				arr.each do |i|
 					case i.type
@@ -111,8 +111,8 @@ class Mandachord_UI
 	end
 	def remove
 		change
-		@drawn.each do |n|
-			n.drawn.remove
+		@notes.each do |n|
+			n.notes.remove
 		end
 		@name.remove
 		@delete_button.remove
@@ -135,8 +135,8 @@ class Mandachord_UI
 	end
 	def export
 		str = "#{{"true"=>0, "false"=>1}[@looped.to_s]}#{$all_mandachord_instruments.find_index(@instrument_percussion).to_s}#{$all_mandachord_instruments.find_index(@instrument_bass).to_s}#{$all_mandachord_instruments.find_index(@instrument_melody).to_s}"
-		@drawn = @drawn.sort_by{ |n| n.x }
-		@drawn.each do |n|
+		@notes = @notes.sort_by{ |n| n.x }
+		@notes.each do |n|
 			str += "#{n.number}#{n.type[0]}#{add_zeros (n.x+14)/21, 4}"
 		end
 		str
@@ -169,12 +169,12 @@ class Mandachord_UI
 				elsif curr_type == "melody"
 					adjust_y = 2
 				end
-				@drawn.push Mandachord_Note.new curr_type, data[i+2, 4].join("").to_i*21-14, curr_y*21+10+adjust_y+@y, data[i], self
+				@notes.push Mandachord_Note.new curr_type, data[i+2, 4].join("").to_i*21-14, curr_y*21+10+adjust_y+@y, data[i], self
 			end
 		end
 	end
 	def scroll_x
-		@drawn.each do |n|
+		@notes.each do |n|
 			n.draw
 		end
 		@line_1.remove
@@ -193,8 +193,8 @@ class Mandachord_UI
 		end
 	end
 	def scroll_y
-		@drawn.each do |n|
-			n.drawn.remove
+		@notes.each do |n|
+			n.notes.remove
 		end
 		@name.remove
 		@delete_button.hide
@@ -223,7 +223,7 @@ class Mandachord_UI
 			if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
 				@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 			end
-			@drawn.each do |n|
+			@notes.each do |n|
 				n.draw
 			end
 		end
@@ -231,12 +231,12 @@ class Mandachord_UI
 	def looped= l
 		@looped = l
 		if l
-			@drawn.filter{ |d| d.x > 1330 }.each do |d|
-				d.drawn.remove
+			@notes.filter{ |d| d.x > 1330 }.each do |d|
+				d.notes.remove
 			end
-			@drawn = @drawn.filter{ |d| d.x <= 1330 }
+			@notes = @notes.filter{ |d| d.x <= 1330 }
 		else
-			@drawn.each do |d|
+			@notes.each do |d|
 				d.x = d.x%1344
 			end
 		end

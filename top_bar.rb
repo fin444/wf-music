@@ -109,6 +109,7 @@ class Top_UI
 			@note.remove
 			$containers.select{ |c| c.class.name == "Shawzin_UI" }.each do |c|
 				if c.notes.any?{ |n| n == @note }
+					c.notes_by_time[(@note.x/1000).to_s].delete_at c.notes.find_index @note
 					c.notes.delete_at c.notes.find_index @note
 				end
 			end

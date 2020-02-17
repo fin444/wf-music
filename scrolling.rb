@@ -198,5 +198,26 @@ class Scroll_Bar_Y
 	end
 end
 
+def update_scrolling
+	if $scrolled_x != $future_scrolled_x
+		$scrolled_x = $future_scrolled_x
+		if !$playing && $playing_bar.x1 != 0
+			$playing_bar.remove
+			$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
+		end
+		$scroll_list_x.each do |c|
+			c.scroll_x
+		end
+		$scroll_bar_x.draw
+	end
+	if $scrolled_y != $future_scrolled_y
+		$scrolled_y = $future_scrolled_y
+		$scroll_list_y.each do |c|
+			c.scroll_y
+		end
+		$scroll_bar_y.draw
+	end
+end
+
 $scroll_bar_x = Scroll_Bar_X.new
 $scroll_bar_y = Scroll_Bar_Y.new

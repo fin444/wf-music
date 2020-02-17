@@ -2,13 +2,15 @@
 # Ruby2D::Error image cannot be created
 # scroll bar math is off when large $full_size_x
 # minor/1.mp3 sounds a bit off
+# mandachord reposition doesn't work on drawn notes
+# mandachord scroll_x still still gets fucked sometimes on the lines
 
 # FEATURES
 # more icons for quads
 # mandachord copy
 # revamp options menu
 
-# SOUNDS NEEDED
+# SOUNDS
 # nelumbo shawzin
 # corbu shawzin
 # mandachord instruments
@@ -50,7 +52,7 @@ load "pop_up.rb"
 $scroll_bar_x.determine
 $scroll_bar_y.determine
 
-set background: $colors["background"]
+set background: $colors["background"] # executed after the ui theme is read from options
 
 # blockers to cover up things in scrolling
 Rectangle.new x: 0, y: 120, width: 50, height: $height-120, color: $colors["background"], z: 4
@@ -72,43 +74,14 @@ update do
 		end
 		$time_counter = 0
 	end
-	if $playing # play the song
-		$playing_previous = $playing_counter.floor
-		$playing_counter += (1340.0/480.0).round 3
-		$playing_bar.remove
-		$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 7
-		$containers.filter{ |c| c.respond_to? "play" }.each do |c|
-			c.play $playing_previous, $playing_counter.floor
-		end
-		if $playing_counter > $scrolled_x+$width-50 or $playing_counter < $scrolled_x-50
-			$future_scrolled_x = ($playing_counter-50).round_to 21
-		end
-		if $playing_counter > $playing_highest
-			pause_all
-		end
+	if $playing
+		play_loop
 	end
 	if $alert.respond_to? "refresh"
 		$alert.refresh
 	end
 	if $time_counter%6 == 0 # scroll every 1/10 of a second
-		if $scrolled_x != $future_scrolled_x
-			$scrolled_x = $future_scrolled_x
-			if !$playing && $playing_bar.x1 != 0
-				$playing_bar.remove
-				$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 3
-			end
-			$scroll_list_x.each do |c|
-				c.scroll_x
-			end
-			$scroll_bar_x.draw
-		end
-		if $scrolled_y != $future_scrolled_y
-			$scrolled_y = $future_scrolled_y
-			$scroll_list_y.each do |c|
-				c.scroll_y
-			end
-			$scroll_bar_y.draw
-		end
+		update_scrolling
 	end
 end
 
@@ -219,8 +192,6 @@ on :key_down do |event|
 			new_file false
 		elsif $keys_down.any?{ |k| k == "o" } # cmd + o = open
 			open_file 1
-		elsif $keys_down.any?{ |k| k == "v" } and $alert.respond_to? "key_down" # cmd + v = paste
-			$alert.key_down Paste_Monkeypatch.new
 		end
 	elsif !$active_key_button.nil?
 		$active_key_button.key_down event
@@ -242,10 +213,10 @@ def play_all
 	$containers.filter{ |c| c.respond_to? "get_last_sound" }.each do |c| # go through every container to find out how long the song is
 		h = c.get_last_sound
 		if h > $playing_highest
-			$playing_highest = h+5
+			$playing_highest = h
 		end
 	end
-	if $playing_highest > 5
+	if $playing_highest != 0
 		$containers[0].buttons[0].image_url = "resources/images/top_bar/pause_icon.png"
 		$containers[0].buttons[0].text = "Pause"
 		$containers[0].buttons[0].draw
@@ -261,6 +232,25 @@ def pause_all
 	$containers[0].buttons[0].image_url = "resources/images/top_bar/play_icon.png"
 	$containers[0].buttons[0].text = "Play"
 	$containers[0].buttons[0].draw
+end
+def play_loop
+	$playing_previous = $playing_counter.floor
+	$playing_counter += (1340.0/480.0).round 3
+	$playing_bar.remove
+	$playing_bar = Line.new x1: $playing_counter-$scrolled_x, y1: $containers[0].container.height, x2: $playing_counter-$scrolled_x, y2: $height, color: $colors["note"], width: 3, z: 7
+	($playing_previous...$playing_counter.floor).each do |x|
+		if (x-50)%21 == 0
+			$containers.filter{ |c| c.respond_to? "play" }.each do |c|
+				c.play x
+			end
+		end
+	end
+	if $playing_counter > $scrolled_x+$width-50 or $playing_counter < $scrolled_x-50
+		$future_scrolled_x = ($playing_counter-50).round_to 21
+	end
+	if $playing_counter > $playing_highest
+		pause_all
+	end
 end
 
 # save/load
@@ -330,7 +320,7 @@ def open_file a # a defines what phase of the process you are on
 	elsif a == 3
 		$containers[-1].remove
 		File.open "saves/#{$file_name}", "r" do |file|
-			begin # ruby equivalent of try
+			begin
 				file.read.split(/\n/).each do |r|
 					case r[0] # first letter of r signifies type of data
 					when "d"
@@ -358,7 +348,7 @@ def open_file a # a defines what phase of the process you are on
 						break
 					end
 				end
-			rescue => err # ruby equivalent of catch
+			rescue => err
 				$saved = true
 				new_file false
 				Popup_Info.new "An error has occured while reading the file:\n#{err}"
@@ -372,7 +362,7 @@ def open_file a # a defines what phase of the process you are on
 end
 
 # save all console output to a log
-$stdout_old = $stdout
+$stdout_old = $stdout # so I can switch back if need be
 if $options["developer_mode"] == "false"
 	$stdout = File.new("log.txt", "w")
 	$stdout.sync = true

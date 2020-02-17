@@ -97,12 +97,6 @@ class Popup_Confirm
 		$alert = nil
 	end
 end
-class Paste_Monkeypatch # to get around the issue where you can't fake an event
-	attr_accessor :key
-	def initialize
-		@key = "paste"
-	end
-end
 class Popup_Ask
 	def initialize title, action
 		$alert = self
@@ -163,12 +157,8 @@ class Popup_Ask
 			@position = 0
 		elsif event.key == "down"
 			@position = @text.length
-		elsif event.key == "paste"
-			t = Clipboard.paste
-			@text += t
-			@position += t.length
 		end
-		if event.key != "return" # preventes re-rendering after being removed
+		if event.key != "return" # prevents re-rendering after being removed
 			while get_text_width(@text[@display_from..@position], 20) > 380 do
 				@display_from += 1				
 			end
@@ -307,20 +297,20 @@ class Popup_Instrument_Options
 		when "Shawzin_UI"
 			@items.push Text_Button.new "Copy Song Code", ($width/2)-((get_text_width("Pentatonic Major", 20)+20)), ($height/2)-30, 20, Proc.new{ Clipboard.copy @instrument.export }
 			@items.push Text_Button.new "Import Song Code", ($width/2), ($height/2)-30, 20, Proc.new{
-				$alert.remove
-				$alert = nil
-				Popup_Ask.new "Paste song code here:", Proc.new{ |c|
-					@instrument.import c
-					$scroll_bar_x.determine
-				}
+				begin
+					@instrument.import Clipboard.paste
+				rescue => err
+					$alert.remove
+					Popup_Info.new "That song code is invalid."
+				end
 			}
 			@items.push Dropdown.new ($width/2)-((get_text_width("Normal", 17)+get_text_width("Pentatonic Major", 17)+60)/2), ($height/2), $all_scales, @instrument.scale, Proc.new{ |s| @instrument.scale = s }
 			@items.push Dropdown.new ($width/2)+((get_text_width("Pentatonic Major", 17)-get_text_width("Normal", 17))/2), ($height/2), $all_shawzin_types, @instrument.type, Proc.new{ |t| @instrument.type = t }
 		when "Mandachord_UI"
 			@items.push Check_Box.new ($width/2)-(get_text_width("Loop", 20)/2)-13, ($height/2)-40, @instrument.looped, "Loop", Proc.new{ |l|
-				if l and @instrument.drawn.any?{ |d| d.x > 1344 }
+				if l and @instrument.notes.any?{ |d| d.x > 1344 }
 					$alert.remove
-					Popup_Confirm.new "Doing this will delete #{@instrument.drawn.filter{ |d| d.x > 1344 }.length} notes saved in your mandachord after the first 8 seconds. Are you sure?", Proc.new{
+					Popup_Confirm.new "Doing this will delete #{@instrument.notes.filter{ |d| d.x > 1344 }.length} notes saved in your mandachord after the first 8 seconds. Are you sure?", Proc.new{
 						@instrument.looped = true
 						Popup_Instrument_Options.new @instrument
 					}, Proc.new{

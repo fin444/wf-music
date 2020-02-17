@@ -2,7 +2,7 @@ $all_scales = ["Pentatonic Minor", "Pentatonic Major", "Chromatic", "Hexatonic",
 $all_shawzin_types = ["Normal", "Nelumbo", "Corba"]
 
 class Shawzin_UI
-	attr_accessor :notes, :scale, :type, :y, :container
+	attr_accessor :notes, :scale, :type, :y, :container, :notes_by_time
 	def initialize
 		@height = 280
 		@y = $containers[-1].y+$containers[-1].container.height+5
@@ -16,6 +16,7 @@ class Shawzin_UI
 		@line_2 = Line.new x1: 50, y1: @y+160+$scrolled_y, x2: $width-50, y2: @y+160+$scrolled_y, width: 4, color: $colors["string"]
 		@line_3 = Line.new x1: 50, y1: @y+240+$scrolled_y, x2: $width-50, y2: @y+240+$scrolled_y, width: 4, color: $colors["string"]
 		@notes = []
+		@notes_by_time = {}
 		@mouse_downed = false # saves if the mouse went down over this object
 		$all_buttons.push self # to handle @mouse_downed
 		$scroll_list_x.push self
@@ -44,6 +45,10 @@ class Shawzin_UI
 				if $containers[0].editing
 					$containers[0].editing_buttons[4].action.call
 				end
+				if @notes_by_time[(@notes[-1].x/1000).to_s].nil?
+					@notes_by_time[(@notes[-1].x/1000).to_s] = []
+				end
+				@notes_by_time[(@notes[-1].x/1000).to_s].push @notes[-1]
 				change
 			else
 				@delete_button.click event
@@ -76,17 +81,28 @@ class Shawzin_UI
 		end
 	end
 	def get_last_sound
-		h = 0
-		@notes.each do |n|
-			if n.x > h
-				h = n.x
+		highest = 0
+		highest_key = "0"
+		if @notes_by_time.length == 0
+			return 0
+		end
+		@notes_by_time.keys.each do |k|
+			if k.to_i > highest_key.to_i
+				highest_key = k
 			end
 		end
-		h
+		@notes_by_time[highest_key].each do |n|
+			if n.x > highest
+				highest = n.x
+			end
+		end
+		highest
 	end
-	def play x, change
-		@notes.select{ |n| (x...change).include? n.x }.each do |n|
-			n.play @scale, @type
+	def play x
+		if !@notes_by_time[(x/1000).to_s].nil?
+			@notes_by_time[(x/1000).to_s].select{ |n| x == n.x }.each do |n|
+				n.play @scale, @type
+			end
 		end
 	end
 	def remove
@@ -132,6 +148,7 @@ class Shawzin_UI
 			n.remove
 		end
 		@notes = []
+		@notes_by_time = {}
 		note_chars = "BCDEFGHJKLMNOPRSTUVWXhijklmnZabcdefpqrstuvxyz012356789+/"
 		time_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 		num_to_fret = {"0"=>[false, false, false], "1"=>[true, false, false], "2"=>[false, true, false], "3"=>[false, false, true], "4"=>[true, true, false], "5"=>[true, false, true], "6"=>[false, true, true], "7"=>[true, true, true]}
@@ -159,6 +176,10 @@ class Shawzin_UI
 				@notes.push Shawzin_Note.new curr_string, @y, curr_x
 				@notes[-1].options = curr_frets
 				@notes[-1].draw
+				if @notes_by_time[(@notes[-1].x/1000).to_s].nil?
+					@notes_by_time[(@notes[-1].x/1000).to_s] = []
+				end
+				@notes_by_time[(@notes[-1].x/1000).to_s].push @notes[-1]
 			end
 		end
 		@notes.filter{ |n| n.x-20 < $scrolled_x && n.x+20 > $scrolled_x+$width }.each do |n|
@@ -169,8 +190,20 @@ class Shawzin_UI
 		@notes.each do |n|
 			n.remove
 		end
-		@notes.filter{ |n| n.x-20 > $scrolled_x && n.x+20 < $scrolled_x+$width }.each do |n|
-			n.draw
+		if !@notes_by_time[($scrolled_x/1000).to_s].nil?
+			@notes_by_time[($scrolled_x/1000).to_s].filter{ |n| n.x-20 > $scrolled_x && n.x+20 < $scrolled_x+$width }.each do |n|
+				n.draw
+			end
+		end
+		if !@notes_by_time[(1+($scrolled_x/1000)).to_s].nil?
+			@notes_by_time[(1+($scrolled_x/1000)).to_s].filter{ |n| n.x-20 > $scrolled_x && n.x+20 < $scrolled_x+$width }.each do |n|
+				n.draw
+			end
+		end
+		if (($scrolled_x/1000)+2)*1000 < $scrolled_x+$width and !@notes_by_time[(2+($scrolled_x/1000)).to_s].nil?
+			@notes_by_time[(2+($scrolled_x/1000)).to_s].filter{ |n| n.x-20 > $scrolled_x && n.x+20 < $scrolled_x+$width }.each do |n|
+				n.draw
+			end
 		end
 	end
 	def scroll_y
@@ -194,9 +227,7 @@ class Shawzin_UI
 			@line_1 = Line.new x1: 50, y1: @y+80+$scrolled_y, x2: $width-50, y2: @y+80+$scrolled_y, width: 4, color: $colors["string"]
 			@line_2 = Line.new x1: 50, y1: @y+160+$scrolled_y, x2: $width-50, y2: @y+160+$scrolled_y, width: 4, color: $colors["string"]
 			@line_3 = Line.new x1: 50, y1: @y+240+$scrolled_y, x2: $width-50, y2: @y+240+$scrolled_y, width: 4, color: $colors["string"]
-			@notes.each do |n|
-				n.draw
-			end
+			scroll_x # scroll notes
 		end
 	end
 end
@@ -219,22 +250,6 @@ class Shawzin_Note
 		@x = (x-50).round_to(21)+50
 		@color = $colors["note"]
 		draw
-	end
-	def play scale, type # get url for the sound to play
-		url = "resources/sounds/shawzin/#{type.downcase}/#{scale.downcase}/#{@string}"
-		if @options[0]
-			url += "sky"
-		end
-		if @options[1]
-			url += "earth"
-		end
-		if @options[2]
-			url += "water"
-		end
-		url += ".mp3"
-		puts "[#{Time.now.strftime("%I:%M:%S")}] #{url}"
-		@sound = Sound.new(url) # causes bugs if not stored as variable
-		@sound.play
 	end
 	def draw
 		# remove
@@ -259,6 +274,22 @@ class Shawzin_Note
 		else
 			@drawn_water = Image.new "resources/images/instruments/right_arrow_button.png", x: @drawn.x+15, y: @drawn.y-47, width: 24, height: 24, color: @color
 		end
+	end
+	def play scale, type # get url for the sound to play
+		url = "resources/sounds/shawzin/#{type.downcase}/#{scale.downcase}/#{@string}"
+		if @options[0]
+			url += "sky"
+		end
+		if @options[1]
+			url += "earth"
+		end
+		if @options[2]
+			url += "water"
+		end
+		url += ".mp3"
+		puts "[#{Time.now.strftime("%I:%M:%S")}] #{url}"
+		@sound = Sound.new(url) # causes bugs if not stored as variable
+		@sound.play
 	end
 	def remove
 		@drawn.remove

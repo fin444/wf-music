@@ -12,6 +12,7 @@ class Lure_UI
 		@animal = $all_animals[0]
 		@lines = []
 		@noises = []
+		@noises_by_time = {}
 		13.times do |n|
 			if n == 3 || n == 9
 				@lines.push Line.new x1: 50, y1: @y+30+n*15+$scrolled_y, x2: $width-50, y2: @y+30+n*15+$scrolled_y, width: 2, color: "white"
@@ -56,31 +57,45 @@ class Lure_UI
 	end
 	def new_noise event
 		if event.y-$scrolled_y > @y+30 && event.y-$scrolled_y < @y+218 && event.x > 50 && event.x < $width-50
-			puts event.y
-			if @noises.any?{ |n| n.x == (((event.x-50)/21).floor)*21+50 }
-				@noises.filter{ |n| n.x == (((event.x-50)/21).floor)*21+50 }.each do |n|
+			if @noises_by_time[((event.x+$scrolled_x)/1000).to_s].nil?
+				@noises_by_time[((event.x+$scrolled_x)/1000).to_s] = []
+			end
+			if @noises_by_time[((event.x+$scrolled_x)/1000).to_s].any?{ |n| n.x == (event.x+$scrolled_x-50).floor_to(21)+50 }
+				@noises_by_time[((event.x+$scrolled_x)/1000).to_s].filter{ |n| n.x == (event.x+$scrolled_x-50).floor_to(21)+50 }.each do |n|
 					n.y = (event.y-$scrolled_y-@y).round_to(15)+@y-5
 					n.draw
 				end
 			else
 				@noises.push Lure_Noise.new event.x+$scrolled_x, event.y-$scrolled_y, @y
+				@noises_by_time[(@noises[-1].x/1000).to_s].push @noises[-1]
 			end
 			change
 		end
 	end
 	def get_last_sound
 		connect_noises
-		h = 0
-		@noises.each do |n|
-			if n.x+10 > h
-				h = n.x+10
+		highest = 0
+		highest_key = "0"
+		if @noises_by_time.length == 0
+			return 0
+		end
+		@noises_by_time.keys.each do |k|
+			if k.to_i > highest_key.to_i
+				highest_key = k
 			end
 		end
-		h
+		@noises_by_time[highest_key].each do |n|
+			if n.x > highest
+				highest = n.x
+			end
+		end
+		highest
 	end
-	def play x, change
-		@noises.filter{ |n| n.x.between? x, change }.each do |n|
-			n.play @animal # when actual noises are added, make it so that they flow based on @connected_noises
+	def play x
+		if !@noises_by_time[(x/1000).to_s].nil?
+			@noises_by_time[(x/1000).to_s].filter{ |n| x == n.x }.each do |n|
+				n.play @animal # when actual noises are added, make it so that they flow based on @connected_noises
+			end
 		end
 	end
 	def remove
@@ -119,6 +134,11 @@ class Lure_UI
 		data.length.times do |i|
 			if i%5 == 0 and !data[i+4].nil?
 				@noises.push Lure_Noise.new data[i, 3].join("").to_i*21+50, data[i+3, 2].join("").to_i*15+@y+30, @y
+				if @noises_by_time[(@noises[-1].x/1000).to_s].nil?
+					@noises_by_time[(@noises[-1].x/1000).to_s] = []
+				end
+				@noises_by_time[(@noises[-1].x/1000).to_s].push @noises[-1]
+
 			end
 		end
 		@noises.filter{ |n| n.x < $scrolled_x && n.x > $width+$scrolled_x }.each do |n|
@@ -142,9 +162,21 @@ class Lure_UI
 		@noises.each do |n|
 			n.remove
 		end
-		@noises.filter{ |n| n.x > $scrolled_x && n.x < $width+$scrolled_x }.each do |n|
-			n.draw
+		if !@noises_by_time[($scrolled_x/1000).to_s].nil?
+			@noises_by_time[($scrolled_x/1000).to_s].filter{ |n| n.x-20 > $scrolled_x && n.x+20 < $scrolled_x+$width }.each do |n|
+				n.draw
+			end
 		end
+		if !@noises_by_time[(1+($scrolled_x/1000)).to_s].nil?
+			@noises_by_time[(1+($scrolled_x/1000)).to_s].filter{ |n| n.x-20 > $scrolled_x && n.x+20 < $scrolled_x+$width }.each do |n|
+				n.draw
+			end
+		end
+		if (($scrolled_x/1000)+2)*1000 < $scrolled_x+$width and !@noises_by_time[(2+($scrolled_x/1000)).to_s].nil?
+			@noises_by_time[(2+($scrolled_x/1000)).to_s].filter{ |n| n.x-20 > $scrolled_x && n.x+20 < $scrolled_x+$width }.each do |n|
+				n.draw
+			end
+ 		end
 	end
 	def scroll_y
 		@container.remove
@@ -175,9 +207,7 @@ class Lure_UI
 					@lines[n].opacity = 0.3
 				end
 			end
-			@noises.each do |n|
-				n.draw
-			end
+			scroll_x # scroll noises
 		end
 	end
 end
@@ -187,7 +217,7 @@ $lure_noise_colors = {"25"=>"#00E5FF", "40"=>"#0099FF", "55"=>"#0582FF", "70"=>"
 class Lure_Noise
 	attr_accessor :x, :y, :container_y, :drawn
 	def initialize x, y, container_y
-		@x = (((x-50)/21).floor)*21+50 # floors to 21, adjusting for the 50 pixel margin on left
+		@x = (x-50).floor_to(21)+50 # floors to 21, adjusting for the 50 pixel margin on left
 		@y = (y-container_y).round_to(15)+container_y-5 # rounds to nearest 15, adjusting for container_y
 		@container_y = container_y
 		draw
