@@ -2,12 +2,9 @@
 # Ruby2D::Error image cannot be created
 # scroll bar math is off when large $full_size_x
 # minor/1.mp3 sounds a bit off
-# mandachord reposition doesn't work on drawn notes
-# mandachord scroll_x still still gets fucked sometimes on the lines
 
 # FEATURES
 # more icons for quads
-# mandachord copy
 # revamp options menu
 
 # SOUNDS
@@ -37,7 +34,6 @@ if OS.windows?
 else
 	set fullscreen: true
 end
-
 
 load "base_classes.rb"
 load "options.rb"
@@ -167,17 +163,19 @@ on :mouse_move do |event|
 	end
 end
 on :mouse_scroll do |event|
-	if event.delta_y.abs > event.delta_x.abs
-		if event.delta_y > 0
-			$scroll_bar_y.scroll_down event.delta_y.ceil_to 21
-		elsif event.delta_y < 0
-			$scroll_bar_y.scroll_up -event.delta_y.floor_to(21)
-		end
-	else
-		if event.delta_x > 0
-			$scroll_bar_x.scroll_right event.delta_x.ceil_to 21
-		elsif event.delta_x < 0
-			$scroll_bar_x.scroll_left -event.delta_x.floor_to(21)
+	if $alert.nil?
+		if event.delta_y.abs > event.delta_x.abs
+			if event.delta_y > 0
+				$scroll_bar_y.scroll_down event.delta_y.ceil_to 21
+			elsif event.delta_y < 0
+				$scroll_bar_y.scroll_up -event.delta_y.floor_to(21)
+			end
+		else
+			if event.delta_x > 0
+				$scroll_bar_x.scroll_right event.delta_x.ceil_to 21
+			elsif event.delta_x < 0
+				$scroll_bar_x.scroll_left -event.delta_x.floor_to(21)
+			end
 		end
 	end
 end

@@ -250,7 +250,7 @@ class Lure_Copy
 		@background = Rectangle.new x: 0, y: 0, width: $width, height: $height, color: [0, 0, 0, 0.8], z: 10
 		@outline = Rectangle.new x: 49, y: ($height/2)-111, width: $width-98, height: 222, color: $colors["string"], z: 10
 		@container = Rectangle.new x: 50, y: ($height/2)-110, width: $width-100, height: 220, color: $colors["background"], z: 10
-		@delete_button = Delete_Button.new $width-70, ($height/2)-100, self
+		@delete_button = Delete_Button.new $width-75, ($height/2)-100, self
 		@delete_button.z = 10
 		@start_button = Text_Button.new "Start", ($width/2)-(get_text_width("Start", 25)/2), ($height/2)-10, 25, Proc.new{ start }
 		@start_button.z = 10

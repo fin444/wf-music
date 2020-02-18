@@ -14,7 +14,7 @@ class Mandachord_UI
 		@instrument_bass = $all_mandachord_instruments[0]
 		@instrument_melody = $all_mandachord_instruments[0]
 		@notes = []
-		@image = Image.new "resources/images/instruments/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: $width-94, height: 278, z: 4
+		@image = Image.new "resources/images/instruments/mandachord_background.png", x: 49, y: @y+30+$scrolled_y, width: 1346, height: 278, z: 4
 		@line_1 = Line.new x1: 50+(336-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(336-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		@line_2 = Line.new x1: 50+(672-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(672-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 		@line_3 = Line.new x1: 50+(1008-$scrolled_x)%1344, y1: @y+30+$scrolled_y, x2: 50+(1008-$scrolled_x)%1344, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
@@ -33,8 +33,8 @@ class Mandachord_UI
 			@delete_button.click event
 			@options.click event
 			@notes.each do |n|
-				if n.notes.contains? event.x, event.y
-					n.notes.remove
+				if n.drawn.contains? event.x, event.y
+					n.drawn.remove
 					@notes.delete_at @notes.find_index n
 					return
 				end
@@ -64,7 +64,7 @@ class Mandachord_UI
 					Popup_Info.new "Warframe limits mandachord songs to 16 notes per type per quadrant."
 					return
 				end
-				@notes.push Mandachord_Note.new type, (event.x-49).floor_to(21)+7+$scrolled_x, (y-@y-$scrolled_y-30).floor_to(21)+@y+30+adjust_y, num, self
+				@notes.push Mandachord_Note.new type, (event.x-49).floor_to(21)+7+$scrolled_x, (y-@y-$scrolled_y-30).floor_to(21)+30+adjust_y, num, self
 				change
 			end
 		end
@@ -112,7 +112,7 @@ class Mandachord_UI
 	def remove
 		change
 		@notes.each do |n|
-			n.notes.remove
+			n.drawn.remove
 		end
 		@name.remove
 		@delete_button.remove
@@ -169,7 +169,7 @@ class Mandachord_UI
 				elsif curr_type == "melody"
 					adjust_y = 2
 				end
-				@notes.push Mandachord_Note.new curr_type, data[i+2, 4].join("").to_i*21-14, curr_y*21+10+adjust_y+@y, data[i], self
+				@notes.push Mandachord_Note.new curr_type, data[i+2, 4].join("").to_i*21-14, curr_y*21+10+adjust_y, data[i], self
 			end
 		end
 	end
@@ -194,7 +194,7 @@ class Mandachord_UI
 	end
 	def scroll_y
 		@notes.each do |n|
-			n.notes.remove
+			n.drawn.remove
 		end
 		@name.remove
 		@delete_button.hide
@@ -223,9 +223,7 @@ class Mandachord_UI
 			if @line_1.x1 == 1393 or @line_2.x1 == 1393 or @line_3.x1 == 1393 or @line_4.x1 == 1393
 				@line_5 = Line.new x1: 50, y1: @y+30+$scrolled_y, x2: 50, y2: @y+307+$scrolled_y, width: 2, color: "white", z: 5
 			end
-			@notes.each do |n|
-				n.draw
-			end
+			scroll_x
 		end
 	end
 	def looped= l
@@ -245,7 +243,7 @@ class Mandachord_UI
 end
 
 class Mandachord_Note
-	attr_accessor :drawn, :selected, :x, :number, :type
+	attr_accessor :drawn, :selected, :x, :y, :number, :type
 	def initialize type, x, y, number, container
 		@type = type
 		@x = x
@@ -265,19 +263,92 @@ class Mandachord_Note
 		@drawn.remove
 		# draw
 		if @container.looped
-			@drawn = Rectangle.new x: 43+(@x-$scrolled_x)%1344, y: @y+1+$scrolled_y, width: 21, height: 21, color: $colors[@type.downcase], z: 4
-		elsif 64+@x-$scrolled_x >= 49 and @x-$scrolled_x <= 1344
-			@drawn = Rectangle.new x: 43+@x-$scrolled_x, y: @y+1+$scrolled_y, width: 21, height: 21, color: $colors[@type.downcase], z: 4
+			@drawn = Rectangle.new x: 43+(@x-$scrolled_x)%1344, y: @y+1+$scrolled_y+@container.y, width: 21, height: 21, color: $colors[@type.downcase], z: 4
+		elsif 43+@x-$scrolled_x >= 49 and @x-$scrolled_x <= 1344
+			@drawn = Rectangle.new x: 43+@x-$scrolled_x, y: @y+1+$scrolled_y+@container.y, width: 21, height: 21, color: $colors[@type.downcase], z: 4
 		end
 	end
-	def determine_y container_y
-		case @type
-		when "percussion"
-			@y = container_y+@number*21+10
-		when "bass"
-			@y = container_y+@number*21+74
-		when "melody"
-			@y = container_y+@number*21+180
+end
+
+class Mandachord_Copy
+	attr_accessor :page
+	def initialize instrument
+		$alert = self
+		@instrument = instrument
+		@page = 0
+		if @instrument.looped
+			@pages = 1
+		else
+			@pages = @instrument.notes.sort_by{ |n| n.x }[-1].x/1344+1
 		end
+		@background = Rectangle.new x: 0, y: 0, width: $width, height: $height, color: [0, 0, 0, 0.8], z: 10
+		@outline = Rectangle.new x: 39, y: ($height/2)-181, width: $width-78, height: 362, color: $colors["string"], z: 10
+		@container = Rectangle.new x: 40, y: ($height/2)-180, width: $width-80, height: 360, color: $colors["background"], z: 10
+		@delete_button = Delete_Button.new $width-65, ($height/2)-175, self
+		@delete_button.z = 10
+		@left_button = Image_Button.new 55, ($height/2)+145, "resources/images/scroll/left_scroll.png", 30, Proc.new{ $alert.page -= 1 }
+		@left_button.z = 10
+		@right_button = Image_Button.new $width-85, ($height/2)+145, "resources/images/scroll/right_scroll.png", 30, Proc.new{ $alert.page += 1 }
+		@right_button.z = 10
+		@image = Image.new "resources/images/instruments/mandachord_background.png", x: 49, y: ($height/2)-139, width: 1346, height: 278, z: 10
+		@drawn = []
+		@lines = []
+		5.times do |n|
+			@lines.push Line.new x1: n*336+49, y1: ($height/2)-139, x2: n*336+49, y2: ($height/2)+139, width: 2, color: "white", z: 10
+		end
+		self.page = 0 # hide buttons appropriately
+		draw
+	end
+	def draw
+		@drawn.each do |d|
+			d.remove
+		end
+		@drawn = []
+		@instrument.notes.filter{ |n| n.x > @page*1344 and n.x < (@page+1)*1344 }.each do |n|
+			@drawn.push Rectangle.new x: n.x+43-(@page*1344), y: n.y-29+@image.y, width: 21, height: 21, color: n.drawn.color, z: 10
+		end
+	end
+	def click event
+		@delete_button.click event
+		@left_button.click event
+		@right_button.click event
+	end
+	def mouse_down event
+		@delete_button.mouse_down event
+		@left_button.mouse_down event
+		@right_button.mouse_down event
+	end
+	def remove
+		@background.remove
+		@outline.remove
+		@container.remove
+		@delete_button.remove
+		@left_button.remove
+		@right_button.remove
+		@image.remove
+		@drawn.each do |d|
+			d.remove
+		end
+		@lines.each do |l|
+			l.remove
+		end
+		$alert = nil
+	end
+	def page= page
+		@page = page
+		@left_button.draw
+		@right_button.draw
+		if @pages == 1
+			@page = 0
+			@left_button.hide
+			@right_button.hide
+		elsif @page <= 0
+			@page = 0
+			@left_button.hide
+		elsif @page >= @pages-1
+			@page = @pages-1
+			@right_button.hide
+		end
+		draw
 	end
 end

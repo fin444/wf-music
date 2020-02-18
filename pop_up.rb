@@ -327,6 +327,14 @@ class Popup_Instrument_Options
 			@items.push Dropdown.new ($width/2)-((get_text_width("Gamma", 17)+20)*1.5), ($height/2), $all_mandachord_instruments, @instrument.instrument_percussion, Proc.new{ |i| @instrument.instrument_percussion = i }
 			@items.push Dropdown.new ($width/2)-((get_text_width("Gamma", 17)+20)/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_bass, Proc.new{ |i| @instrument.instrument_bass = i }
 			@items.push Dropdown.new ($width/2)+((get_text_width("Gamma", 17)+20)/2), ($height/2), $all_mandachord_instruments, @instrument.instrument_melody, Proc.new{ |i| @instrument.instrument_melody = i }
+			@items.push Text_Button.new "Copy", ($width/2)-(get_text_width("Copy", 20)/2), ($height/2)+30, 20, Proc.new{
+				$alert.remove
+				if @instrument.notes.length == 0
+					Popup_Info.new "Copy only works if there are notes in the mandachord."
+				else
+					Mandachord_Copy.new @instrument
+				end
+			}
 		when "Lure_UI"
 			@title.remove
 			@title = Text.new "Options for Echo Lure", x: ($width/2)-(get_text_width("Options for Echo Lure", 30)/2), y: ($height/2)-90, size: 30, color: $colors["string"], z: 10
