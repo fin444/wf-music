@@ -410,7 +410,6 @@ class Gear_Button
 	end
 end
 class Key_Button
-	attr_accessor :z
 	def initialize x, y, key, action
 		@x = x
 		@y = y
@@ -477,7 +476,7 @@ class Key_Button
 	end
 end
 class Check_Box
-	attr_accessor :z, :checked
+	attr_accessor :checked
 	def initialize x, y, checked, text, action
 		@x = x
 		@y = y
@@ -534,7 +533,6 @@ class Check_Box
 	end
 end
 class Image_Button
-	attr_accessor :z
 	def initialize x, y, image_url, size, action
 		@x = x
 		@y = y

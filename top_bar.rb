@@ -13,10 +13,9 @@ class Top_UI
 			end
 		}
 		@buttons.push Quad_Button.new "Save", 140, @y+10, "resources/images/top_bar/save.png", Proc.new{ save }
-		@buttons.push Quad_Button.new "Save As", 230, @y+10, "resources/images/clear.png", Proc.new{ save_as }
-		@buttons.push Quad_Button.new "New", 320, @y+10, "resources/images/clear.png", Proc.new{ new_file false }
-		@buttons.push Quad_Button.new "Open", 410, @y+10, "resources/images/clear.png", Proc.new{ open_file 1 }
-		@buttons.push Quad_Button.new "Options", 500, @y+10, "resources/images/gear.png", Proc.new { $options_window.draw }
+		@buttons.push Quad_Button.new "New", 230, @y+10, "resources/images/top_bar/new.png", Proc.new{ new_file false }
+		@buttons.push Quad_Button.new "Open", 320, @y+10, "resources/images/top_bar/open.png", Proc.new{ open_file 1 }
+		@buttons.push Quad_Button.new "Options", 410, @y+10, "resources/images/gear.png", Proc.new { $options_window.draw }
 		@buttons.each do |b|
 			b.z = 6
 		end
@@ -27,8 +26,8 @@ class Top_UI
 		@editing_buttons.push Toggle_Quad_Button.new "Sky Fret", 50, @y+10, "resources/images/top_bar/left_arrow.png", false
 		@editing_buttons.push Toggle_Quad_Button.new "Earth Fret", 140, @y+10, "resources/images/top_bar/down_arrow.png", false
 		@editing_buttons.push Toggle_Quad_Button.new "Water Fret", 230, @y+10, "resources/images/top_bar/right_arrow.png", false
-		@editing_buttons.push Quad_Button.new "Delete", 320, @y+10, "resources/images/clear.png", Proc.new{ } # Proc filled in later
-		@editing_buttons.push Quad_Button.new "Stop Editing", 410, @y+10, "resources/images/clear.png", Proc.new{ } # Proc filled in later
+		@editing_buttons.push Quad_Button.new "Delete", 320, @y+10, "resources/images/top_bar/delete.png", Proc.new{ } # Proc filled in later
+		@editing_buttons.push Quad_Button.new "Stop Editing", 410, @y+10, "resources/images/top_bar/close.png", Proc.new{ } # Proc filled in later
 		@editing_buttons.each do |b|
 			b.z = 6
 			b.hide

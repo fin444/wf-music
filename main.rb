@@ -4,7 +4,6 @@
 # minor/1.mp3 sounds a bit off
 
 # FEATURES
-# more icons for quads
 # revamp options menu
 
 # SOUNDS
