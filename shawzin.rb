@@ -1,5 +1,5 @@
 $all_scales = ["Pentatonic Minor", "Pentatonic Major", "Chromatic", "Hexatonic", "Major", "Minor", "Hirajoshi", "Phrygian", "Yo"]
-$all_shawzin_types = ["Normal", "Nelumbo", "Corba"]
+$all_shawzin_types = ["Normal", "Corbu", "Nelumbo"]
 
 class Shawzin_UI
 	attr_accessor :notes, :scale, :type, :y, :container, :notes_by_time

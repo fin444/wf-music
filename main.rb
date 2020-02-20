@@ -1,14 +1,12 @@
 # BUGS
 # Ruby2D::Error image cannot be created
 # scroll bar math is off when large $full_size_x
-# minor/1.mp3 sounds a bit off
 
 # FEATURES
 # revamp options menu
 
 # SOUNDS
 # nelumbo shawzin
-# corbu shawzin
 # mandachord instruments
 # echo lure
 
