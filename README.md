@@ -1,7 +1,4 @@
 # WF-Music
-*work in progress*
+This was gonna be a whole thing that I could publish, and I spent over 2 months working on it so I could find out that there's not really any way to build Ruby programs into workable apps/executables.
 
-A project about making music for Warframe. I felt like it.
-
-### Special Thanks To...
-* My IRL friend Ezra for asking me to play All Star, causing me to notice that long songs are actually pretty laggy
+yay
